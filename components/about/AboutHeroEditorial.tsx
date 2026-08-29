@@ -65,7 +65,7 @@ export default function AboutHeroEditorial() {
       src: "/images/teknisi-2.webp",
       tag: dict.about.cards[0]?.tag || "SERVICE CENTER",
       desktopOffset: "lg:self-end lg:z-10 lg:sm:-translate-x-2",
-      desktopTiltClass: "lg:-rotate-[3.5deg]",
+      tiltClass: "-rotate-2 sm:-rotate-3 lg:-rotate-[3.5deg]",
     },
     {
       id: 2,
@@ -74,7 +74,7 @@ export default function AboutHeroEditorial() {
       src: "/images/fixmi-lab1.webp",
       tag: dict.about.cards[1]?.tag || "MICROSOLDER LAB",
       desktopOffset: "lg:self-start lg:-ml-12 lg:z-20",
-      desktopTiltClass: "",
+      tiltClass: "",
     },
     {
       id: 3,
@@ -83,7 +83,7 @@ export default function AboutHeroEditorial() {
       src: "/images/services/1.webp",
       tag: dict.about.cards[2]?.tag || "INTEGRATED ECOSYSTEM",
       desktopOffset: "lg:self-end lg:z-30",
-      desktopTiltClass: "",
+      tiltClass: "",
     },
     {
       id: 4,
@@ -92,7 +92,7 @@ export default function AboutHeroEditorial() {
       src: "/images/spareparts.webp",
       tag: dict.about.cards[3]?.tag || "QUALITY ASSURANCE",
       desktopOffset: "lg:self-start lg:-ml-8 lg:z-40",
-      desktopTiltClass: "",
+      tiltClass: "",
     },
   ];
 
@@ -121,12 +121,12 @@ export default function AboutHeroEditorial() {
       mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
         if (!rightStackRef.current) return;
 
-        const cards = rightStackRef.current.querySelectorAll(".stack-photo-card");
-        if (!cards.length) return;
+        const items = rightStackRef.current.querySelectorAll(".stack-photo-item");
+        if (!items.length) return;
 
-        cards.forEach((card, index) => {
+        items.forEach((item, index) => {
           gsap.fromTo(
-            card,
+            item,
             {
               y: 50 * (index + 1),
               opacity: 0.85,
@@ -138,7 +138,7 @@ export default function AboutHeroEditorial() {
               scale: 1,
               ease: "none",
               scrollTrigger: {
-                trigger: card,
+                trigger: item,
                 start: "top 90%",
                 end: "top 40%",
                 scrub: 1.2,
@@ -335,7 +335,7 @@ export default function AboutHeroEditorial() {
                 className={`stack-photo-item relative w-[78vw] sm:w-[50vw] md:w-[42vw] lg:w-[84%] shrink-0 lg:shrink snap-center lg:snap-align-none ${photo.desktopOffset}`}
               >
                 <div
-                  className={`stack-photo-card group relative aspect-[4/5] w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-white/[0.1] bg-[#0c0c0c] shadow-[0_16px_40px_rgba(0,0,0,0.85)] transition-all duration-500 ease-out hover:border-primary/50 hover:shadow-[0_24px_60px_rgba(255,107,0,0.2)] ${photo.desktopTiltClass}`}
+                  className={`stack-photo-card group relative aspect-[4/5] w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-white/[0.1] bg-[#0c0c0c] shadow-[0_16px_40px_rgba(0,0,0,0.85)] transition-all duration-500 ease-out hover:border-primary/50 hover:shadow-[0_24px_60px_rgba(255,107,0,0.2)] hover:rotate-0 origin-center ${photo.tiltClass}`}
                 >
                   {/* Photo Image with Grayscale default -> Full Color on Hover */}
                   <div className="relative h-full w-full overflow-hidden">
