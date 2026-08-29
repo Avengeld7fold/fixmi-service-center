@@ -149,14 +149,22 @@ export interface Dictionary {
     emptyGallery: string;
   };
   footer: {
+    locatorHeading: string;
+    locatorSubheading: string;
     headStore: string;
     branchStore: string;
     otherStore: string;
+    headStoreRegion: string;
+    branchStoreRegion: string;
+    otherStoreRegion: string;
     openStatusOpen: string;
     openStatusClosed: string;
     openHoursLabel: string;
+    hoursMonSat: string;
+    hoursSun: string;
     directContactLabel: string;
     locationLabel: string;
+    routeBtn: string;
     mapsBtn: string;
     consultationBtn: string;
     quickLinks: string;

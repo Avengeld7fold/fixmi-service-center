@@ -28,68 +28,8 @@ interface Store {
   map: string; // query untuk Google Maps
 }
 
-const STORES: Record<StoreKey, Store> = {
-  head: {
-    name: "FIXMI Service Center",
-    label: "Toko Utama",
-    region: "Kedonganan · Badung",
-    city: "Kedonganan",
-    rating: "4.9",
-    reviews: "420+",
-    address:
-      "Link. Kubu Alit Kedonganan, Jl. Raya Uluwatu, Kedonganan, Kec. Kuta, Kabupaten Badung, Bali 80361",
-    phone: "0819-9933-6722",
-    hours: [
-      "Senin – Sabtu 09.00 – 21.00 WITA",
-      "Minggu Tutup",
-    ],
-    map: "Fixmi Service Center Kedonganan Jl Raya Uluwatu Bali 80361",
-  },
-  branch: {
-    name: "FIXMI Taman Griya",
-    label: "Cabang Jimbaran",
-    region: "Jimbaran · Badung",
-    city: "Jimbaran",
-    rating: "4.8",
-    reviews: "190+",
-    address:
-      "Taman Griya, Jl. Nuansa Utama No. 33, Jimbaran, Kuta Selatan, Kabupaten Badung, Bali 80361",
-    phone: "0851-2357-9557",
-    hours: [
-      "Senin – Sabtu 09.00 – 21.00 WITA",
-      "Minggu Tutup",
-    ],
-    map: "Fixmi Service Center Phone Taman Griya Jl Nuansa Utama Jimbaran Bali",
-  },
-  other: {
-    name: "Mobicare by FIXMI",
-    label: "Cabang Denpasar",
-    region: "Denpasar Barat",
-    city: "Denpasar",
-    rating: "4.9",
-    reviews: "310+",
-    address:
-      "Cellular World Arena, Jl. Teuku Umar No. 57, Dauh Puri Kauh, Kec. Denpasar Barat, Kota Denpasar, Bali 80113",
-    phone: "0819-9933-6722",
-    hours: [
-      "Senin – Sabtu 09.00 – 21.00 WITA",
-      "Minggu Tutup",
-    ],
-    map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
-  },
-};
-
 const ORDER: StoreKey[] = ["head", "branch", "other"];
 const DISPLAY = "var(--font-bayon), sans-serif";
-
-const waLink = (phone: string) => {
-  const cleanPhone = "62" + phone.replace(/[^0-9]/g, "").replace(/^0/, "");
-  const msg = `Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:
-
-• Tipe Gadget: 
-• Kendala / Kerusakan: `;
-  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-};
 
 const SOCIALS: { label: string; href: string; path: string }[] = [
   {
@@ -117,8 +57,60 @@ export default function Footer() {
   // Halaman admin dan contact/book now punya store locator sendiri — footer global disembunyikan
   if (pathname.startsWith("/admin") || pathname === "/contact" || pathname === "/en/contact") return null;
 
+  const isEn = pathname.startsWith("/en");
+
+  const STORES: Record<StoreKey, Store> = {
+    head: {
+      name: "FIXMI Service Center",
+      label: dict.footer.headStore,
+      region: dict.footer.headStoreRegion,
+      city: "Kedonganan",
+      rating: "4.9",
+      reviews: "420+",
+      address:
+        "Link. Kubu Alit Kedonganan, Jl. Raya Uluwatu, Kedonganan, Kec. Kuta, Kabupaten Badung, Bali 80361",
+      phone: "0819-9933-6722",
+      hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
+      map: "Fixmi Service Center Kedonganan Jl Raya Uluwatu Bali 80361",
+    },
+    branch: {
+      name: "FIXMI Taman Griya",
+      label: dict.footer.branchStore,
+      region: dict.footer.branchStoreRegion,
+      city: "Jimbaran",
+      rating: "4.8",
+      reviews: "190+",
+      address:
+        "Taman Griya, Jl. Nuansa Utama No. 33, Jimbaran, Kuta Selatan, Kabupaten Badung, Bali 80361",
+      phone: "0851-2357-9557",
+      hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
+      map: "Fixmi Service Center Phone Taman Griya Jl Nuansa Utama Jimbaran Bali",
+    },
+    other: {
+      name: "Mobicare by FIXMI",
+      label: dict.footer.otherStore,
+      region: dict.footer.otherStoreRegion,
+      city: "Denpasar",
+      rating: "4.9",
+      reviews: "310+",
+      address:
+        "Cellular World Arena, Jl. Teuku Umar No. 57, Dauh Puri Kauh, Kec. Denpasar Barat, Kota Denpasar, Bali 80113",
+      phone: "0819-9933-6722",
+      hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
+      map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
+    },
+  };
+
   const s = STORES[active];
   const q = encodeURIComponent(s.map);
+
+  const waLink = (phone: string) => {
+    const cleanPhone = "62" + phone.replace(/[^0-9]/g, "").replace(/^0/, "");
+    const msg = isEn
+      ? `Hello FIXMI Service Center, I would like to consult about gadget repair:\n\n• Device Model: \n• Issue / Damage: `
+      : `Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:\n\n• Tipe Gadget: \n• Kendala / Kerusakan: `;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+  };
 
   return (
     <footer className="border-t border-white/[0.08] bg-[#121212] text-neutral-300">
@@ -150,11 +142,10 @@ export default function Footer() {
               className="max-w-[18ch] text-[clamp(2.25rem,4vw,3.5rem)] uppercase leading-[1.15] text-[#f5f5f5]"
               style={{ fontFamily: DISPLAY, letterSpacing: "0.04em" }}
             >
-              Temukan toko kami
+              {dict.footer.locatorHeading}
             </h2>
             <p className="mt-4 max-w-[46ch] text-[0.95rem] leading-relaxed text-neutral-400">
-              Tiga gerai di Bali. Pilih lokasi untuk alamat lengkap, jam buka, dan
-              arahkan rute langsung dari peta.
+              {dict.footer.locatorSubheading}
             </p>
           </div>
 
@@ -219,7 +210,7 @@ export default function Footer() {
               <dl key={active} className="footer-spec mt-8">
                 <div style={{ ["--row" as string]: 0 } as CSSProperties} className="grid grid-cols-[5rem_1fr] gap-4 border-t border-white/[0.08] py-4 sm:grid-cols-[6rem_1fr]">
                   <dt className="pt-0.5 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-neutral-400">
-                    Alamat
+                    {dict.footer.locationLabel}
                   </dt>
                   <dd className="text-sm leading-relaxed text-neutral-200">{s.address}</dd>
                 </div>
@@ -243,7 +234,7 @@ export default function Footer() {
                 </div>
                 <div style={{ ["--row" as string]: 2 } as CSSProperties} className="grid grid-cols-[5rem_1fr] gap-4 border-y border-white/[0.08] py-4 sm:grid-cols-[6rem_1fr]">
                   <dt className="pt-0.5 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-neutral-400">
-                    Jam Buka
+                    {dict.footer.openHoursLabel}
                   </dt>
                   <dd className="space-y-1 text-sm leading-relaxed text-neutral-300">
                     {s.hours.map((h, i) => (
@@ -262,7 +253,7 @@ export default function Footer() {
                 className="block h-[20rem] w-full border-0 lg:h-auto lg:flex-1 lg:min-h-[26rem]"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title={`Peta lokasi ${s.name}`}
+                title={`${isEn ? "Location map for" : "Peta lokasi"} ${s.name}`}
               />
               <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.08] bg-[#161616]/95 px-4 py-3.5 backdrop-blur-md">
                 <div className="flex min-w-0 items-center gap-3">
@@ -282,7 +273,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-neutral-300 transition-[color,transform] duration-150 ease-out hover:text-primary active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                   >
-                    Rute
+                    {dict.footer.routeBtn}
                     <span aria-hidden="true">→</span>
                   </a>
                   <a
@@ -291,7 +282,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-neutral-300 transition-[color,transform] duration-150 ease-out hover:text-primary active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                   >
-                    Buka di Maps
+                    {dict.footer.mapsBtn}
                     <span aria-hidden="true">→</span>
                   </a>
                 </div>
