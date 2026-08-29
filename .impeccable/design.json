@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-15T23:04:27.000Z",
+  "title": "Design System: FIXMI Service Center",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Diagnostic Orange", "canonical": "#FF6B00", "tonalRamp": ["#331500", "#662b00", "#994000", "#cc5600", "#FF6B00", "#ff8933", "#ffaa66", "#ffd5b3"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Dark Slate", "canonical": "#121212", "tonalRamp": ["#000000", "#121212", "#1a1a1a", "#262626", "#404040", "#737373", "#a3a3a3", "#f5f5f5"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Bayon Display", "purpose": "Section titles & store locator headers." },
+      "body": { "displayName": "Neue Montreal Body", "purpose": "Primary readable prose & description text." },
+      "mono": { "displayName": "Geist Mono", "purpose": "Tabular metrics, pricing, ratings, & contact numbers." }
+    },
+    "shadows": [
+      { "name": "panel-shadow", "value": "0 20px 25px -5px rgba(0, 0, 0, 0.5)", "purpose": "Elevated card frames & interactive map container." }
+    ],
+    "motion": [
+      { "name": "tactile-push", "value": "transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Tactile active push feedback." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action CTA button with tactile feedback.",
+      "html": "<button class=\"ds-btn-primary\">CHAT CS WHATSAPP</button>",
+      "css": ".ds-btn-primary { background: #FF6B00; color: #ffffff; padding: 12px 24px; font-family: var(--font-neue-montreal), sans-serif; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; } .ds-btn-primary:hover { background: #e05e00; } .ds-btn-primary:active { transform: scale(0.98) translateY(-1px); }"
+    },
+    {
+      "name": "Card Panel",
+      "kind": "card",
+      "refersTo": "card-panel",
+      "description": "Glassmorphism dark panel surface.",
+      "html": "<div class=\"ds-card-panel\"><h3>FIXMI Service Center</h3><p>Kedonganan, Badung, Bali</p></div>",
+      "css": ".ds-card-panel { background: #1a1a1a; color: #f5f5f5; border: 1px solid #262626; border-radius: 16px; padding: 24px; backdrop-filter: blur(12px); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Clinical Diagnostic Instrument",
+    "overview": "FIXMI Service Center menghadirkan antarmuka instrumen teknis klinis tingkat laboratorium. Desain berpusat pada presisi, kejelasan informasi harga, dan visual peranti keras tanpa ornamen dekoratif generik.",
+    "keyCharacteristics": [
+      "Tonal Dark Slate Base (#121212)",
+      "Diagnostic Orange Accent (#FF6B00)",
+      "Zero Emoji Policy",
+      "Instrument Spacing & Monospace Specs"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Aksen oranye utama hanya boleh mengisi ≤10% dari total area layar. Kelangkaan aksen adalah kunci kontras diagnostik.", "section": "colors" },
+      { "name": "The Tonal Layering Rule", "body": "Kedalaman antarmuka dicapai melalui kontras border 1px dan lapisan panel glassmorphism, bukan dengan bayangan tebal.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do gunakan aksen oranye #FF6B00 secara hemat dan bermakna.",
+      "Do gunakan font-mono tabular-nums untuk seluruh angka, harga, dan nomor telepon.",
+      "Do terapkan active:scale-[0.98] untuk tactile push feedback."
+    ],
+    "donts": [
+      "Don't gunakan emoji di dalam antarmuka.",
+      "Don't gunakan gradien warna AI-purple atau cyan neon.",
+      "Don't gunakan bayangan tebal gelap di luar konteks elevated."
+    ]
+  }
+}

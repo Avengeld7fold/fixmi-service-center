@@ -1,0 +1,52 @@
+<svg width="400" height="780" viewBox="0 0 400 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Layer 3: Logic Board, CPU Bionic, IC Power & Flex Cables -->
+  <defs>
+    <linearGradient id="pcbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#121814"/>
+      <stop offset="50%" stopColor="#0B100D"/>
+      <stop offset="100%" stopColor="#050806"/>
+    </linearGradient>
+    <linearGradient id="goldPin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FFE082"/>
+      <stop offset="100%" stopColor="#D4AF37"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mainboard PCB Silhouette (Right side of battery) -->
+  <path d="M245,60 L345,60 L345,540 L290,540 L290,200 L245,200 Z" fill="url(#pcbGrad)" stroke="#1B3828" strokeWidth="2"/>
+
+  <!-- Gold Contact Pads & Micro Components -->
+  <g stroke="url(#goldPin)" strokeWidth="1.5" opacity="0.8">
+    <rect x="255" y="70" width="30" height="15" fill="#18241C" rx="2"/>
+    <rect x="295" y="70" width="40" height="15" fill="#18241C" rx="2"/>
+    <rect x="300" y="95" width="35" height="12" fill="#18241C" rx="2"/>
+  </g>
+
+  <!-- CPU Bionic Processor Shield (Stacked SoC) -->
+  <rect x="255" y="125" width="80" height="70" rx="4" fill="#1A1C1E" stroke="#FF6B00" strokeWidth="1.5"/>
+  <rect x="260" y="130" width="70" height="60" rx="2" fill="#111315"/>
+  <text x="295" y="165" fill="#FF6B00" fontSize="11" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle">BIONIC</text>
+  <text x="295" y="178" fill="#888" fontSize="8" fontFamily="monospace" textAnchor="middle">A-SERIES CPU</text>
+
+  <!-- IC Power Management & NAND Flash -->
+  <rect x="300" y="220" width="38" height="48" rx="2" fill="#202226" stroke="#444"/>
+  <text x="319" y="248" fill="#AAA" fontSize="7" fontFamily="monospace" textAnchor="middle">NAND</text>
+  
+  <rect x="300" y="280" width="38" height="35" rx="2" fill="#202226" stroke="#444"/>
+  <text x="319" y="302" fill="#AAA" fontSize="7" fontFamily="monospace" textAnchor="middle">PMIC</text>
+
+  <!-- Micro Soldering Copper Traces -->
+  <path d="M260,200 L260,350 L295,350" stroke="#FF6B00" strokeWidth="1.5" strokeDasharray="4 2" fill="none" opacity="0.6"/>
+  <path d="M320,320 L320,530" stroke="#00E5FF" strokeWidth="1" strokeDasharray="3 3" fill="none" opacity="0.5"/>
+
+  <!-- Taptic Engine & Charging Port Assembly (Bottom Sub-board) -->
+  <rect x="70" y="655" width="260" height="70" rx="12" fill="#1A1A1D" stroke="#333338" strokeWidth="2"/>
+  <rect x="150" y="665" width="100" height="40" rx="4" fill="#2A2A30" stroke="#555"/>
+  <text x="200" y="690" fill="#DDD" fontSize="9" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle">TAPTIC ENGINE</text>
+  
+  <!-- USB-C / Lightning Port Port Center -->
+  <rect x="175" y="710" width="50" height="12" rx="4" fill="#000" stroke="#FF6B00" strokeWidth="1.5"/>
+
+  <!-- Label Part Watermark -->
+  <text x="200" y="620" fill="#666" fontSize="11" fontFamily="monospace" textAnchor="middle" letterSpacing="3">PART 03 // LOGIC BOARD &amp; IC</text>
+</svg>

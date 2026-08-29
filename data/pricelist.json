@@ -1,0 +1,381 @@
+[
+  {
+    "Name": "iPhone",
+    "Slug": "iphone",
+    "description": "Layanan perbaikan display OLED, penggantian baterai, kalibrasi Face ID, dan restorasi logic board iPhone secara presisi.",
+    "Image": "/images/iphone.webp",
+    "service_types": []
+  },
+  {
+    "Name": "iPad",
+    "Slug": "ipad",
+    "description": "Restorasi digitizer presisi tinggi, penggantian baterai iPad, dan reparasi port pengisian daya.",
+    "Image": "/images/ipad.webp",
+    "service_types": [
+      {
+        "Name": "Battery",
+        "Slug": "battery",
+        "icon": "battery",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPad Pro 13\" (M4)",
+            "prices": {
+              "harga": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPad Pro 11\" (M4)",
+            "prices": {
+              "harga": 850000
+            }
+          },
+          {
+            "DeviceModel": "iPad Air 13\" (M2)",
+            "prices": {
+              "harga": 700000
+            }
+          },
+          {
+            "DeviceModel": "iPad Air 11\" (M2)",
+            "prices": {
+              "harga": 650000
+            }
+          },
+          {
+            "DeviceModel": "iPad Pro 12.9\" (Gen 6)",
+            "prices": {
+              "harga": 800000
+            }
+          },
+          {
+            "DeviceModel": "iPad Pro 11\" (Gen 4)",
+            "prices": {
+              "harga": 750000
+            }
+          },
+          {
+            "DeviceModel": "iPad 10th Gen",
+            "prices": {
+              "harga": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPad 9th Gen",
+            "prices": {
+              "harga": 450000
+            }
+          },
+          {
+            "DeviceModel": "iPad Mini 6",
+            "prices": {
+              "harga": 550000
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "Macbook",
+    "Slug": "macbook",
+    "description": "Perbaikan hardware logic board, penggantian layar retina, dan pembersihan komponen termal interior Macbook.",
+    "Image": "/images/macbook.webp",
+    "service_types": [
+      {
+        "Name": "LCD / Display",
+        "Slug": "lcd-display",
+        "icon": "smartphone",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "MacBook Pro 16\" (M3 Max)",
+            "prices": {
+              "harga": 6500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M3 Pro)",
+            "prices": {
+              "harga": 5500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 15\" (M3)",
+            "prices": {
+              "harga": 4500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M3)",
+            "prices": {
+              "harga": 4000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 16\" (M2 Max)",
+            "prices": {
+              "harga": 6000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M2 Pro)",
+            "prices": {
+              "harga": 5000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M2)",
+            "prices": {
+              "harga": 3800000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 13\" (M2)",
+            "prices": {
+              "harga": 4500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M1)",
+            "prices": {
+              "harga": 3500000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Battery",
+        "Slug": "battery",
+        "icon": "battery",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "MacBook Pro 16\" (M3 Max)",
+            "prices": {
+              "harga": 1200000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M3 Pro)",
+            "prices": {
+              "harga": 1000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 15\" (M3)",
+            "prices": {
+              "harga": 900000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M3)",
+            "prices": {
+              "harga": 850000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 16\" (M2 Max)",
+            "prices": {
+              "harga": 1100000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M2 Pro)",
+            "prices": {
+              "harga": 950000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M2)",
+            "prices": {
+              "harga": 800000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M1)",
+            "prices": {
+              "harga": 750000
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "iWatch",
+    "Slug": "iwatch",
+    "description": "Penggantian kaca pecah, layar sentuh OLED, dan penggantian baterai jam pintar Apple Watch.",
+    "Image": "/images/iwatch.webp",
+    "service_types": [
+      {
+        "Name": "LCD / Display",
+        "Slug": "lcd-display",
+        "icon": "smartphone",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "Apple Watch Ultra 2",
+            "prices": {
+              "harga": 3000000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Ultra",
+            "prices": {
+              "harga": 2800000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 9",
+            "prices": {
+              "harga": 1800000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 8",
+            "prices": {
+              "harga": 1600000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 7",
+            "prices": {
+              "harga": 1400000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE (Gen 2)",
+            "prices": {
+              "harga": 1000000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE",
+            "prices": {
+              "harga": 900000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Battery",
+        "Slug": "battery",
+        "icon": "battery",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "Apple Watch Ultra 2",
+            "prices": {
+              "harga": 500000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Ultra",
+            "prices": {
+              "harga": 500000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 9",
+            "prices": {
+              "harga": 350000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 8",
+            "prices": {
+              "harga": 350000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 7",
+            "prices": {
+              "harga": 350000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE (Gen 2)",
+            "prices": {
+              "harga": 300000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE",
+            "prices": {
+              "harga": 300000
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "Android",
+    "Slug": "android",
+    "description": "Servis perbaikan flagship Android (Samsung Galaxy, Google Pixel, Xiaomi) dengan komponen berkualitas tinggi.",
+    "Image": "/images/android.webp",
+    "service_types": [
+      {
+        "Name": "Service LCD",
+        "Slug": "samsung-samsung-a-series--service-lcd",
+        "Brand": "Samsung",
+        "Series": "Samsung A Series",
+        "icon": "wrench",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": []
+      },
+      {
+        "Name": "LCD",
+        "Slug": "asus-zenfone--lcd",
+        "Brand": "Asus",
+        "Series": "ROG",
+        "icon": "smartphone",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": []
+      }
+    ]
+  }
+]
