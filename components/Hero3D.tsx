@@ -241,8 +241,16 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
   const pageActive = useRef(false);
   useEffect(() => {
     const el = gl.domElement;
+    // Cache rect canvas — getBoundingClientRect memaksa layout reflow, jadi
+    // jangan panggil pada SETIAP pointermove. Cache di-invalidate saat
+    // scroll/resize dan dihitung ulang lazily pada event pointer berikutnya.
+    let cachedRect: DOMRect | null = null;
+    const invalidateRect = () => {
+      cachedRect = null;
+    };
     const setFrom = (clientX: number, clientY: number) => {
-      const r = el.getBoundingClientRect();
+      if (!cachedRect) cachedRect = el.getBoundingClientRect();
+      const r = cachedRect;
       if (r.width === 0 || r.bottom < 0 || r.top > window.innerHeight) return;
       pagePointer.current.set(
         ((clientX - r.left) / r.width) * 2 - 1,
@@ -257,10 +265,14 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     window.addEventListener("pointermove", onPointer);
     window.addEventListener("touchstart", onTouch, { passive: true });
     window.addEventListener("touchmove", onTouch, { passive: true });
+    window.addEventListener("scroll", invalidateRect, { passive: true });
+    window.addEventListener("resize", invalidateRect);
     return () => {
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("touchstart", onTouch);
       window.removeEventListener("touchmove", onTouch);
+      window.removeEventListener("scroll", invalidateRect);
+      window.removeEventListener("resize", invalidateRect);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -307,10 +319,18 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
   useFrame((state) => {
     if (!materialRef.current) return;
 
-    // Enforce active texture unit bindings every frame to prevent any potential GPU unit mismatch
-    materialRef.current.uniforms.uTextureBroken.value = textures.broken;
-    materialRef.current.uniforms.uTextureFixed.value = textures.fixed;
-    materialRef.current.uniforms.uDepthMap.value = textures.depth;
+    // Uniform KONSTAN (tekstur, radius, threshold, textureAspect) hanya perlu
+    // ditulis ulang tiap frame di DEV agar kebal Fast Refresh. Di produksi
+    // tidak ada Fast Refresh — nilai awal useRef sudah benar & permanen,
+    // jadi kita lewati tulisan redundan tersebut demi frame time yang lebih ramping.
+    if (process.env.NODE_ENV !== "production") {
+      materialRef.current.uniforms.uTextureBroken.value = textures.broken;
+      materialRef.current.uniforms.uTextureFixed.value = textures.fixed;
+      materialRef.current.uniforms.uDepthMap.value = textures.depth;
+      materialRef.current.uniforms.uTextureAspect.value = textures.aspect;
+      materialRef.current.uniforms.uRadius.value = 3.0;
+      materialRef.current.uniforms.uThreshold.value = 0.1;
+    }
 
     const time = state.clock.getElapsedTime();
     
@@ -323,13 +343,6 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     // → iPhone positioning selalu stabil meskipun canvas diperpanjang
     const phoneAspect = typeof window !== "undefined" ? window.innerWidth / window.innerHeight : viewportWidth / viewportHeight;
     materialRef.current.uniforms.uPhoneAspect.value = phoneAspect;
-    materialRef.current.uniforms.uTextureAspect.value = textures.aspect;
-
-    // Brush seragam SEMUA perangkat (paritas landonorris.com: bundle Lando
-    // tak punya cabang mobile). uRadius 3.0 = tanpa batas radial, threshold
-    // 0.1 = nilai Lando. Ditulis per frame agar kebal Fast Refresh.
-    materialRef.current.uniforms.uRadius.value = 3.0;
-    materialRef.current.uniforms.uThreshold.value = 0.1;
 
     // Geser iPhone hanya saat canvas portrait (mobile/tablet).
     // Gunakan phoneAspect (window), bukan canvas aspect.
@@ -494,6 +507,13 @@ export default function Hero3D() {
     brokenTex = loader.load("/images/iphone-broken.png?v=2");
     fixedTex = loader.load("/images/iphone-fixed.png?v=2");
     depthTex = loader.load("/images/iphone-depth.png?v=2");
+
+    // Bebaskan memori GPU saat komponen unmount (navigasi ke halaman lain)
+    return () => {
+      brokenTex?.dispose();
+      fixedTex?.dispose();
+      depthTex?.dispose();
+    };
   }, []);
 
   return (
@@ -506,7 +526,10 @@ export default function Hero3D() {
         <WebGLBoundary>
           <Canvas
             camera={{ position: [0, 0, 1], fov: 90 }}
-            gl={{ antialias: true, alpha: true }}
+            // antialias: false — scene ini hanya fullscreen quad shader (tanpa tepi
+            // geometri), MSAA tidak memberi efek visual apa pun tetapi membebani
+            // GPU tua secara signifikan. powerPreference meminta GPU diskrit bila ada.
+            gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
             dpr={isCoarse ? [1, 2] : [1, 1.25]}
             className="w-full h-full touch-pan-y"
           >

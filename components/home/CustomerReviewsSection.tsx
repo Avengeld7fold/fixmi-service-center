@@ -47,8 +47,11 @@ export default function CustomerReviewsSection() {
 
   // Mouse & Touch Dragging Gesture State with Physical Spring Response
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStartX, setDragStartX] = useState<number>(0);
-  const [dragOffset, setDragOffset] = useState<number>(0);
+  // Drag offset disimpan di ref + ditulis langsung ke DOM track
+  // (tanpa setState per mousemove/touchmove → zero re-render saat drag)
+  const dragStartXRef = useRef<number>(0);
+  const dragOffsetRef = useRef<number>(0);
+  const trackRef = useRef<HTMLDivElement | null>(null);
 
   // Responsive visible count tracking
   useEffect(() => {
@@ -131,47 +134,67 @@ export default function CustomerReviewsSection() {
     return () => clearInterval(timer);
   }, [isPaused, isDragging, allCardsCount, visibleCount, currentIndex, maxIndex]);
 
+  // Formula transform dasar (offset drag = 0)
+  const buildTransform = (offset: number) =>
+    visibleCount === 3
+      ? `translateX(calc(-${currentIndex} * (100% / 3 + 8px) + ${offset}px))`
+      : visibleCount === 2
+      ? `translateX(calc(-${currentIndex} * (100% / 2 + 12px) + ${offset}px))`
+      : `translateX(calc(-${currentIndex} * (100% + 24px) + ${offset}px))`;
+
+  // Tulis offset drag langsung ke DOM track (bypass React render)
+  const writeDragOffset = (delta: number) => {
+    // Rubber-banding resistance saat melewati batas awal/akhir
+    const withResistance =
+      (currentIndex === 0 && delta > 0) || (currentIndex === maxIndex && delta < 0)
+        ? delta * 0.4
+        : delta;
+    dragOffsetRef.current = withResistance;
+    if (trackRef.current) {
+      trackRef.current.style.transform = buildTransform(withResistance);
+    }
+  };
+
+  const endDrag = () => {
+    const offset = dragOffsetRef.current;
+    if (offset < -50) {
+      handleNext();
+    } else if (offset > 50) {
+      handlePrev();
+    }
+    dragOffsetRef.current = 0;
+    if (trackRef.current) {
+      // Kembalikan ke baseline eksplisit — React tidak menulis ulang style
+      // yang di-mutate langsung jika nilai virtual DOM-nya tidak berubah.
+      // Bila index berubah (next/prev), re-render React akan menimpanya dengan nilai baru.
+      trackRef.current.style.transform = buildTransform(0);
+    }
+    setIsDragging(false);
+  };
+
   // ── MOUSE DRAG GESTURE WITH PHYSICAL RESISTANCE & SNAP ──
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsDragging(true);
-    setDragStartX(e.clientX);
-    setDragOffset(0);
+    dragStartXRef.current = e.clientX;
+    dragOffsetRef.current = 0;
     setIsPaused(true);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    const delta = e.clientX - dragStartX;
-    // Apply slight edge rubber-banding resistance if dragging past boundaries
-    if ((currentIndex === 0 && delta > 0) || (currentIndex === maxIndex && delta < 0)) {
-      setDragOffset(delta * 0.4);
-    } else {
-      setDragOffset(delta);
-    }
+    writeDragOffset(e.clientX - dragStartXRef.current);
   };
 
   const handleMouseUp = () => {
     if (!isDragging) return;
-    if (dragOffset < -50) {
-      handleNext();
-    } else if (dragOffset > 50) {
-      handlePrev();
-    }
-    setIsDragging(false);
-    setDragOffset(0);
+    endDrag();
     setIsPaused(false);
   };
 
   const handleMouseLeave = () => {
     if (isDragging) {
-      if (dragOffset < -50) {
-        handleNext();
-      } else if (dragOffset > 50) {
-        handlePrev();
-      }
-      setIsDragging(false);
-      setDragOffset(0);
+      endDrag();
     }
     setIsPaused(false);
   };
@@ -179,30 +202,19 @@ export default function CustomerReviewsSection() {
   // ── TOUCH SWIPE GESTURE ──
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
-    setDragStartX(e.targetTouches[0].clientX);
-    setDragOffset(0);
+    dragStartXRef.current = e.targetTouches[0].clientX;
+    dragOffsetRef.current = 0;
     setIsPaused(true);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
-    const delta = e.targetTouches[0].clientX - dragStartX;
-    if ((currentIndex === 0 && delta > 0) || (currentIndex === maxIndex && delta < 0)) {
-      setDragOffset(delta * 0.4);
-    } else {
-      setDragOffset(delta);
-    }
+    writeDragOffset(e.targetTouches[0].clientX - dragStartXRef.current);
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
-    if (dragOffset < -50) {
-      handleNext();
-    } else if (dragOffset > 50) {
-      handlePrev();
-    }
-    setIsDragging(false);
-    setDragOffset(0);
+    endDrag();
     setIsPaused(false);
   };
 
@@ -211,12 +223,7 @@ export default function CustomerReviewsSection() {
   };
 
   // Mathematical translation formula (Zero clipping + Hardware acceleration)
-  const transformStyle =
-    visibleCount === 3
-      ? `translateX(calc(-${currentIndex} * (100% / 3 + 8px) + ${dragOffset}px))`
-      : visibleCount === 2
-      ? `translateX(calc(-${currentIndex} * (100% / 2 + 12px) + ${dragOffset}px))`
-      : `translateX(calc(-${currentIndex} * (100% + 24px) + ${dragOffset}px))`;
+  const transformStyle = buildTransform(0);
 
   return (
     <section className="relative w-full bg-[#121212] text-white py-12 sm:py-16 lg:py-20 overflow-hidden select-none border-t border-white/[0.06]">
@@ -375,6 +382,7 @@ export default function CustomerReviewsSection() {
             </div>
           ) : (
             <div
+              ref={trackRef}
               className={`flex gap-6 font-sans items-stretch ${isDragging ? "scale-[0.995]" : "scale-100"}`}
               style={{
                 transform: transformStyle,

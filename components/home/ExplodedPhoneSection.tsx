@@ -367,6 +367,35 @@ export default function ExplodedPhoneSection() {
 
     let isHovered = false;
     let rafId: number | null = null;
+    // Nilai progress terakhir yang dikirim ke React state (quantized).
+    // GSAP timeline tetap di-update SETIAP frame (animasi layer tetap 60fps mulus),
+    // tetapi React state hanya di-update saat perubahan terlihat (>= 0.005)
+    // sehingga komponen besar ini tidak re-render pada setiap frame settle lerp.
+    let lastQuantized = -1;
+
+    const applyProgress = (val: number, isFinal: boolean) => {
+      currentProgressRef.current = val;
+
+      // Update GSAP timeline langsung ke DOM — bebas biaya re-render React
+      if (timelineRef.current) {
+        timelineRef.current.progress(val);
+      }
+
+      const quantized = isFinal ? val : Math.round(val * 200) / 200;
+      if (quantized === lastQuantized) return;
+      lastQuantized = quantized;
+
+      setScrollProgress(quantized);
+
+      const activeStep = Math.min(13, Math.max(1, Math.floor(quantized * 12.9) + 1));
+      setCurrentStep(activeStep);
+      setIsAssembled(quantized > 0.92);
+
+      const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
+      if (currentLayerDef && currentLayerDef.calloutId) {
+        setActiveCalloutId(currentLayerDef.calloutId);
+      }
+    };
 
     const startRaf = () => {
       if (rafId !== null) return;
@@ -377,39 +406,10 @@ export default function ExplodedPhoneSection() {
 
         if (Math.abs(diff) > 0.0002) {
           // Exponential smoothing lerp (Apple CADisplayLink feel)
-          const nextVal = current + diff * 0.16;
-          currentProgressRef.current = nextVal;
-          setScrollProgress(nextVal);
-
-          if (timelineRef.current) {
-            timelineRef.current.progress(nextVal);
-          }
-
-          const activeStep = Math.min(13, Math.max(1, Math.floor(nextVal * 12.9) + 1));
-          setCurrentStep(activeStep);
-          setIsAssembled(nextVal > 0.92);
-
-          const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
-          if (currentLayerDef && currentLayerDef.calloutId) {
-            setActiveCalloutId(currentLayerDef.calloutId);
-          }
-
+          applyProgress(current + diff * 0.16, false);
           rafId = requestAnimationFrame(tick);
         } else {
-          currentProgressRef.current = target;
-          setScrollProgress(target);
-          if (timelineRef.current) {
-            timelineRef.current.progress(target);
-          }
-          const activeStep = Math.min(13, Math.max(1, Math.floor(target * 12.9) + 1));
-          setCurrentStep(activeStep);
-          setIsAssembled(target > 0.92);
-
-          const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
-          if (currentLayerDef && currentLayerDef.calloutId) {
-            setActiveCalloutId(currentLayerDef.calloutId);
-          }
-
+          applyProgress(target, true);
           rafId = null;
         }
       };
@@ -522,9 +522,21 @@ export default function ExplodedPhoneSection() {
       setSpatialMap(newMap);
     };
 
+    // Throttle: posisi dot/lingkaran RELATIF terhadap grid tidak berubah saat scroll murni
+    // (semua elemen bergeser bersama). Listener scroll hanya penjaga untuk layout shift,
+    // jadi cukup dijalankan maksimal sekali per 200ms (trailing) — bukan 9x gBCR per event.
+    let throttleTimer: ReturnType<typeof setTimeout> | null = null;
+    const throttledUpdate = () => {
+      if (throttleTimer !== null) return;
+      throttleTimer = setTimeout(() => {
+        throttleTimer = null;
+        updateSpatialMap();
+      }, 200);
+    };
+
     updateSpatialMap();
-    window.addEventListener("resize", updateSpatialMap);
-    window.addEventListener("scroll", updateSpatialMap);
+    window.addEventListener("resize", throttledUpdate);
+    window.addEventListener("scroll", throttledUpdate, { passive: true });
 
     const t1 = setTimeout(updateSpatialMap, 50);
     const t2 = setTimeout(updateSpatialMap, 200);
@@ -532,8 +544,9 @@ export default function ExplodedPhoneSection() {
     const t4 = setTimeout(updateSpatialMap, 1200);
 
     return () => {
-      window.removeEventListener("resize", updateSpatialMap);
-      window.removeEventListener("scroll", updateSpatialMap);
+      window.removeEventListener("resize", throttledUpdate);
+      window.removeEventListener("scroll", throttledUpdate);
+      if (throttleTimer !== null) clearTimeout(throttleTimer);
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
@@ -768,7 +781,9 @@ export default function ExplodedPhoneSection() {
                         src={layer.file}
                         alt={layer.name}
                         fill
-                        priority
+                        priority={index === 0}
+                        loading={index === 0 ? undefined : "eager"}
+                        sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
                         className="object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.85)]"
                       />
                     </div>

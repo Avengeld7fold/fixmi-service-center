@@ -109,10 +109,6 @@ export default function WhyChooseFixmiSection() {
     dragStartXRef.current = e.clientX;
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
-  };
-
   const handleMouseUp = (e: React.MouseEvent) => {
     if (!isDraggingRef.current) return;
     const delta = dragStartXRef.current - e.clientX;
@@ -249,7 +245,6 @@ export default function WhyChooseFixmiSection() {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
             onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -273,6 +268,8 @@ export default function WhyChooseFixmiSection() {
                       alt={photo.title}
                       fill
                       priority={idx === 0}
+                      loading={idx === 0 ? undefined : "lazy"}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                       className="object-cover object-center brightness-[0.88] contrast-[1.04]"
                     />
 

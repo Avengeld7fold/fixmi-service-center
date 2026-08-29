@@ -4,11 +4,17 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import ExplodedPhoneSection from "./ExplodedPhoneSection";
-import WhyChooseFixmiSection from "./WhyChooseFixmiSection";
-import RepairJourneySection from "./RepairJourneySection";
-import FaqSection from "./FaqSection";
-import CustomerReviewsSection from "./CustomerReviewsSection";
+import dynamic from "next/dynamic";
+
+// Code-splitting: semua section di bawah fold dipecah ke chunk JS terpisah.
+// SSR tetap aktif (default) sehingga HTML awal identik — tidak ada perubahan
+// visual, layout shift, ataupun dampak SEO. Hanya beban parse JS awal yang
+// berkurang signifikan untuk perangkat lawas.
+const WhyChooseFixmiSection = dynamic(() => import("./WhyChooseFixmiSection"));
+const ExplodedPhoneSection = dynamic(() => import("./ExplodedPhoneSection"));
+const RepairJourneySection = dynamic(() => import("./RepairJourneySection"));
+const CustomerReviewsSection = dynamic(() => import("./CustomerReviewsSection"));
+const FaqSection = dynamic(() => import("./FaqSection"));
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);

@@ -96,10 +96,22 @@ export default function AboutHeroEditorial() {
 
   // Floating hover preview state
   const [hoveredData, setHoveredData] = useState<HoverImageTrigger | null>(null);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+
+  // Posisi kursor disimpan di ref + ditulis langsung ke DOM tooltip
+  // (tanpa setState per mousemove → seluruh hero tidak re-render saat mouse bergerak)
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const cursorPosRef = useRef({ x: 0, y: 0 });
+
+  const positionTooltip = () => {
+    const el = tooltipRef.current;
+    if (!el) return;
+    el.style.left = `${cursorPosRef.current.x + 24}px`;
+    el.style.top = `${cursorPosRef.current.y - 120}px`;
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    setCursorPos({ x: e.clientX, y: e.clientY });
+    cursorPosRef.current = { x: e.clientX, y: e.clientY };
+    positionTooltip();
   };
 
   useGSAP(
@@ -139,10 +151,15 @@ export default function AboutHeroEditorial() {
       {/* ── Interactive Floating Image Tooltip ── */}
       {hoveredData && (
         <div
+          ref={(el) => {
+            tooltipRef.current = el;
+            // Posisikan segera saat tooltip muncul (mengikuti posisi kursor terakhir)
+            if (el) positionTooltip();
+          }}
           className="pointer-events-none fixed z-50 transition-transform duration-100 ease-out hidden md:block"
           style={{
-            left: `${cursorPos.x + 24}px`,
-            top: `${cursorPos.y - 120}px`,
+            left: `${cursorPosRef.current.x + 24}px`,
+            top: `${cursorPosRef.current.y - 120}px`,
           }}
         >
           <div className="overflow-hidden rounded-xl border border-white/20 bg-[#161616]/95 p-2 shadow-[0_25px_60px_rgba(0,0,0,0.85)] backdrop-blur-xl w-64">

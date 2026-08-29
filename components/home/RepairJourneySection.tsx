@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -35,7 +35,8 @@ export default function RepairJourneySection() {
   const progressLineRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(1);
 
-  const repairSteps: JourneyStep[] = [
+  // Memoized: hanya dibuat ulang jika bahasa (dict) berubah — bukan setiap render
+  const repairSteps: JourneyStep[] = useMemo(() => [
     {
       stepNumber: "01.",
       tabLabel: dict.journey.step1Tag,
@@ -76,7 +77,8 @@ export default function RepairJourneySection() {
       targetY: 36,
       zIndex: 40,
     },
-  ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [dict]);
 
   useGSAP(
     () => {

@@ -14,12 +14,54 @@ if (typeof window !== "undefined") {
 export default function FaqSection() {
   const { dict } = useI18n();
   const [openId, setOpenId] = useState<string | null>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
 
   const sectionRef = useRef<HTMLElement | null>(null);
   const photoCardRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const accordionListRef = useRef<HTMLDivElement | null>(null);
+
+  // ── 3D Tilt via direct DOM writes (tanpa setState per mousemove → zero re-render) ──
+  const tiltStageRef = useRef<HTMLDivElement | null>(null);
+  const tiltBackRef = useRef<HTMLDivElement | null>(null);
+  const tiltMainRef = useRef<HTMLDivElement | null>(null);
+  const tiltGlareRef = useRef<HTMLDivElement | null>(null);
+  const tiltRafRef = useRef<number | null>(null);
+  const tiltStateRef = useRef({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+
+  const applyTilt = () => {
+    tiltRafRef.current = null;
+    const t = tiltStateRef.current;
+    if (tiltStageRef.current) {
+      tiltStageRef.current.style.transform = `perspective(1200px) rotateY(${-12 + t.x}deg) rotateX(${4 + t.y}deg) skewY(-2deg)`;
+    }
+    if (tiltBackRef.current) {
+      tiltBackRef.current.style.transform = `translateZ(-35px) translateX(${t.x * 0.4}px) translateY(${t.y * 0.4}px)`;
+    }
+    if (tiltMainRef.current) {
+      tiltMainRef.current.style.boxShadow = `
+                      ${-18 - t.x * 1.5}px ${28 - t.y * 1.5}px 60px rgba(0,0,0,0.95),
+                      0 0 35px rgba(0,0,0,0.8),
+                      inset 0 1px 0 rgba(255,255,255,0.22),
+                      inset 0 -1px 0 rgba(0,0,0,0.8)
+                    `;
+    }
+    if (tiltGlareRef.current) {
+      tiltGlareRef.current.style.opacity = String(t.opacity);
+      tiltGlareRef.current.style.background = `radial-gradient(circle at ${t.glareX}% ${t.glareY}%, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`;
+    }
+  };
+
+  const scheduleTilt = () => {
+    if (tiltRafRef.current === null) {
+      tiltRafRef.current = requestAnimationFrame(applyTilt);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (tiltRafRef.current !== null) cancelAnimationFrame(tiltRafRef.current);
+    };
+  }, []);
 
   // ── GSAP ScrollTrigger Entrance Animation (Staggered & Weighted Entrance) ──
   useGSAP(
@@ -92,17 +134,19 @@ export default function FaqSection() {
     const glareX = ((e.clientX - rect.left) / rect.width) * 100;
     const glareY = ((e.clientY - rect.top) / rect.height) * 100;
 
-    setTilt({
+    tiltStateRef.current = {
       x: x * 12,
       y: -y * 12,
       glareX,
       glareY,
       opacity: 0.35,
-    });
+    };
+    scheduleTilt();
   };
 
   const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+    tiltStateRef.current = { x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 };
+    scheduleTilt();
   };
 
   return (
@@ -123,17 +167,19 @@ export default function FaqSection() {
             >
               {/* 3D Rotating Stage with true preserve-3d */}
               <div
+                ref={tiltStageRef}
                 className="relative transition-transform duration-200 ease-out"
                 style={{
-                  transform: `perspective(1200px) rotateY(${-12 + tilt.x}deg) rotateX(${4 + tilt.y}deg) skewY(-2deg)`,
+                  transform: `perspective(1200px) rotateY(-12deg) rotateX(4deg) skewY(-2deg)`,
                   transformStyle: "preserve-3d",
                 }}
               >
                 {/* 1. BACK WIREFRAME RECTANGLE (Floats in 3D Space at translateZ(-35px)) */}
                 <div
+                  ref={tiltBackRef}
                   className="absolute -top-5 -right-5 sm:-top-6 sm:-right-6 w-full h-full rounded-2xl sm:rounded-3xl border border-white/[0.25] pointer-events-none transition-transform duration-200 ease-out"
                   style={{
-                    transform: `translateZ(-35px) translateX(${tilt.x * 0.4}px) translateY(${tilt.y * 0.4}px)`,
+                    transform: `translateZ(-35px) translateX(0px) translateY(0px)`,
                     boxShadow: "0 0 30px rgba(0,0,0,0.6)",
                   }}
                   aria-hidden="true"
@@ -141,12 +187,13 @@ export default function FaqSection() {
 
                 {/* 2. MAIN 3D PHOTO CARD (Height matching accordion list span) */}
                 <div
+                  ref={tiltMainRef}
                   className="relative z-10 w-full h-[340px] sm:h-[380px] lg:h-[410px] xl:h-[430px] rounded-2xl sm:rounded-3xl overflow-hidden bg-[#161619] border border-white/[0.16] transition-shadow duration-200"
                   style={{
                     transform: "translateZ(25px)",
                     transformStyle: "preserve-3d",
                     boxShadow: `
-                      ${-18 - tilt.x * 1.5}px ${28 - tilt.y * 1.5}px 60px rgba(0,0,0,0.95),
+                      -18px 28px 60px rgba(0,0,0,0.95),
                       0 0 35px rgba(0,0,0,0.8),
                       inset 0 1px 0 rgba(255,255,255,0.22),
                       inset 0 -1px 0 rgba(0,0,0,0.8)
@@ -164,10 +211,11 @@ export default function FaqSection() {
 
                   {/* 3. DYNAMIC AMBIENT GLARE SHEEN (Light reflection tracking mouse position) */}
                   <div
+                    ref={tiltGlareRef}
                     className="absolute inset-0 pointer-events-none transition-opacity duration-300"
                     style={{
-                      opacity: tilt.opacity,
-                      background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`,
+                      opacity: 0,
+                      background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)`,
                     }}
                   />
 

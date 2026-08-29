@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, Geist_Mono, Bayon } from "next/font/google";
+import { Geist_Mono, Bayon } from "next/font/google";
 import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,19 +8,9 @@ import LoadingGate from "@/components/loader/LoadingGate";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
-
 const bayon = Bayon({
   variable: "--font-bayon",
   weight: "400",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -213,7 +203,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} h-full antialiased`}
+      className={`${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} h-full antialiased`}
     >
       <head>
         <script
