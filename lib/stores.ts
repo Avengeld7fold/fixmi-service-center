@@ -36,7 +36,7 @@ export const STORES: Store[] = [
     address:
       "Link. Kubu Alit Kedonganan, Jl. Raya Uluwatu, Kedonganan, Kec. Kuta, Kabupaten Badung, Bali 80361",
     phone: "0819-9933-6722",
-    hours: "Senin – Jumat 09.00 – 21.00 WITA · Minggu Tutup",
+    hours: "Senin – Sabtu 09.00 – 21.00 WITA · Minggu Tutup",
     map: "Fixmi Service Center Kedonganan Jl Raya Uluwatu Bali 80361",
     lat: -8.759229543631317,
     lng: 115.17628628769123,
@@ -52,7 +52,7 @@ export const STORES: Store[] = [
     address:
       "Taman Griya, Jl. Nuansa Utama No. 33, Jimbaran, Kuta Selatan, Kabupaten Badung, Bali 80361",
     phone: "0851-2357-9557",
-    hours: "Senin – Jumat 09.00 – 21.00 WITA · Minggu Tutup",
+    hours: "Senin – Sabtu 09.00 – 21.00 WITA · Minggu Tutup",
     map: "Fixmi Service Center Phone Taman Griya Jl Nuansa Utama Jimbaran Bali",
     lat: -8.795211286730995,
     lng: 115.18692765700816,
@@ -68,7 +68,7 @@ export const STORES: Store[] = [
     address:
       "Cellular World Arena, Jl. Teuku Umar No. 57, Dauh Puri Kauh, Kec. Denpasar Barat, Kota Denpasar, Bali 80113",
     phone: "0819-9933-6722",
-    hours: "Senin – Jumat 09.00 – 21.00 WITA · Minggu Tutup",
+    hours: "Senin – Sabtu 09.00 – 21.00 WITA · Minggu Tutup",
     map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
     lat: -8.67049674423244,
     lng: 115.209545433761,
