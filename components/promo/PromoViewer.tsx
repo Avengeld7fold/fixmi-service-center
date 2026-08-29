@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, ZoomIn, Tag } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
 import type { PromoImageItem } from "@/lib/promo-server";
 
 interface PromoViewerProps {
@@ -10,6 +11,8 @@ interface PromoViewerProps {
 }
 
 export default function PromoViewer({ promos }: PromoViewerProps) {
+  const { dict, locale } = useI18n();
+  const isEn = locale === "en";
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const selectedPromo = selectedIndex !== null ? promos[selectedIndex] : null;
@@ -62,10 +65,10 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
           className="text-lg sm:text-xl font-medium text-white mb-2"
           style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
         >
-          Informasi Penawaran &amp; Promo
+          {isEn ? "Offers & Promo Information" : "Informasi Penawaran & Promo"}
         </h3>
         <p className="text-xs sm:text-sm text-text-secondary max-w-md leading-relaxed">
-          Program penawaran khusus dan promo berkala akan ditampilkan di sini.
+          {dict.promo.emptyPromo}
         </p>
       </div>
     );
@@ -134,7 +137,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
           <button
             type="button"
             onClick={handleClose}
-            aria-label="Tutup Preview"
+            aria-label={dict.common.close}
             className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 rounded-full bg-white/10 p-2.5 sm:p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
           >
             <X className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -147,7 +150,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
               e.stopPropagation();
               handlePrev();
             }}
-            aria-label="Promo Sebelumnya"
+            aria-label={isEn ? "Previous promo" : "Promo Sebelumnya"}
             className="absolute left-2 sm:left-6 z-50 rounded-full bg-white/10 p-2 sm:p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
           >
             <ChevronLeft className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -160,7 +163,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
               e.stopPropagation();
               handleNext();
             }}
-            aria-label="Promo Berikutnya"
+            aria-label={isEn ? "Next promo" : "Promo Berikutnya"}
             className="absolute right-2 sm:right-6 z-50 rounded-full bg-white/10 p-2 sm:p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
           >
             <ChevronRight className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -174,7 +177,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
             <div className="relative flex items-center justify-center max-h-[78vh] w-auto max-w-full overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
               <img
                 src={selectedPromo.Image}
-                alt={selectedPromo.altText || selectedPromo.Title || "Banner Promo FIXMI"}
+                alt={selectedPromo.altText || selectedPromo.Title || (isEn ? "FIXMI Promo Banner" : "Banner Promo FIXMI")}
                 className="max-h-[78vh] max-w-full object-contain block"
               />
             </div>
@@ -182,7 +185,9 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
             {/* Bottom Caption */}
             <div className="mt-3.5 flex items-center justify-between w-full max-w-2xl px-3">
               <span className="text-xs sm:text-sm font-mono text-neutral-400">
-                Promo {selectedIndex + 1} dari {promos.length}
+                {isEn
+                  ? `Promo ${selectedIndex + 1} of ${promos.length}`
+                  : `Promo ${selectedIndex + 1} dari ${promos.length}`}
               </span>
               {selectedPromo.Title && (
                 <span className="text-xs sm:text-sm font-medium text-neutral-300 tracking-wide truncate max-w-[65%] text-right">

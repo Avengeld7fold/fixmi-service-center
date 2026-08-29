@@ -3,19 +3,24 @@
 import { useEffect } from "react";
 import { X, ShieldCheck, Check } from "lucide-react";
 import { useLenis } from "lenis/react";
+import { useI18n } from "@/lib/i18n/context";
 
-/**
- * Modal Ketentuan Garansi Service. Dikontrol parent (open/onClose).
- * Escape + klik backdrop menutup; Lenis di-stop agar latar tak tergulir.
- */
-const TERMS = [
-  "Garansi service berlaku 30 hari sejak tanggal pengambilan perangkat.",
-  "Garansi hanya mencakup sparepart yang diganti dan jasa pengerjaan terkait — bukan komponen lain di luar yang diservis.",
-  "Klaim garansi WAJIB menyertakan nota/bukti service asli dari FIXMI.",
-  "Garansi HANGUS bila segel garansi rusak/dilepas atau perangkat dibongkar pihak/teknisi lain.",
-  "Kerusakan akibat kelalaian pengguna (human error) — terjatuh, tertekan, tertindih — tidak dicover garansi.",
-  "Kerusakan akibat cairan/air, korsleting, atau tegangan listrik tidak stabil tidak dicover garansi.",
-  "Data & aplikasi pribadi bukan tanggung jawab garansi. Harap backup data sebelum service.",
+const ID_TERMS = [
+  "Garansi service berlaku hingga 365 hari (1 tahun) sesuai jenis suku cadang yang diganti.",
+  "Garansi mencakup suku cadang yang diganti dan jasa teknisi terkait — bukan komponen lain di luar perbaikan.",
+  "Klaim garansi sangat mudah: cukup tunjukkan nota digital atau nomor WhatsApp terdaftar.",
+  "Garansi gugur bila segel garansi rusak/dilepas atau perangkat dibongkar pihak lain.",
+  "Kerusakan fisik akibat kelalaian pengguna (jatuh, retak, tertindih, atau terkena air) tidak termasuk garansi.",
+  "Data & privasi perangkat dijamin aman. Harap backup data bila memungkinkan sebelum perbaikan.",
+];
+
+const EN_TERMS = [
+  "Service warranty valid up to 365 days (1 year) depending on the replacement part category.",
+  "Warranty covers replaced parts and associated labor — does not apply to unrelated hardware faults.",
+  "Seamless warranty claims: simply present your digital receipt or registered WhatsApp contact.",
+  "Warranty void if warranty tamper seals are damaged or if the unit is dismantled by external parties.",
+  "Physical accidental damage (drops, cracked glass, excessive pressure, or liquid ingress) is excluded.",
+  "Data privacy is strictly protected. Please back up your device when possible prior to service benching.",
 ];
 
 export default function WarrantyModal({
@@ -26,6 +31,9 @@ export default function WarrantyModal({
   onClose: () => void;
 }) {
   const lenis = useLenis();
+  const { dict, locale } = useI18n();
+  const isEn = locale === "en";
+  const terms = isEn ? EN_TERMS : ID_TERMS;
 
   useEffect(() => {
     if (!open) return;
@@ -54,7 +62,7 @@ export default function WarrantyModal({
       {/* Backdrop */}
       <button
         type="button"
-        aria-label="Tutup"
+        aria-label={dict.common.close}
         onClick={onClose}
         className="absolute inset-0 h-full w-full cursor-default bg-black/70 backdrop-blur-sm"
       />
@@ -71,16 +79,16 @@ export default function WarrantyModal({
               id="warranty-title"
               className="text-base font-semibold text-foreground lg:text-lg"
             >
-              Ketentuan Garansi Service
+              {dict.pricelist.warrantyModalTitle}
             </h2>
             <p className="font-mono text-[0.625rem] uppercase tracking-widest text-text-muted">
-              Syarat &amp; Ketentuan Berlaku
+              {dict.pricelist.warrantyModalSubtitle}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Tutup"
+            aria-label={dict.common.close}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-panel-border text-text-muted transition-[border-color,color,transform] duration-150 ease-out hover:border-primary hover:text-primary active:scale-95"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -92,7 +100,7 @@ export default function WarrantyModal({
           data-lenis-prevent
           className="flex-1 space-y-3 overflow-y-auto [overscroll-behavior:contain] px-5 py-5 lg:px-6"
         >
-          {TERMS.map((t, i) => (
+          {terms.map((t, i) => (
             <li key={i} className="flex items-start gap-3">
               <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15">
                 <Check className="h-3 w-3 text-primary" aria-hidden="true" />
@@ -105,8 +113,9 @@ export default function WarrantyModal({
         {/* Footer */}
         <div className="border-t border-panel-border px-5 py-4 lg:px-6">
           <p className="text-xs leading-relaxed text-text-muted">
-            Ada pertanyaan soal garansi? Hubungi tim FIXMI — kami bantu jelaskan sebelum
-            service dimulai.
+            {isEn
+              ? "Have questions regarding warranty coverage? Contact FIXMI team — we will gladly explain before workbench intake."
+              : "Ada pertanyaan soal garansi? Hubungi tim FIXMI — kami bantu jelaskan sebelum service dimulai."}
           </p>
         </div>
       </div>

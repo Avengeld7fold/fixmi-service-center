@@ -4,52 +4,18 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { useI18n } from "@/lib/i18n/context";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-interface TimelineEvent {
-  year: string;
-  role: string;
-  company: string;
-  description: string;
-}
-
-const TIMELINE_EVENTS: TimelineEvent[] = [
-  {
-    year: "2024 – Sekarang",
-    role: "EKOSISTEM TERPADU: SERVICE, ACADEMY & B2B",
-    company: "PT FIXMI BALI DIGITAL",
-    description:
-      "Memperluas layanan perbaikan perangkat cerdas, standarisasi laboratorium mikrosolder bersertifikasi, serta penyediaan dukungan teknis dan operasional B2B untuk jaringan perusahaan di Bali.",
-  },
-  {
-    year: "2021 – 2024",
-    role: "MITRA RESMI JARINGAN RETAIL GADGET",
-    company: "BALI REGIONAL",
-    description:
-      "Dipercaya sebagai partner perbaikan resmi bagi jaringan toko elektronik dan retail ternama di Bali termasuk Cellular World ID, iUsed Phone, dan RA Gadget.",
-  },
-  {
-    year: "2017 – 2021",
-    role: "PEMBENTUKAN FIXMI TECH ACADEMY",
-    company: "KEDONGANAN, KUTA",
-    description:
-      "Menyelenggarakan program pelatihan dan sertifikasi teknisi profesional berkolaborasi dengan institusi pendidikan teknis nasional seperti Borneo Flasher Indonesia.",
-  },
-  {
-    year: "2014 – 2017",
-    role: "PENDIRIAN PT FIXMI BALI DIGITAL",
-    company: "JL. RAYA ULUWATU",
-    description:
-      "Didirikan pada Agustus 2014 di Kedonganan, Badung oleh Dedik Bowo Sutrisno dengan komitmen menghadirkan layanan perbaikan gadget yang cepat, presisi, transparan, dan bergaransi resmi.",
-  },
-];
-
 export default function AboutJourneyTimeline() {
+  const { dict } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
   const rowsContainerRef = useRef<HTMLDivElement>(null);
+
+  const timelineEvents = dict.about.timeline || [];
 
   useGSAP(
     () => {
@@ -85,20 +51,20 @@ export default function AboutJourneyTimeline() {
       ref={sectionRef}
       className="relative w-full max-w-[90rem] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 py-12 sm:py-16 md:py-20 lg:py-24"
     >
-      {/* ── Section Title: PERJALANAN KAMI (Solid Orange + Outline White) ── */}
+      {/* ── Section Title (Solid Orange + Outline White) ── */}
       <h2
         className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[-0.03em] leading-none mb-8 sm:mb-12 md:mb-16 select-none"
         style={{ fontFamily: "var(--font-bayon), sans-serif" }}
       >
-        <span className="text-primary">PERJALANAN</span>{" "}
+        <span className="text-primary">{dict.about.timelineHeading1}</span>{" "}
         <span className="text-transparent [-webkit-text-stroke:1.25px_#fff] sm:[-webkit-text-stroke:1.5px_#fff]">
-          KAMI
+          {dict.about.timelineHeading2}
         </span>
       </h2>
 
       {/* ── Minimalist Ledger Rows (Exact layout matching reference) ── */}
       <div ref={rowsContainerRef} className="w-full border-t border-white/[0.08]">
-        {TIMELINE_EVENTS.map((item, idx) => (
+        {timelineEvents.map((item, idx) => (
           <div
             key={idx}
             className="exp-timeline-row group relative w-full border-b border-white/[0.08] py-6 sm:py-8 md:py-10 transition-colors duration-300 hover:border-white/20"

@@ -56,6 +56,10 @@ export interface Dictionary {
     checkPriceBtn: string;
     waConsultBtn: string;
     galleryTitle: string;
+    workshopSlides: Array<{
+      title: string;
+      subtitle: string;
+    }>;
   };
   teardown: {
     badge: string;
@@ -97,6 +101,7 @@ export interface Dictionary {
     writeReviewBtn: string;
     viewAllReviewsBtn: string;
     verifiedCustomer: string;
+    reviewsCountLabel: string;
   };
   faq: {
     badge: string;
@@ -147,6 +152,84 @@ export interface Dictionary {
     subtitle: string;
     allFilter: string;
     emptyGallery: string;
+  };
+  about: {
+    metaTitle: string;
+    metaDescription: string;
+    headline: string;
+    driveBadge: string;
+    driveHeadline: string;
+    driveP1: string;
+    driveP2: string;
+    microsolderLabel: string;
+    microsolderCaption: string;
+    cleanroomLabel: string;
+    cleanroomCaption: string;
+    originalPartsLabel: string;
+    originalPartsCaption: string;
+    behindBadge: string;
+    behindP1: string;
+    behindP2: string;
+    academyLabel: string;
+    academyCaption: string;
+    communityBadge: string;
+    communityP1: string;
+    communityP2: string;
+    partnersLabel: string;
+    partnersCaption: string;
+    workshopHint: string;
+    swipeHint: string;
+    cards: Array<{
+      tag: string;
+      title: string;
+      subtitle: string;
+    }>;
+    stats: Array<{
+      label: string;
+      sublabel: string;
+      suffix: string;
+    }>;
+    timelineHeading1: string;
+    timelineHeading2: string;
+    timeline: Array<{
+      year: string;
+      role: string;
+      company: string;
+      description: string;
+    }>;
+    ctaHeadline: string;
+    ctaDescription: string;
+    ctaBtn: string;
+  };
+  contact: {
+    metaTitle: string;
+    metaDescription: string;
+    requestBadge: string;
+    requestHeading1: string;
+    requestHeading2: string;
+    requestDescription: string;
+    outletsBadge: string;
+    outletsHeading1: string;
+    outletsHeading2: string;
+    outletsDescription: string;
+    form: {
+      nameLabel: string;
+      namePlaceholder: string;
+      phoneLabel: string;
+      phonePlaceholder: string;
+      deviceLabel: string;
+      devicePlaceholder: string;
+      serviceTypeLabel: string;
+      serviceTypePlaceholder: string;
+      issueLabel: string;
+      issuePlaceholder: string;
+      outletLabel: string;
+      outletPlaceholder: string;
+      submitBtn: string;
+      submitting: string;
+      successTitle: string;
+      successMessage: string;
+    };
   };
   footer: {
     locatorHeading: string;

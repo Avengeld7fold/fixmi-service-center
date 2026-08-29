@@ -5,17 +5,41 @@ import { Clock, MapPin, Phone, ArrowRight } from "lucide-react";
 import StoreMap from "./StoreMap";
 import { STORES, mapDirectionsUrl, mapSearchUrl } from "@/lib/stores";
 import { getStoreLiveStatus } from "@/lib/storeStatus";
+import { useI18n } from "@/lib/i18n/context";
 
 /** 0819-9933-6722 → tel:+6281999336722 */
 const telHref = (phone: string) =>
   `tel:+62${phone.replace(/[^0-9]/g, "").replace(/^0/, "")}`;
 
-/**
- * Store locator 3 gerai — tata letak ringkas & terstruktur untuk peta dan status live.
- */
 export default function StoreLocator() {
+  const { dict } = useI18n();
   const [active, setActive] = useState(STORES[0].key);
-  const store = STORES.find((s) => s.key === active) ?? STORES[0];
+
+  const localizedStores = [
+    {
+      ...STORES[0],
+      name: dict.footer.headStore,
+      role: dict.locale === "en" ? "Headquarters & Central Workshop" : "Pusat & Workshop Utama",
+      region: dict.footer.headStoreRegion,
+      hoursDisplay: dict.footer.hoursMonSat,
+    },
+    {
+      ...STORES[1],
+      name: dict.footer.branchStore,
+      role: dict.locale === "en" ? "South Bali Branch" : "Gerai Bali Selatan",
+      region: dict.footer.branchStoreRegion,
+      hoursDisplay: dict.footer.hoursMonSat,
+    },
+    {
+      ...STORES[2],
+      name: dict.footer.otherStore,
+      role: dict.locale === "en" ? "Express Workshop & Service Point" : "Gerai & Service Point",
+      region: dict.footer.otherStoreRegion,
+      hoursDisplay: dict.footer.hoursMonSat,
+    },
+  ];
+
+  const store = localizedStores.find((s) => s.key === active) ?? localizedStores[0];
 
   const activeLive = getStoreLiveStatus({
     openHour: store.openHour,
@@ -27,7 +51,7 @@ export default function StoreLocator() {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_1.15fr] lg:gap-10">
       {/* Daftar gerai */}
       <div className="space-y-3.5">
-        {STORES.map((s) => {
+        {localizedStores.map((s) => {
           const on = s.key === active;
           const live = getStoreLiveStatus({
             openHour: s.openHour,
@@ -74,7 +98,13 @@ export default function StoreLocator() {
                         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[0.7rem] font-mono font-medium tracking-wide ${live.badgeClass}`}
                       >
                         <span className={`h-1.5 w-1.5 rounded-full ${live.dotClass}`} />
-                        <span>{live.label}</span>
+                        <span>
+                          {dict.locale === "en"
+                            ? live.isOpen
+                              ? dict.footer.openStatusOpen
+                              : dict.footer.openStatusClosed
+                            : live.label}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -104,7 +134,9 @@ export default function StoreLocator() {
                     }`}
                   >
                     <Clock className="h-4 w-4 shrink-0 text-neutral-400" aria-hidden="true" />
-                    <span>Buka setiap hari · <span className="font-mono tabular-nums">{s.hours}</span></span>
+                    <span>
+                      {s.hoursDisplay} · <span className="text-neutral-400">{dict.footer.hoursSun}</span>
+                    </span>
                   </p>
                 </div>
               </button>
@@ -116,7 +148,9 @@ export default function StoreLocator() {
               >
                 <Phone className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                 <span className="font-mono text-[0.92rem] font-medium tabular-nums">{s.phone}</span>
-                <span className="ml-auto text-xs text-neutral-500 transition-colors group-hover:text-neutral-400">Hubungi Langsung →</span>
+                <span className="ml-auto text-xs text-neutral-500 transition-colors group-hover:text-neutral-400">
+                  {dict.locale === "en" ? "Call Direct →" : "Hubungi Langsung →"}
+                </span>
               </a>
             </div>
           );
@@ -142,7 +176,13 @@ export default function StoreLocator() {
                 className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[0.68rem] font-mono font-medium tracking-wide ${activeLive.badgeClass}`}
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${activeLive.dotClass}`} />
-                <span>{activeLive.label}</span>
+                <span>
+                  {dict.locale === "en"
+                    ? activeLive.isOpen
+                      ? dict.footer.openStatusOpen
+                      : dict.footer.openStatusClosed
+                    : activeLive.label}
+                </span>
               </span>
             </div>
 
@@ -154,7 +194,7 @@ export default function StoreLocator() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 transition-all hover:border-primary/40 hover:bg-primary/[0.06] hover:text-primary active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
               >
-                <span>Petunjuk Arah</span>
+                <span>{dict.footer.routeBtn}</span>
                 <span aria-hidden="true" className="text-primary font-bold">→</span>
               </a>
               <a
@@ -163,7 +203,7 @@ export default function StoreLocator() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 transition-all hover:border-primary/40 hover:bg-primary/[0.06] hover:text-primary active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
               >
-                <span>Buka di Maps</span>
+                <span>{dict.footer.mapsBtn}</span>
                 <span aria-hidden="true" className="text-neutral-400">↗</span>
               </a>
             </div>
@@ -173,3 +213,4 @@ export default function StoreLocator() {
     </div>
   );
 }
+

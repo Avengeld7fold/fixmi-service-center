@@ -10,39 +10,29 @@ import { whatsappUrl } from "@/lib/constants";
 interface WorkshopPhoto {
   id: string;
   number: string;
-  title: string;
-  subtitle: string;
   image: string;
 }
 
-const WORKSHOP_PHOTOS: WorkshopPhoto[] = [
+const WORKSHOP_PHOTO_ASSETS: WorkshopPhoto[] = [
   {
     id: "live-bench",
     number: "01",
-    title: "Live Repair Station",
-    subtitle: "Pengerjaan transparan langsung di meja servis tanpa ada data pribadi yang diakses.",
     image: "/images/teknisi-1.webp",
   },
   {
     id: "speed-assembly",
     number: "02",
-    title: "Precision Modular Assembly",
-    subtitle: "Penggantian layar & baterai kilat 15–30 menit bisa langsung ditunggu di lounge.",
     image: "/images/lounge.webp",
   },
   {
     id: "microscope",
     number: "03",
-    title: "Micro-soldering & CPU Reballing",
-    subtitle: "Peralatan mikroskop elektronika tingkat lanjut untuk pemulihan Logic Board.",
     image:
       "https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "quality-check",
     number: "04",
-    title: "Quality Control & Warranty",
-    subtitle: "Uji fungsi menyeluruh berstandar pabrikan dan garansi resmi hingga 365 hari.",
     image:
       "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1200&auto=format&fit=crop",
   },
@@ -59,12 +49,18 @@ export default function WhyChooseFixmiSection() {
   const isDraggingRef = useRef<boolean>(false);
   const dragStartXRef = useRef<number>(0);
 
+  const workshopPhotos = WORKSHOP_PHOTO_ASSETS.map((asset, idx) => ({
+    ...asset,
+    title: dict.whyUs.workshopSlides[idx]?.title || "Workshop Station",
+    subtitle: dict.whyUs.workshopSlides[idx]?.subtitle || "",
+  }));
+
   const nextSlide = useCallback(() => {
-    setCurrentIdx((prev) => (prev + 1) % WORKSHOP_PHOTOS.length);
+    setCurrentIdx((prev) => (prev + 1) % WORKSHOP_PHOTO_ASSETS.length);
   }, []);
 
   const prevSlide = useCallback(() => {
-    setCurrentIdx((prev) => (prev - 1 + WORKSHOP_PHOTOS.length) % WORKSHOP_PHOTOS.length);
+    setCurrentIdx((prev) => (prev - 1 + WORKSHOP_PHOTO_ASSETS.length) % WORKSHOP_PHOTO_ASSETS.length);
   }, []);
 
   // ── Standalone Auto-Slide Timer (resets on manual interaction) ──
@@ -251,7 +247,7 @@ export default function WhyChooseFixmiSection() {
             <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.12] bg-[#121216] shadow-[0_20px_50px_rgba(0,0,0,0.85)] sm:shadow-[0_30px_70px_rgba(0,0,0,0.85)] aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11]">
               
               {/* Photo Slides */}
-              {WORKSHOP_PHOTOS.map((photo, idx) => {
+              {workshopPhotos.map((photo, idx) => {
                 const isActive = currentIdx === idx;
                 return (
                   <div
@@ -281,7 +277,7 @@ export default function WhyChooseFixmiSection() {
               <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-20">
                 <div className="inline-flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-xs font-mono">
                   <span className="font-semibold text-primary">
-                    {WORKSHOP_PHOTOS[currentIdx].number}
+                    {workshopPhotos[currentIdx]?.number}
                   </span>
                   <span className="text-neutral-400">/ 04</span>
                 </div>
@@ -294,10 +290,10 @@ export default function WhyChooseFixmiSection() {
                     className="font-bayon text-xl sm:text-2xl lg:text-3xl uppercase text-white mb-1 leading-tight"
                     style={{ fontFamily: "var(--font-bayon), sans-serif" }}
                   >
-                    {WORKSHOP_PHOTOS[currentIdx].title}
+                    {workshopPhotos[currentIdx]?.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-md font-normal line-clamp-2 sm:line-clamp-none">
-                    {WORKSHOP_PHOTOS[currentIdx].subtitle}
+                    {workshopPhotos[currentIdx]?.subtitle}
                   </p>
                 </div>
 
@@ -305,7 +301,7 @@ export default function WhyChooseFixmiSection() {
                 <div className="flex items-center justify-between pt-3 border-t border-white/10">
                   {/* Segmented Dots */}
                   <div className="flex items-center gap-2">
-                    {WORKSHOP_PHOTOS.map((_, dotIdx) => (
+                    {workshopPhotos.map((_, dotIdx) => (
                       <button
                         key={dotIdx}
                         type="button"
@@ -313,7 +309,7 @@ export default function WhyChooseFixmiSection() {
                         className={`h-1.5 rounded-full transition-all duration-300 ${
                           currentIdx === dotIdx ? "w-6 bg-primary" : "w-2 bg-white/20 hover:bg-white/40"
                         }`}
-                        aria-label={`Lihat foto ${dotIdx + 1}`}
+                        aria-label={`Slide ${dotIdx + 1}`}
                       />
                     ))}
                   </div>

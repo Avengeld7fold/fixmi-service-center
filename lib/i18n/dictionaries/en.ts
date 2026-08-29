@@ -58,6 +58,24 @@ export const enDictionary: Dictionary = {
     checkPriceBtn: "Check Repair Pricing",
     waConsultBtn: "Chat WhatsApp",
     galleryTitle: "OUR TECHNICIAN WORKBENCH FACILITIES",
+    workshopSlides: [
+      {
+        title: "Live Repair Station",
+        subtitle: "100% transparent diagnostics and repair directly at the front desk with zero passcode required.",
+      },
+      {
+        title: "Precision Modular Assembly",
+        subtitle: "Express 15–30 minute screen & battery replacement while you relax in our comfortable lounge.",
+      },
+      {
+        title: "Micro-soldering & CPU Reballing",
+        subtitle: "Advanced stereo microscopy and thermal imaging laboratory for chip-level logic board recovery.",
+      },
+      {
+        title: "Quality Control & Warranty",
+        subtitle: "Manufacturer-grade 18-point function testing and official store warranty up to 365 days.",
+      },
+    ],
   },
   teardown: {
     badge: "MULTI-LAYER DIAGNOSTICS",
@@ -103,6 +121,7 @@ export const enDictionary: Dictionary = {
     writeReviewBtn: "Write a Review on Google Maps",
     viewAllReviewsBtn: "View All Reviews on Maps",
     verifiedCustomer: "Verified Customer",
+    reviewsCountLabel: "Reviews",
   },
   faq: {
     badge: "FREQUENTLY ASKED QUESTIONS",
@@ -205,6 +224,160 @@ export const enDictionary: Dictionary = {
     subtitle: "Real photographic documentation from our certified technicians and cleanroom laboratory in Bali.",
     allFilter: "All Photos",
     emptyGallery: "No showcase photos available in this category yet.",
+  },
+  about: {
+    metaTitle: "About Us — Track Record & Standards of PT Fixmi Bali Digital",
+    metaDescription:
+      "Official profile of PT Fixmi Bali Digital: Bali's premier certified smart device repair laboratory since August 2014. Micro-soldering specialists, FIXMI Tech Academy, and B2B partnerships across 3 Bali service centers.",
+    headline: "ABOUT US",
+    driveBadge: "01 / THE DRIVE",
+    driveHeadline:
+      "Established in August 2014 in Bali, we set the benchmark for smart device repairs grounded in integrity, technical precision, and official warranty assurance.",
+    driveP1:
+      "At FIXMI, we dedicate ourselves to providing utmost peace of mind and comfort for every device owner. We eliminate doubts regarding component authenticity and guarantee all itemized cost estimates are presented transparently from the initial diagnostic stage.",
+    driveP2:
+      "From OLED/LCD screen replacements, battery performance restoration, camera fixes, to chip-level logic board circuitry recovery at our",
+    microsolderLabel: "microsolder lab",
+    microsolderCaption:
+      "Precision microscope facility handling component-level motherboard and IC repairs.",
+    cleanroomLabel: "precision tools",
+    cleanroomCaption:
+      "Safe display and housing surgical tools eliminating any secondary damage risk.",
+    originalPartsLabel: "certified spare parts",
+    originalPartsCaption:
+      "Premium OEM-certified replacement components backed by official store warranty.",
+    behindBadge: "02 / BEHIND THE BENCH",
+    behindP1:
+      "Our service reliability is powered by profound technical mastery and dedicated skill advancement through",
+    behindP2:
+      "Every reinstalled component, reconstructed micro-electronic trace, and renewed water-resistant acoustic seal is executed with meticulous discipline, precision, and strict compliance with device safety standards.",
+    academyLabel: "FIXMI Tech Academy",
+    academyCaption:
+      "Professional technician training and skill certification hub in Bali.",
+    communityBadge: "03 / THE COMMUNITY & TRUST",
+    communityP1:
+      "Beyond serving thousands of individual residents and international travelers in Bali, PT Fixmi Bali Digital is trusted as the official technical repair partner by leading",
+    communityP2:
+      "We invite you to visit our central workshop at Jalan Raya Uluwatu No. 79, Kedonganan, Kuta, for a comprehensive live diagnostic and the highest standard repair solution for your device.",
+    partnersLabel: "premier retail networks in Bali",
+    partnersCaption:
+      "Trusted by Cellular World ID, iUsed Phone, RA Gadget, and thousands of clients.",
+    workshopHint: "WORKSHOP DOCUMENTATION",
+    swipeHint: "Swipe Horizontal →",
+    cards: [
+      {
+        tag: "SERVICE CENTER",
+        title: "Certified Master Technicians",
+        subtitle: "Industry Experience Since August 2014",
+      },
+      {
+        tag: "MICROSOLDER LAB",
+        title: "Hardware Lab & Microsoldering",
+        subtitle: "Chip-Level & Motherboard Recovery",
+      },
+      {
+        tag: "INTEGRATED ECOSYSTEM",
+        title: "Bali Smart Device Hub",
+        subtitle: "Kedonganan, Kuta, and Denpasar",
+      },
+      {
+        tag: "QUALITY ASSURANCE",
+        title: "Precision & Official Warranty",
+        subtitle: "iPhone, Android, and MacBook",
+      },
+    ],
+    stats: [
+      {
+        label: "Years of Professional Experience",
+        sublabel: "Operating in Bali Since August 2014",
+        suffix: "+",
+      },
+      {
+        label: "Devices Successfully Repaired",
+        sublabel: "iPhone, Android, MacBook, and iPad",
+        suffix: "+",
+      },
+      {
+        label: "Integrated Service Pillars",
+        sublabel: "Service Center, Academy & B2B",
+        suffix: " Pillars",
+      },
+      {
+        label: "Transparency & Warranty",
+        sublabel: "Open Diagnostics With Zero Hidden Fees",
+        suffix: "%",
+      },
+    ],
+    timelineHeading1: "OUR",
+    timelineHeading2: "JOURNEY",
+    timeline: [
+      {
+        year: "2024 – Present",
+        role: "INTEGRATED ECOSYSTEM: SERVICE, ACADEMY & B2B",
+        company: "PT FIXMI BALI DIGITAL",
+        description:
+          "Expanding smart device repair services, standardized certified micro-soldering labs, and providing enterprise B2B technical support across corporate networks in Bali.",
+      },
+      {
+        year: "2021 – 2024",
+        role: "OFFICIAL GADGET RETAIL PARTNER",
+        company: "BALI REGIONAL",
+        description:
+          "Appointed as official authorized repair partner for prominent electronics and retail chains in Bali including Cellular World ID, iUsed Phone, and RA Gadget.",
+      },
+      {
+        year: "2017 – 2021",
+        role: "ESTABLISHMENT OF FIXMI TECH ACADEMY",
+        company: "KEDONGANAN, KUTA",
+        description:
+          "Launching professional technician training and certification programs in collaboration with national technical education institutions like Borneo Flasher Indonesia.",
+      },
+      {
+        year: "2014 – 2017",
+        role: "FOUNDING OF PT FIXMI BALI DIGITAL",
+        company: "JL. RAYA ULUWATU",
+        description:
+          "Founded in August 2014 in Kedonganan, Badung by Dedik Bowo Sutrisno with a firm commitment to fast, precise, transparent, and officially warrantied repairs.",
+      },
+    ],
+    ctaHeadline: "Consult Your Device Issue With Our Technicians",
+    ctaDescription:
+      "Visit our main workshop at Jalan Raya Uluwatu No. 79, Kedonganan, Kuta, or message our technicians via WhatsApp for an immediate free initial diagnosis.",
+    ctaBtn: "Chat Technician via WhatsApp",
+  },
+  contact: {
+    metaTitle: "Locations & Contact — 3 FIXMI Service Centers in Bali",
+    metaDescription:
+      "Visit our 3 official FIXMI Bali service centers in Kedonganan (Kuta), Jimbaran (Taman Griya), and Denpasar (Teuku Umar). Online WhatsApp consultation and repair request form.",
+    requestBadge: "CONSULTATION & REPAIR",
+    requestHeading1: "CONTACT US &",
+    requestHeading2: "REQUEST SERVICE",
+    requestDescription:
+      "Submit your device symptoms and details. Our technicians will promptly provide an estimated cost and repair turnaround time.",
+    outletsBadge: "3 BALI OUTLETS",
+    outletsHeading1: "VISIT OUR",
+    outletsHeading2: "SERVICE CENTERS",
+    outletsDescription:
+      "Three official branches available across Bali. Choose a location to view complete addresses, opening hours, and direct Google Maps directions.",
+    form: {
+      nameLabel: "Full Name",
+      namePlaceholder: "Enter your name",
+      phoneLabel: "WhatsApp Number",
+      phonePlaceholder: "Example: +62 812-3456-7890",
+      deviceLabel: "Device Model",
+      devicePlaceholder: "Example: iPhone 13 Pro Max",
+      serviceTypeLabel: "Service Type",
+      serviceTypePlaceholder: "Select repair service",
+      issueLabel: "Issue / Symptoms",
+      issuePlaceholder: "Briefly describe the issue or damage with your device...",
+      outletLabel: "Select Nearest Branch",
+      outletPlaceholder: "Choose FIXMI branch",
+      submitBtn: "Submit Service Request",
+      submitting: "Submitting...",
+      successTitle: "Service Request Sent!",
+      successMessage:
+        "Thank you! A FIXMI technician will reach out to your WhatsApp number shortly to confirm your repair estimate and timing.",
+    },
   },
   footer: {
     locatorHeading: "Find Our Stores",

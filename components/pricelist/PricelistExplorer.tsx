@@ -247,36 +247,47 @@ export default function PricelistExplorer({
                 {/* Status Pill Badge */}
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[0.6875rem] sm:text-xs font-mono tracking-wider text-neutral-300 uppercase mb-3 sm:mb-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span>INFORMASI LAYANAN</span>
+                  <span>{dict.pricelist.emptyTitle}</span>
                 </div>
 
                 <h3
                   className="font-bayon text-2xl sm:text-3xl md:text-4xl text-white uppercase tracking-tight leading-[0.98]"
                   style={{ fontFamily: "var(--font-bayon), sans-serif" }}
                 >
-                  Daftar Harga {activeCategory?.Name ?? "Perangkat"}{" "}
-                  <span className="text-primary">Belum Tersedia</span>
+                  {dict.locale === "en" ? (
+                    <>
+                      {activeCategory?.Name ?? "Device"} Price List{" "}
+                      <span className="text-primary">Coming Soon</span>
+                    </>
+                  ) : (
+                    <>
+                      Daftar Harga {activeCategory?.Name ?? "Perangkat"}{" "}
+                      <span className="text-primary">Belum Tersedia</span>
+                    </>
+                  )}
                 </h3>
 
                 <p
                   className="mt-3 sm:mt-4 text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary max-w-xl"
                   style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
                 >
-                  Informasi biaya perbaikan untuk kategori ini saat ini belum terdaftar di website. Untuk menanyakan estimasi harga dan ketersediaan suku cadang, silakan hubungi tim kami via WhatsApp.
+                  {dict.pricelist.emptyDescription}
                 </p>
               </div>
 
               {/* Direct WhatsApp Action — 100% konsisten dengan card bawah */}
               <a
                 href={whatsappUrl(
-                  `Halo FIXMI Service Center, saya ingin menanyakan estimasi biaya servis untuk kategori ${activeCategory?.Name ?? "Gadget"}:\n\n• Tipe / Model: \n• Kendala / Kerusakan: `
+                  dict.locale === "en"
+                    ? `Hello FIXMI Service Center, I would like to inquire about repair costs for ${activeCategory?.Name ?? "Gadget"}:\n\n• Model: \n• Issue / Damage: `
+                    : `Halo FIXMI Service Center, saya ingin menanyakan estimasi biaya servis untuk kategori ${activeCategory?.Name ?? "Gadget"}:\n\n• Tipe / Model: \n• Kendala / Kerusakan: `
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2.5 sm:gap-3 rounded-xl bg-primary px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm md:text-base font-semibold text-white tracking-[-0.01em] transition-all duration-200 ease-out hover:bg-primary-light hover:brightness-105 active:scale-[0.98] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_24px_rgba(255,107,0,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
               >
                 <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white stroke-[2]" aria-hidden="true" />
-                <span>Chat Teknisi via WhatsApp</span>
+                <span>{dict.pricelist.emptyCtaBtn}</span>
                 <ArrowRight
                   className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/80 transition-transform duration-200 ease-out group-hover:translate-x-1 group-hover:text-white"
                   strokeWidth={2}
@@ -308,29 +319,31 @@ export default function PricelistExplorer({
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 sm:px-3 sm:py-1 text-[0.6875rem] sm:text-xs font-mono tracking-wider text-neutral-300 uppercase mb-2.5 sm:mb-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                <span>KONSULTASI GRATIS &amp; CEK SPAREPART</span>
+                <span>{dict.pricelist.unlistedBadge}</span>
               </div>
               <h3
                 className="text-lg sm:text-xl md:text-2xl lg:text-[1.625rem] font-bold text-white tracking-[-0.01em] leading-snug"
                 style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
               >
-                Tipe Perangkat Anda Belum Tercantum di Atas?
+                {dict.pricelist.unlistedTitle}
               </h3>
               <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary">
-                Jangan khawatir. Hubungi teknisi kami untuk cek ketersediaan sparepart, diagnosa kerusakan, dan estimasi biaya perbaikan secara transparan.
+                {dict.pricelist.unlistedDescription}
               </p>
             </div>
 
             <a
               href={whatsappUrl(
-                `Halo FIXMI Service Center, tipe perangkat saya belum ada di daftar harga website. Saya mau tanya estimasi biaya servis:\n\n• Kategori: ${activeCategory?.Name ?? "Gadget"}\n• Tipe / Seri Model: \n• Kendala / Kerusakan: `
+                dict.locale === "en"
+                  ? `Hello FIXMI Service Center, my device model is not listed in the website pricelist. I would like to inquire about repair costs:\n\n• Category: ${activeCategory?.Name ?? "Gadget"}\n• Device Model: \n• Issue / Damage: `
+                  : `Halo FIXMI Service Center, tipe perangkat saya belum ada di daftar harga website. Saya mau tanya estimasi biaya servis:\n\n• Kategori: ${activeCategory?.Name ?? "Gadget"}\n• Tipe / Seri Model: \n• Kendala / Kerusakan: `
               )}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2.5 sm:gap-3 rounded-xl bg-primary px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm md:text-base font-semibold text-white tracking-[-0.01em] transition-all duration-200 ease-out hover:bg-primary-light hover:brightness-105 active:scale-[0.98] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_8px_24px_rgba(255,107,0,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
             >
               <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white stroke-[2]" aria-hidden="true" />
-              <span>Chat Teknisi via WhatsApp</span>
+              <span>{dict.pricelist.unlistedCtaBtn}</span>
               <ArrowRight
                 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/80 transition-transform duration-200 ease-out group-hover:translate-x-1 group-hover:text-white"
                 strokeWidth={2}

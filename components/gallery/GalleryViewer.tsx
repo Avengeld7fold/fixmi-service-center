@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ImageOff } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
 import type { GalleryImage } from "@/lib/gallery-server";
 
 interface GalleryViewerProps {
@@ -9,6 +10,8 @@ interface GalleryViewerProps {
 }
 
 export default function GalleryViewer({ images }: GalleryViewerProps) {
+  const { dict, locale } = useI18n();
+  const isEn = locale === "en";
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const selectedImage = selectedIndex !== null ? images[selectedIndex] : null;
@@ -61,10 +64,10 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
           className="text-lg sm:text-xl font-medium text-white mb-2"
           style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
         >
-          Arsip Dokumentasi Teknis
+          {isEn ? "Technical Documentation Archive" : "Arsip Dokumentasi Teknis"}
         </h3>
         <p className="text-xs sm:text-sm text-text-secondary max-w-md leading-relaxed">
-          Koleksi dokumentasi visual dan studi kasus hasil penanganan perangkat pintar di laboratorium FIXMI diperbarui secara berkala.
+          {dict.gallery.emptyGallery}
         </p>
       </div>
     );
@@ -110,7 +113,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
           <button
             type="button"
             onClick={handleClose}
-            aria-label="Tutup Preview"
+            aria-label={dict.common.close}
             className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 rounded-full bg-white/10 p-2.5 sm:p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
           >
             <X className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -123,7 +126,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
               e.stopPropagation();
               handlePrev();
             }}
-            aria-label="Foto Sebelumnya"
+            aria-label={isEn ? "Previous photo" : "Foto Sebelumnya"}
             className="absolute left-2 sm:left-6 z-50 rounded-full bg-white/10 p-2 sm:p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
           >
             <ChevronLeft className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -136,7 +139,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
               e.stopPropagation();
               handleNext();
             }}
-            aria-label="Foto Berikutnya"
+            aria-label={isEn ? "Next photo" : "Foto Berikutnya"}
             className="absolute right-2 sm:right-6 z-50 rounded-full bg-white/10 p-2 sm:p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
           >
             <ChevronRight className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -150,7 +153,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
             <div className="relative flex items-center justify-center max-h-[78vh] w-auto max-w-full overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
               <img
                 src={selectedImage.Image}
-                alt={selectedImage.altText || selectedImage.Title || "Dokumentasi Servis FIXMI"}
+                alt={selectedImage.altText || selectedImage.Title || (isEn ? "FIXMI Repair Documentation" : "Dokumentasi Servis FIXMI")}
                 className="max-h-[78vh] max-w-full object-contain block"
               />
             </div>
@@ -158,7 +161,9 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
             {/* Bottom Caption (Clean Photo Counter & Title) */}
             <div className="mt-3.5 flex items-center justify-between w-full max-w-2xl px-3">
               <span className="text-xs sm:text-sm font-mono text-neutral-400">
-                Foto {selectedIndex + 1} dari {images.length}
+                {isEn
+                  ? `Photo ${selectedIndex + 1} of ${images.length}`
+                  : `Foto ${selectedIndex + 1} dari ${images.length}`}
               </span>
               {selectedImage.Title && (
                 <span className="text-xs sm:text-sm font-medium text-neutral-300 tracking-wide truncate max-w-[65%] text-right">

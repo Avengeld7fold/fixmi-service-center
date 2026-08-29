@@ -5,6 +5,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { useI18n } from "@/lib/i18n/context";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -17,126 +18,134 @@ interface HoverImageTrigger {
   caption: string;
 }
 
-const HOVER_PREVIEWS: Record<string, HoverImageTrigger> = {
-  microsolder: {
-    key: "microsolder",
-    label: "lab mikrosolder",
-    image: "/images/fixmi-lab1.webp",
-    caption: "Fasilitas mikroskop presisi & penanganan logic board tingkat komponen dan IC.",
-  },
-  cleanroom: {
-    key: "cleanroom",
-    label: "peralatan presisi",
-    image: "/images/fixmi-lab2.webp",
-    caption: "Peralatan pembedahan LCD dan housing aman tanpa risiko kerusakan sekunder.",
-  },
-  originalParts: {
-    key: "originalParts",
-    label: "sparepart bersertifikasi",
-    image: "/images/spareparts.webp",
-    caption: "Suku cadang pilihan berkualitas tinggi dengan jaminan garansi resmi.",
-  },
-  academy: {
-    key: "academy",
-    label: "FIXMI Tech Academy",
-    image: "/images/toko1.webp",
-    caption: "Pusat pelatihan & sertifikasi keahlian teknisi profesional di Bali.",
-  },
-  partners: {
-    key: "partners",
-    label: "jaringan retail terkemuka di Bali",
-    image: "/images/services/1.webp",
-    caption: "Dipercaya Cellular World ID, iUsed Phone, RA Gadget, dan ribuan pelanggan.",
-  },
-};
-
-const STACK_PHOTOS = [
-  {
-    id: 1,
-    title: "Teknisi Ahli & Bersertifikasi",
-    subtitle: "Pengalaman Sejak Agustus 2014",
-    src: "/images/teknisi-2.webp",
-    tag: "SERVICE CENTER",
-    desktopOffset: "lg:self-end lg:z-10 lg:sm:-translate-x-2",
-    desktopTiltClass: "lg:-rotate-[3.5deg]",
-  },
-  {
-    id: 2,
-    title: "Hardware Lab & Mikrosolder",
-    subtitle: "Penanganan Motherboard & Chip-Level",
-    src: "/images/fixmi-lab1.webp",
-    tag: "MICROSOLDER LAB",
-    desktopOffset: "lg:self-start lg:-ml-12 lg:z-20",
-    desktopTiltClass: "",
-  },
-  {
-    id: 3,
-    title: "Pusat Solusi Gadget Bali",
-    subtitle: "Kedonganan, Kuta, dan Denpasar",
-    src: "/images/services/1.webp",
-    tag: "INTEGRATED ECOSYSTEM",
-    desktopOffset: "lg:self-end lg:z-30",
-    desktopTiltClass: "",
-  },
-  {
-    id: 4,
-    title: "Presisi & Garansi Resmi",
-    subtitle: "iPhone, Android, dan MacBook",
-    src: "/images/spareparts.webp",
-    tag: "QUALITY ASSURANCE",
-    desktopOffset: "lg:self-start lg:-ml-8 lg:z-40",
-    desktopTiltClass: "",
-  },
-];
-
 export default function AboutHeroEditorial() {
+  const { dict } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const leftStickyRef = useRef<HTMLDivElement>(null);
   const rightStackRef = useRef<HTMLDivElement>(null);
+
+  const hoverPreviews: Record<string, HoverImageTrigger> = {
+    microsolder: {
+      key: "microsolder",
+      label: dict.about.microsolderLabel,
+      image: "/images/fixmi-lab1.webp",
+      caption: dict.about.microsolderCaption,
+    },
+    cleanroom: {
+      key: "cleanroom",
+      label: dict.about.cleanroomLabel,
+      image: "/images/fixmi-lab2.webp",
+      caption: dict.about.cleanroomCaption,
+    },
+    originalParts: {
+      key: "originalParts",
+      label: dict.about.originalPartsLabel,
+      image: "/images/spareparts.webp",
+      caption: dict.about.originalPartsCaption,
+    },
+    academy: {
+      key: "academy",
+      label: dict.about.academyLabel,
+      image: "/images/toko1.webp",
+      caption: dict.about.academyCaption,
+    },
+    partners: {
+      key: "partners",
+      label: dict.about.partnersLabel,
+      image: "/images/services/1.webp",
+      caption: dict.about.partnersCaption,
+    },
+  };
+
+  const stackPhotos = [
+    {
+      id: 1,
+      title: dict.about.cards[0]?.title || "Teknisi Ahli & Bersertifikasi",
+      subtitle: dict.about.cards[0]?.subtitle || "Pengalaman Sejak Agustus 2014",
+      src: "/images/teknisi-2.webp",
+      tag: dict.about.cards[0]?.tag || "SERVICE CENTER",
+      desktopOffset: "lg:self-end lg:z-10 lg:sm:-translate-x-2",
+      desktopTiltClass: "lg:-rotate-[3.5deg]",
+    },
+    {
+      id: 2,
+      title: dict.about.cards[1]?.title || "Hardware Lab & Mikrosolder",
+      subtitle: dict.about.cards[1]?.subtitle || "Penanganan Motherboard & Chip-Level",
+      src: "/images/fixmi-lab1.webp",
+      tag: dict.about.cards[1]?.tag || "MICROSOLDER LAB",
+      desktopOffset: "lg:self-start lg:-ml-12 lg:z-20",
+      desktopTiltClass: "",
+    },
+    {
+      id: 3,
+      title: dict.about.cards[2]?.title || "Pusat Solusi Gadget Bali",
+      subtitle: dict.about.cards[2]?.subtitle || "Kedonganan, Kuta, dan Denpasar",
+      src: "/images/services/1.webp",
+      tag: dict.about.cards[2]?.tag || "INTEGRATED ECOSYSTEM",
+      desktopOffset: "lg:self-end lg:z-30",
+      desktopTiltClass: "",
+    },
+    {
+      id: 4,
+      title: dict.about.cards[3]?.title || "Presisi & Garansi Resmi",
+      subtitle: dict.about.cards[3]?.subtitle || "iPhone, Android, dan MacBook",
+      src: "/images/spareparts.webp",
+      tag: dict.about.cards[3]?.tag || "QUALITY ASSURANCE",
+      desktopOffset: "lg:self-start lg:-ml-8 lg:z-40",
+      desktopTiltClass: "",
+    },
+  ];
 
   // Floating hover preview state
   const [hoveredData, setHoveredData] = useState<HoverImageTrigger | null>(null);
 
   // Posisi kursor disimpan di ref + ditulis langsung ke DOM tooltip
-  // (tanpa setState per mousemove → seluruh hero tidak re-render saat mouse bergerak)
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const cursorPosRef = useRef({ x: 0, y: 0 });
-
-  const positionTooltip = () => {
-    const el = tooltipRef.current;
-    if (!el) return;
-    el.style.left = `${cursorPosRef.current.x + 24}px`;
-    el.style.top = `${cursorPosRef.current.y - 120}px`;
-  };
+  const targetXRef = useRef<number>(0);
+  const targetYRef = useRef<number>(0);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    cursorPosRef.current = { x: e.clientX, y: e.clientY };
-    positionTooltip();
+    targetXRef.current = e.clientX + 16;
+    targetYRef.current = e.clientY + 16;
+    if (tooltipRef.current) {
+      tooltipRef.current.style.transform = `translate3d(${targetXRef.current}px, ${targetYRef.current}px, 0)`;
+    }
   };
 
+  // ── GSAP Stacking & Parallax Animation on Desktop (≥ lg) ──
   useGSAP(
     () => {
-      if (!containerRef.current || !rightStackRef.current) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      if (window.innerWidth < 1024) return; // Parallax stack only active on desktop viewports
+      const mm = gsap.matchMedia();
 
-      // Subtle parallax on desktop vertical stack
-      const items = rightStackRef.current.querySelectorAll(".stack-photo-item");
-      items.forEach((item, i) => {
-        gsap.fromTo(
-          item,
-          { y: 24 * (i % 2 === 0 ? 1 : -1) },
-          {
-            y: -24 * (i % 2 === 0 ? 1 : -1),
-            ease: "none",
-            scrollTrigger: {
-              trigger: item,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1.2,
+      // Only enable vertical stacking parallax on desktop screens (≥ 1024px)
+      mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+        if (!rightStackRef.current) return;
+
+        const cards = rightStackRef.current.querySelectorAll(".stack-photo-card");
+        if (!cards.length) return;
+
+        cards.forEach((card, index) => {
+          gsap.fromTo(
+            card,
+            {
+              y: 50 * (index + 1),
+              opacity: 0.85,
+              scale: 0.95,
             },
-          }
-        );
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 90%",
+                end: "top 40%",
+                scrub: 1.2,
+              },
+            }
+          );
+        });
       });
     },
     { scope: containerRef }
@@ -146,23 +155,18 @@ export default function AboutHeroEditorial() {
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative w-full max-w-[90rem] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 pt-8 sm:pt-12 md:pt-16 lg:pt-20 pb-16 sm:pb-24 lg:pb-28 overflow-x-clip"
+      className="relative w-full max-w-[90rem] mx-auto px-4 sm:px-6 md:px-12 lg:px-16 pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 lg:pb-24"
     >
-      {/* ── Interactive Floating Image Tooltip ── */}
+      {/* ── Floating Cursor-Following Image Preview Tooltip ── */}
       {hoveredData && (
         <div
-          ref={(el) => {
-            tooltipRef.current = el;
-            // Posisikan segera saat tooltip muncul (mengikuti posisi kursor terakhir)
-            if (el) positionTooltip();
-          }}
-          className="pointer-events-none fixed z-50 transition-transform duration-100 ease-out hidden md:block"
+          ref={tooltipRef}
+          className="fixed top-0 left-0 z-50 pointer-events-none transition-opacity duration-200"
           style={{
-            left: `${cursorPosRef.current.x + 24}px`,
-            top: `${cursorPosRef.current.y - 120}px`,
+            transform: `translate3d(${targetXRef.current}px, ${targetYRef.current}px, 0)`,
           }}
         >
-          <div className="overflow-hidden rounded-xl border border-white/20 bg-[#161616]/95 p-2 shadow-[0_25px_60px_rgba(0,0,0,0.85)] backdrop-blur-xl w-64">
+          <div className="w-56 sm:w-64 rounded-xl border border-white/20 bg-black/90 backdrop-blur-xl p-2 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-neutral-900">
               <Image
                 src={hoveredData.image}
@@ -192,7 +196,7 @@ export default function AboutHeroEditorial() {
           ref={leftStickyRef}
           className="lg:col-span-6 lg:sticky lg:top-28 flex flex-col justify-start lg:pr-4"
         >
-          {/* Main Display Headline (Identical typography to Pricelist) */}
+          {/* Main Display Headline */}
           <h1
             style={{
               fontFamily: "var(--font-bayon), sans-serif",
@@ -204,14 +208,14 @@ export default function AboutHeroEditorial() {
             }}
             className="text-[clamp(2.25rem,7vw,3.125rem)] md:text-[clamp(3.125rem,5.5vw,4rem)] lg:text-[clamp(4rem,5vw,4.75rem)] mb-8 lg:mb-10"
           >
-            TENTANG KAMI
+            {dict.about.headline}
           </h1>
 
           {/* ── 01 / THE DRIVE ── */}
           <div className="mb-8 sm:mb-10 lg:mb-12">
             <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-white/[0.08] mb-4 sm:mb-5">
               <span className="font-mono text-xs sm:text-[0.8125rem] uppercase tracking-[0.15em] text-primary font-bold">
-                01 / THE DRIVE
+                {dict.about.driveBadge}
               </span>
             </div>
 
@@ -219,40 +223,40 @@ export default function AboutHeroEditorial() {
               className="text-base sm:text-lg lg:text-[1.375rem] xl:text-[1.4375rem] font-medium text-white leading-[1.38] tracking-[-0.015em] mb-4 sm:mb-5"
               style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
             >
-              Hadir sejak Agustus 2014 di Bali, kami membangun standar perbaikan perangkat pintar berlandaskan kejujuran, ketelitian teknis, dan kepastian garansi resmi.
+              {dict.about.driveHeadline}
             </h2>
 
             <p className="text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary mb-3.5 sm:mb-4">
-              Di FIXMI, kami mendedikasikan diri untuk memberikan rasa aman dan kenyamanan maksimal bagi setiap pemilik perangkat. Kami mengeliminasi keraguan terhadap keaslian suku cadang serta memastikan seluruh rincian estimasi biaya disampaikan secara transparan sejak tahap diagnosa awal.
+              {dict.about.driveP1}
             </p>
 
             <p className="text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary">
-              Mulai dari pergantian layar LCD, pemulihan performa baterai, perbaikan kamera, hingga rekonstruksi sirkuit motherboard pada{" "}
+              {dict.about.driveP2}{" "}
               <button
                 type="button"
-                onMouseEnter={() => setHoveredData(HOVER_PREVIEWS.microsolder)}
+                onMouseEnter={() => setHoveredData(hoverPreviews.microsolder)}
                 onMouseLeave={() => setHoveredData(null)}
                 className="inline-flex items-center text-white underline underline-offset-4 decoration-white/40 hover:text-primary hover:decoration-primary font-medium cursor-help transition-colors"
               >
-                lab mikrosolder
+                {dict.about.microsolderLabel}
               </button>
-              , setiap penanganan dikerjakan menggunakan{" "}
+              , {dict.locale === "en" ? "all repairs are performed using" : "setiap penanganan dikerjakan menggunakan"}{" "}
               <button
                 type="button"
-                onMouseEnter={() => setHoveredData(HOVER_PREVIEWS.cleanroom)}
+                onMouseEnter={() => setHoveredData(hoverPreviews.cleanroom)}
                 onMouseLeave={() => setHoveredData(null)}
                 className="inline-flex items-center text-white underline underline-offset-4 decoration-white/40 hover:text-primary hover:decoration-primary font-medium cursor-help transition-colors"
               >
-                peralatan presisi
+                {dict.about.cleanroomLabel}
               </button>{" "}
-              dan jaminan{" "}
+              {dict.locale === "en" ? "and backed by" : "dan jaminan"}{" "}
               <button
                 type="button"
-                onMouseEnter={() => setHoveredData(HOVER_PREVIEWS.originalParts)}
+                onMouseEnter={() => setHoveredData(hoverPreviews.originalParts)}
                 onMouseLeave={() => setHoveredData(null)}
                 className="inline-flex items-center text-white underline underline-offset-4 decoration-white/40 hover:text-primary hover:decoration-primary font-medium cursor-help transition-colors"
               >
-                sparepart bersertifikasi
+                {dict.about.originalPartsLabel}
               </button>
               .
             </p>
@@ -262,25 +266,25 @@ export default function AboutHeroEditorial() {
           <div className="mb-8 sm:mb-10 lg:mb-12">
             <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-white/[0.08] mb-4 sm:mb-5">
               <span className="font-mono text-xs sm:text-[0.8125rem] uppercase tracking-[0.15em] text-primary font-bold">
-                02 / BEHIND THE BENCH
+                {dict.about.behindBadge}
               </span>
             </div>
 
             <p className="text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary mb-3.5 sm:mb-4">
-              Keandalan layanan kami didukung oleh penguasaan teknis mendalam dan dedikasi pengembangan keahlian melalui{" "}
+              {dict.about.behindP1}{" "}
               <button
                 type="button"
-                onMouseEnter={() => setHoveredData(HOVER_PREVIEWS.academy)}
+                onMouseEnter={() => setHoveredData(hoverPreviews.academy)}
                 onMouseLeave={() => setHoveredData(null)}
                 className="inline-flex items-center text-white underline underline-offset-4 decoration-white/40 hover:text-primary hover:decoration-primary font-medium cursor-help transition-colors"
               >
-                FIXMI Tech Academy
+                {dict.about.academyLabel}
               </button>
-              . Kami meyakini bahwa kualitas perbaikan terbaik berakar dari pemahaman menyeluruh terhadap arsitektur hardware perangkat.
+              . {dict.locale === "en" ? "We firmly believe that supreme repair quality stems from an exhaustive understanding of device hardware architecture." : "Kami meyakini bahwa kualitas perbaikan terbaik berakar dari pemahaman menyeluruh terhadap arsitektur hardware perangkat."}
             </p>
 
             <p className="text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary">
-              Setiap komponen yang dipasang kembali, jalur mikroelektronika yang direkonstruksi, hingga segel proteksi air yang diperbarui dikerjakan dengan disiplin tinggi, presisi, dan kepatuhan penuh terhadap standar keselamatan perangkat.
+              {dict.about.behindP2}
             </p>
           </div>
 
@@ -288,25 +292,25 @@ export default function AboutHeroEditorial() {
           <div>
             <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-white/[0.08] mb-4 sm:mb-5">
               <span className="font-mono text-xs sm:text-[0.8125rem] uppercase tracking-[0.15em] text-primary font-bold">
-                03 / THE COMMUNITY &amp; TRUST
+                {dict.about.communityBadge}
               </span>
             </div>
 
             <p className="text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary mb-3.5 sm:mb-4">
-              Selain melayani ribuan pelanggan individu dan wisatawan di Bali, PT Fixmi Bali Digital dipercaya sebagai mitra teknis resmi oleh berbagai{" "}
+              {dict.about.communityP1}{" "}
               <button
                 type="button"
-                onMouseEnter={() => setHoveredData(HOVER_PREVIEWS.partners)}
+                onMouseEnter={() => setHoveredData(hoverPreviews.partners)}
                 onMouseLeave={() => setHoveredData(null)}
                 className="inline-flex items-center text-white underline underline-offset-4 decoration-white/40 hover:text-primary hover:decoration-primary font-medium cursor-help transition-colors"
               >
-                jaringan retail terkemuka di Bali
+                {dict.about.partnersLabel}
               </button>{" "}
-              seperti Cellular World ID, iUsed Phone, RA Gadget, hingga mitra rental gadget.
+              {dict.locale === "en" ? "including Cellular World ID, iUsed Phone, RA Gadget, and gadget rental enterprises." : "seperti Cellular World ID, iUsed Phone, RA Gadget, hingga mitra rental gadget."}
             </p>
 
             <p className="text-xs sm:text-sm md:text-base leading-relaxed text-text-secondary">
-              Kami menyambut Anda untuk berkonsultasi langsung di workshop pusat kami di Jalan Raya Uluwatu No. 79, Kedonganan, Kuta, guna memperoleh diagnosa menyeluruh dan solusi perbaikan terbaik bagi perangkat Anda.
+              {dict.about.communityP2}
             </p>
           </div>
 
@@ -319,13 +323,13 @@ export default function AboutHeroEditorial() {
         >
           {/* Mobile & Tablet Horizontal Scroll Hint */}
           <div className="flex lg:hidden items-center justify-between mb-3 text-neutral-400 font-mono text-[0.6875rem] uppercase tracking-wider px-1">
-            <span>DOKUMENTASI WORKSHOP</span>
-            <span className="text-primary font-medium">Geser Horizontal &rarr;</span>
+            <span>{dict.about.workshopHint}</span>
+            <span className="text-primary font-medium">{dict.about.swipeHint}</span>
           </div>
 
           {/* Cards Container: Horizontal Slider on Mobile/Tablet, Vertical Overlapping on Desktop */}
           <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none gap-4 sm:gap-6 lg:gap-0 lg:space-y-[-130px] pb-4 lg:pb-0 pt-1 lg:pt-14 -mx-4 sm:-mx-6 lg:mx-0 px-4 sm:px-6 lg:px-0 scrollbar-none items-stretch">
-            {STACK_PHOTOS.map((photo) => (
+            {stackPhotos.map((photo) => (
               <div
                 key={photo.id}
                 className={`stack-photo-item relative w-[78vw] sm:w-[50vw] md:w-[42vw] lg:w-[84%] shrink-0 lg:shrink snap-center lg:snap-align-none ${photo.desktopOffset}`}

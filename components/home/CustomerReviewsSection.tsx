@@ -297,10 +297,10 @@ export default function CustomerReviewsSection() {
             </div>
             <div className="flex flex-col justify-center font-sans">
               <span className="text-sm sm:text-base font-semibold text-white">
-                {totalReviews}+ Ulasan
+                {totalReviews}+ {dict.reviews.reviewsCountLabel}
               </span>
               <span className="text-xs text-neutral-400 mt-0.5">
-                Rating Google Maps Terverifikasi
+                {dict.locale === "en" ? "Verified Google Maps Rating" : "Rating Google Maps Terverifikasi"}
               </span>
               <Link
                 href={mapsUrl}
@@ -349,7 +349,7 @@ export default function CustomerReviewsSection() {
             <button
               type="button"
               onClick={handlePrev}
-              aria-label="Ulasan Sebelumnya"
+              aria-label={dict.locale === "en" ? "Previous Reviews" : "Ulasan Sebelumnya"}
               className="group w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-[#161619] border border-white/[0.1] hover:border-white/30 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer hover:bg-white/[0.06] hover:scale-105"
             >
               <ChevronLeft className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5" />
@@ -357,7 +357,7 @@ export default function CustomerReviewsSection() {
             <button
               type="button"
               onClick={handleNext}
-              aria-label="Ulasan Selanjutnya"
+              aria-label={dict.locale === "en" ? "Next Reviews" : "Ulasan Selanjutnya"}
               className="group w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-[#161619] border border-white/[0.1] hover:border-white/30 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer hover:bg-white/[0.06] hover:scale-105"
             >
               <ChevronRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5" />
@@ -378,7 +378,7 @@ export default function CustomerReviewsSection() {
         >
           {filteredReviews.length === 0 ? (
             <div className="py-16 text-center text-neutral-400 text-sm font-sans bg-[#161619] rounded-2xl border border-white/[0.08]">
-              Tidak ada ulasan yang tersedia.
+              {dict.locale === "en" ? "No reviews available." : "Tidak ada ulasan yang tersedia."}
             </div>
           ) : (
             <div
@@ -423,7 +423,7 @@ export default function CustomerReviewsSection() {
                         {/* Google G Icon with Micro-Hover */}
                         <span
                           className="shrink-0 p-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] group-hover:border-white/20 transition-colors"
-                          title="Ulasan Terverifikasi Google Maps"
+                          title={dict.reviews.verifiedCustomer}
                         >
                           <svg className="w-4 h-4 pointer-events-none transition-transform duration-200 group-hover:scale-110" viewBox="0 0 24 24">
                             <path
@@ -465,7 +465,7 @@ export default function CustomerReviewsSection() {
                           onClick={() => toggleExpand(rev.id)}
                           className="text-xs text-primary hover:text-primary-light hover:underline mt-1.5 font-medium cursor-pointer transition-colors"
                         >
-                          {isExpanded ? "Sembunyikan" : "Baca selengkapnya"}
+                          {isExpanded ? dict.reviews.readLess : dict.reviews.readMore}
                         </button>
                       )}
                     </div>
@@ -474,7 +474,7 @@ export default function CustomerReviewsSection() {
                     <div className="mt-5 pt-3.5 border-t border-white/[0.06] flex items-center justify-between text-[0.75rem] text-neutral-400">
                       <span className="flex items-center gap-1.5 text-neutral-300">
                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                        <span>Terverifikasi Google</span>
+                        <span>{dict.locale === "en" ? "Verified on Google" : "Terverifikasi Google"}</span>
                       </span>
                       <span className="text-neutral-500 font-mono text-[0.7rem]">
                         FIXMI Bali
@@ -497,10 +497,12 @@ export default function CustomerReviewsSection() {
                     <MessageSquarePlus className="w-5 h-5" />
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-2 leading-snug">
-                    Pernah Servis di FIXMI?
+                    {dict.locale === "en" ? "Repaired at FIXMI Before?" : "Pernah Servis di FIXMI?"}
                   </h3>
                   <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                    Pengalaman Anda sangat berharga bagi kami. Bagikan kepuasan perbaikan perangkat Anda di Google Maps.
+                    {dict.locale === "en"
+                      ? "Your feedback matters to us. Share your repair experience on Google Maps."
+                      : "Pengalaman Anda sangat berharga bagi kami. Bagikan kepuasan perbaikan perangkat Anda di Google Maps."}
                   </p>
                 </div>
 
@@ -511,7 +513,7 @@ export default function CustomerReviewsSection() {
                     rel="noopener noreferrer"
                     className="group inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-[#FF7A1A] text-[#121212] font-semibold text-xs transition-all duration-150 ease-out active:scale-[0.98] text-center shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.35)]"
                   >
-                    <span>Tulis Ulasan Anda</span>
+                    <span>{dict.locale === "en" ? "Write Your Review" : "Tulis Ulasan Anda"}</span>
                     <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </Link>
                 </div>

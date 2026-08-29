@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MoveLeft, MoveRight, Search, X } from "lucide-react";
 import { formatThousands, type ServiceType } from "@/lib/data";
+import { useI18n } from "@/lib/i18n/context";
 
 interface PriceTableProps {
   service: ServiceType;
@@ -10,6 +11,8 @@ interface PriceTableProps {
 }
 
 export default function PriceTable({ service, categoryName }: PriceTableProps) {
+  const { dict, locale } = useI18n();
+  const isEn = locale === "en";
   const [query, setQuery] = useState("");
 
   // Afordansi geser horizontal: true selama masih ada kolom terpotong di
@@ -74,15 +77,15 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari model / layanan…"
-            aria-label="Cari model"
+            placeholder={dict.pricelist.searchPlaceholder}
+            aria-label={dict.pricelist.searchPlaceholder}
             className="w-full rounded-[12px] border border-panel-border bg-background py-2.5 pl-9 pr-9 text-sm text-foreground placeholder:text-text-muted outline-none transition-[border-color,box-shadow] duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label="Bersihkan pencarian"
+              aria-label={dict.common.close}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-foreground transition-colors p-1"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -90,7 +93,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
           )}
         </div>
         <p className="font-mono text-[0.6875rem] uppercase tracking-widest text-text-muted">
-          {rows.length} model
+          {rows.length} {isEn ? "models" : "model"}
         </p>
       </div>
 
@@ -101,13 +104,13 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
         <p className="mb-2 flex items-center justify-end text-right ml-auto w-full gap-1.5 font-mono text-[0.625rem] sm:text-[0.6875rem] uppercase tracking-widest text-primary">
           {canRight ? (
             <>
-              Geser tabel untuk detail
+              {isEn ? "Swipe table for details" : "Geser tabel untuk detail"}
               <MoveRight className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
             </>
           ) : (
             <>
               <MoveLeft className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
-              Geser tabel untuk detail
+              {isEn ? "Swipe table for details" : "Geser tabel untuk detail"}
             </>
           )}
         </p>
@@ -139,7 +142,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                   {service.Name}
                 </span>
                 <span className="mt-0.5 block text-[0.625rem] font-normal tracking-wide text-text-muted">
-                  {categoryName} Models
+                  {categoryName} {isEn ? "Models" : "Models"}
                 </span>
               </th>
               {variants.map((v) => (
@@ -167,8 +170,8 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                   className="px-4 py-10 text-center text-sm text-text-muted"
                 >
                   {query
-                    ? `Tidak ada model yang cocok dengan “${query}”.`
-                    : "Belum ada data model untuk service ini."}
+                    ? (isEn ? `No models matching “${query}”.` : `Tidak ada model yang cocok dengan “${query}”.`)
+                    : (isEn ? "No model pricing available for this service." : "Belum ada data model untuk service ini.")}
                 </td>
               </tr>
             ) : (
@@ -188,7 +191,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                         className="border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-right font-mono text-sm tabular-nums whitespace-nowrap"
                       >
                         {price == null ? (
-                          <span className="text-text-muted/40" aria-label="Tidak tersedia">
+                          <span className="text-text-muted/40" aria-label={isEn ? "Not available" : "Tidak tersedia"}>
                             –
                           </span>
                         ) : (

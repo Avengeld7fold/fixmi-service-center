@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, MessageCircle, ArrowRight, RotateCcw } from "lucide-react";
 import { whatsappUrl } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/context";
 
 /**
  * Form Request Service FIXMI — Compact, Highly-Responsive & Bulletproof Design
@@ -12,14 +13,44 @@ import { whatsappUrl } from "@/lib/constants";
  */
 
 const DEVICES = [
-  { key: "iphone", label: "iPhone", image: "/images/iphone.webp", placeholder: "Misal: iPhone 15 Pro Max / 13 Mini" },
-  { key: "ipad", label: "iPad", image: "/images/ipad.webp", placeholder: "Misal: iPad Pro 11\" M2 / iPad Air 5" },
-  { key: "macbook", label: "MacBook", image: "/images/macbook.webp", placeholder: "Misal: MacBook Air M2 / Pro 14\"" },
-  { key: "iwatch", label: "Apple Watch", image: "/images/iwatch.webp", placeholder: "Misal: Apple Watch Series 8 / Ultra" },
-  { key: "android", label: "Android", image: "/images/android.webp", placeholder: "Misal: Samsung S23 Ultra / Pixel 8" },
+  {
+    key: "iphone",
+    label: "iPhone",
+    image: "/images/iphone.webp",
+    placeholderId: "Misal: iPhone 15 Pro Max / 13 Mini",
+    placeholderEn: "E.g., iPhone 15 Pro Max / 13 Mini",
+  },
+  {
+    key: "ipad",
+    label: "iPad",
+    image: "/images/ipad.webp",
+    placeholderId: "Misal: iPad Pro 11\" M2 / iPad Air 5",
+    placeholderEn: "E.g., iPad Pro 11\" M2 / iPad Air 5",
+  },
+  {
+    key: "macbook",
+    label: "MacBook",
+    image: "/images/macbook.webp",
+    placeholderId: "Misal: MacBook Air M2 / Pro 14\"",
+    placeholderEn: "E.g., MacBook Air M2 / Pro 14\"",
+  },
+  {
+    key: "iwatch",
+    label: "Apple Watch",
+    image: "/images/iwatch.webp",
+    placeholderId: "Misal: Apple Watch Series 8 / Ultra",
+    placeholderEn: "E.g., Apple Watch Series 8 / Ultra",
+  },
+  {
+    key: "android",
+    label: "Android",
+    image: "/images/android.webp",
+    placeholderId: "Misal: Samsung S23 Ultra / Pixel 8",
+    placeholderEn: "E.g., Samsung S23 Ultra / Pixel 8",
+  },
 ];
 
-const COMMON_SYMPTOMS = [
+const COMMON_SYMPTOMS_ID = [
   "Layar Pecah / Retak",
   "Baterai Drop",
   "Mati Total",
@@ -28,6 +59,17 @@ const COMMON_SYMPTOMS = [
   "Tidak Bisa Dicas",
   "Sinyal / Wi-Fi Eror",
   "Ganti Kaca Belakang",
+];
+
+const COMMON_SYMPTOMS_EN = [
+  "Cracked Screen / Display",
+  "Battery Drain / Replacement",
+  "Dead Unit / No Power",
+  "Water / Liquid Damage",
+  "Camera Malfunction",
+  "Charging Port Fault",
+  "Signal / Wi-Fi Glitch",
+  "Back Glass Replacement",
 ];
 
 type Errors = Partial<Record<"name" | "phone" | "issue", string>>;
@@ -40,6 +82,7 @@ const getInputClass = (hasError?: boolean) =>
   }`;
 
 export default function ServiceRequestForm() {
+  const { dict, getLocalizedPath } = useI18n();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [device, setDevice] = useState("iphone");
@@ -48,6 +91,8 @@ export default function ServiceRequestForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
 
+  const isEn = dict.locale === "en";
+  const commonSymptoms = isEn ? COMMON_SYMPTOMS_EN : COMMON_SYMPTOMS_ID;
   const selectedDeviceObj = DEVICES.find((d) => d.key === device) ?? DEVICES[0];
 
   const toggleSymptom = (symptom: string) => {
@@ -89,11 +134,18 @@ export default function ServiceRequestForm() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const next: Errors = {};
-    if (!name.trim()) next.name = "Isi nama lengkap Anda.";
-    if (!phone.trim()) next.phone = "Isi nomor WhatsApp Anda.";
+    if (!name.trim())
+      next.name = isEn ? "Please enter your full name." : "Isi nama lengkap Anda.";
+    if (!phone.trim())
+      next.phone = isEn ? "Please enter your WhatsApp number." : "Isi nomor WhatsApp Anda.";
     else if (phone.replace(/\D/g, "").length < 8)
-      next.phone = "Nomor WhatsApp terlalu pendek (minimal 8 digit).";
-    if (!issue.trim()) next.issue = "Tuliskan kendala perangkat Anda.";
+      next.phone = isEn
+        ? "WhatsApp number too short (minimum 8 digits)."
+        : "Nomor WhatsApp terlalu pendek (minimal 8 digit).";
+    if (!issue.trim())
+      next.issue = isEn
+        ? "Please describe the issue with your device."
+        : "Tuliskan kendala perangkat Anda.";
     setErrors(next);
 
     if (next.name) {
@@ -112,14 +164,23 @@ export default function ServiceRequestForm() {
     const deviceLabel = selectedDeviceObj.label;
     const fullDevice = model.trim() ? `${deviceLabel} (${model.trim()})` : deviceLabel;
 
-    const message = [
-      "Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:",
-      "",
-      `• Nama: ${name.trim()}`,
-      `• No. WhatsApp: ${phone.trim()}`,
-      `• Perangkat: ${fullDevice}`,
-      `• Kendala / Keluhan: ${issue.trim()}`,
-    ].join("\n");
+    const message = isEn
+      ? [
+          "Hello FIXMI Service Center, I would like a consultation for my device repair:",
+          "",
+          `• Full Name: ${name.trim()}`,
+          `• WhatsApp No.: ${phone.trim()}`,
+          `• Device: ${fullDevice}`,
+          `• Issue / Symptoms: ${issue.trim()}`,
+        ].join("\n")
+      : [
+          "Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:",
+          "",
+          `• Nama: ${name.trim()}`,
+          `• No. WhatsApp: ${phone.trim()}`,
+          `• Perangkat: ${fullDevice}`,
+          `• Kendala / Keluhan: ${issue.trim()}`,
+        ].join("\n");
 
     const waUrl = whatsappUrl(message);
     window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -145,10 +206,12 @@ export default function ServiceRequestForm() {
               </span>
               <div className="space-y-0.5 sm:space-y-1">
                 <p className="text-xs sm:text-sm font-semibold text-emerald-200">
-                  WhatsApp Terbuka di Tab Baru
+                  {isEn ? "WhatsApp Opened in New Tab" : "WhatsApp Terbuka di Tab Baru"}
                 </p>
                 <p className="text-[0.75rem] sm:text-xs text-emerald-300/80 leading-relaxed">
-                  Silakan tekan tombol <strong>Kirim</strong> di aplikasi WhatsApp untuk menyelesaikan konsultasi dengan teknisi FIXMI.
+                  {isEn
+                    ? "Please tap the Send button in WhatsApp to complete your consultation with FIXMI technicians."
+                    : "Silakan tekan tombol Kirim di aplikasi WhatsApp untuk menyelesaikan konsultasi dengan teknisi FIXMI."}
                 </p>
               </div>
             </div>
@@ -158,29 +221,41 @@ export default function ServiceRequestForm() {
         <div className="relative z-10 space-y-6 sm:space-y-7 md:space-y-8">
           {/* Seksi 1 — Informasi Kontak */}
           <Step
-            title="Informasi Kontak"
-            description="Untuk memudahkan konfirmasi estimasi biaya perbaikan."
+            title={isEn ? "Contact Information" : "Informasi Kontak"}
+            description={
+              isEn
+                ? "To confirm your device diagnostic and repair cost estimate."
+                : "Untuk memudahkan konfirmasi estimasi biaya perbaikan."
+            }
           >
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
-              <Field id="req-name" label="Nama Lengkap" error={errors.name}>
+              <Field
+                id="req-name"
+                label={dict.contact.form.nameLabel}
+                error={errors.name}
+              >
                 <input
                   id="req-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Masukkan nama lengkap Anda"
+                  placeholder={dict.contact.form.namePlaceholder}
                   autoComplete="name"
                   aria-invalid={!!errors.name}
                   className={getInputClass(!!errors.name)}
                 />
               </Field>
-              <Field id="req-phone" label="Nomor WhatsApp" error={errors.phone}>
+              <Field
+                id="req-phone"
+                label={dict.contact.form.phoneLabel}
+                error={errors.phone}
+              >
                 <input
                   id="req-phone"
                   type="tel"
                   inputMode="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Masukkan nomor WhatsApp"
+                  placeholder={dict.contact.form.phonePlaceholder}
                   autoComplete="tel"
                   aria-invalid={!!errors.phone}
                   className={getInputClass(!!errors.phone)}
@@ -193,12 +268,18 @@ export default function ServiceRequestForm() {
 
           {/* Seksi 2 — Perangkat & Model */}
           <Step
-            title="Perangkat & Seri Model"
-            description="Pilih kategori gadget dan tuliskan tipe spesifik jika diketahui."
+            title={isEn ? "Device & Model Series" : "Perangkat & Seri Model"}
+            description={
+              isEn
+                ? "Select gadget category and enter the specific model if known."
+                : "Pilih kategori gadget dan tuliskan tipe spesifik jika diketahui."
+            }
           >
             <div className="space-y-4 sm:space-y-4.5">
               <fieldset>
-                <legend className="sr-only">Pilih jenis perangkat</legend>
+                <legend className="sr-only">
+                  {isEn ? "Select device category" : "Pilih jenis perangkat"}
+                </legend>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3">
                   {DEVICES.map((d, index) => {
                     const on = d.key === device;
@@ -245,12 +326,16 @@ export default function ServiceRequestForm() {
                 </div>
               </fieldset>
 
-              <Field id="req-model" label="Tipe / Seri Model" hint="opsional">
+              <Field
+                id="req-model"
+                label={isEn ? "Model / Series Type" : "Tipe / Seri Model"}
+                hint={isEn ? "optional" : "opsional"}
+              >
                 <input
                   id="req-model"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder={selectedDeviceObj.placeholder}
+                  placeholder={isEn ? selectedDeviceObj.placeholderEn : selectedDeviceObj.placeholderId}
                   className={getInputClass()}
                 />
               </Field>
@@ -261,17 +346,21 @@ export default function ServiceRequestForm() {
 
           {/* Seksi 3 — Detail Kerusakan */}
           <Step
-            title="Detail Kerusakan"
-            description="Pilih kendala umum di bawah atau tuliskan keluhan Anda."
+            title={isEn ? "Issue & Fault Details" : "Detail Kerusakan"}
+            description={
+              isEn
+                ? "Select common faults below or describe your specific problem."
+                : "Pilih kendala umum di bawah atau tuliskan keluhan Anda."
+            }
           >
             <div className="space-y-4 sm:space-y-4.5">
               {/* Quick Symptom Chips */}
               <div>
                 <span className="block text-[0.72rem] sm:text-xs font-medium text-neutral-400 mb-2">
-                  Pilih kendala yang sering terjadi:
+                  {isEn ? "Select common device symptoms:" : "Pilih kendala yang sering terjadi:"}
                 </span>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {COMMON_SYMPTOMS.map((symptom) => {
+                  {commonSymptoms.map((symptom) => {
                     const isSelected = isSymptomActive(symptom);
                     return (
                       <button
@@ -292,13 +381,17 @@ export default function ServiceRequestForm() {
                 </div>
               </div>
 
-              <Field id="req-issue" label="Rincian Kendala" error={errors.issue}>
+              <Field
+                id="req-issue"
+                label={dict.contact.form.issueLabel}
+                error={errors.issue}
+              >
                 <textarea
                   id="req-issue"
                   value={issue}
                   onChange={(e) => setIssue(e.target.value)}
                   rows={3}
-                  placeholder="Tuliskan detail kerusakan atau keluhan yang dialami..."
+                  placeholder={dict.contact.form.issuePlaceholder}
                   aria-invalid={!!errors.issue}
                   className={`${getInputClass(!!errors.issue)} min-h-[75px] sm:min-h-[85px] resize-y leading-relaxed`}
                 />
@@ -312,25 +405,25 @@ export default function ServiceRequestForm() {
               <div className="flex items-center gap-2">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
                 <span className="text-[0.75rem] sm:text-xs font-medium text-neutral-300">
-                  Buka Setiap Hari · 09.00 – 21.00 WITA
+                  {dict.footer.hoursMonSat} · {dict.footer.hoursSun}
                 </span>
               </div>
               <p className="text-[0.75rem] sm:text-[0.8rem] text-neutral-400">
-                Ingin respon langsung?{" "}
+                {isEn ? "Prefer direct messaging? " : "Ingin respon langsung? "}
                 <a
                   href={whatsappUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-neutral-200 font-medium underline underline-offset-4 decoration-white/20 transition-colors hover:text-primary hover:decoration-primary"
                 >
-                  Chat WhatsApp
+                  {isEn ? "Chat WhatsApp" : "Chat WhatsApp"}
                 </a>{" "}
-                atau{" "}
+                {isEn ? "or " : "atau "}
                 <Link
-                  href="/pricelist"
+                  href={getLocalizedPath("/pricelist")}
                   className="text-neutral-200 font-medium underline underline-offset-4 decoration-white/20 transition-colors hover:text-primary hover:decoration-primary"
                 >
-                  Cek Daftar Harga
+                  {isEn ? "Check Price List" : "Cek Daftar Harga"}
                 </Link>
               </p>
             </div>
@@ -341,10 +434,10 @@ export default function ServiceRequestForm() {
                   type="button"
                   onClick={resetForm}
                   className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-3 sm:py-3.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-white/[0.06] hover:text-white"
-                  title="Kosongkan form dan buat permintaan baru"
+                  title="Reset form"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Reset Form</span>
+                  <span>{isEn ? "Reset Form" : "Reset Form"}</span>
                 </button>
               )}
 
@@ -357,7 +450,13 @@ export default function ServiceRequestForm() {
                 ) : (
                   <MessageCircle className="h-4 w-4 text-white stroke-[2]" aria-hidden="true" />
                 )}
-                <span>{sent ? "Kirim Ulang ke WhatsApp" : "Kirimkan Permintaan"}</span>
+                <span>
+                  {sent
+                    ? isEn
+                      ? "Resend to WhatsApp"
+                      : "Kirim Ulang ke WhatsApp"
+                    : dict.contact.form.submitBtn}
+                </span>
                 <ArrowRight
                   className="h-3.5 w-3.5 text-white/80 transition-transform duration-200 ease-out group-hover:translate-x-0.5 group-hover:text-white"
                   strokeWidth={2}

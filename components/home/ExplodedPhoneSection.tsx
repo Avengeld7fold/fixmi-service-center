@@ -53,6 +53,7 @@ const ALL_13_LAYERS: LayerDefinition[] = [
 interface ServiceCallout {
   id: string;
   name: string;
+  nameEn: string;
   code: string;
   side: "left" | "right";
   layerRange: string;
@@ -63,8 +64,11 @@ interface ServiceCallout {
   icon: typeof Smartphone;
   hotspot: { x: number; y: number };
   symptoms: string[];
+  symptomsEn: string[];
   fixmiSolution: string;
+  fixmiSolutionEn: string;
   estimatedTime: string;
+  estimatedTimeEn: string;
   categoryLink: string;
 }
 
@@ -72,6 +76,7 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
   {
     id: "screen",
     name: "Layar & Glass",
+    nameEn: "Screen & Glass",
     code: "DISPLAY // 13 & 12",
     side: "left",
     layerRange: "Layer 13 & 12",
@@ -82,13 +87,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: Smartphone,
     hotspot: { x: 50, y: 18 },
     symptoms: ["Kaca Retak / Pecah", "Garis Hijau / Blank Hitam", "Ghost Touch / Tidak Responsif"],
+    symptomsEn: ["Cracked / Shattered Glass", "Green Lines / Black Screen", "Ghost Touch / Unresponsive Panel"],
     fixmiSolution: "Penggantian Layar OLED Original + Pemindahan IC Touch & Kalibrasi TrueTone.",
+    fixmiSolutionEn: "OEM OLED Display Replacement + Touch IC Transfer & TrueTone Calibration.",
     estimatedTime: "25 - 40 Menit",
+    estimatedTimeEn: "25 - 40 Minutes",
     categoryLink: "/pricelist/iphone",
   },
   {
     id: "faceid",
     name: "Face ID Sensor",
+    nameEn: "Face ID Sensor",
     code: "BIOMETRICS // 10",
     side: "left",
     layerRange: "Layer 10",
@@ -99,13 +108,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: ScanFace,
     hotspot: { x: 50, y: 8 },
     symptoms: ["Face ID 'Move a bit lower'", "Kamera Depan Mati", "Sensor Proximity Earpiece Error"],
+    symptomsEn: ["Face ID 'Move a bit lower' Error", "Front Camera Failure", "Earpiece Proximity Sensor Glitch"],
     fixmiSolution: "Restorasi Dot Projector & Infrared Camera tanpa ganti modul utuh (Face ID tetap aktif).",
+    fixmiSolutionEn: "Dot Projector & IR Camera Micro-soldering (preserves original Face ID function).",
     estimatedTime: "1 - 2 Jam",
+    estimatedTimeEn: "1 - 2 Hours",
     categoryLink: "/pricelist/iphone",
   },
   {
     id: "battery",
     name: "Baterai & MagSafe",
+    nameEn: "Battery & MagSafe",
     code: "POWER // 5 & 2",
     side: "left",
     layerRange: "Layer 5 & 2",
@@ -116,13 +129,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: BatteryCharging,
     hotspot: { x: 40, y: 55 },
     symptoms: ["Battery Health <80% / Service", "Baterai Kembung / Drop Cepat", "Sering Mati Mendadak"],
+    symptomsEn: ["Battery Health <80% / Service Alert", "Swollen Battery / Fast Drain", "Random Power Shutdowns"],
     fixmiSolution: "Sel Baterai High-Capacity Grade A+ dengan pemindahan modul BMS (tanpa pesan error).",
+    fixmiSolutionEn: "Grade A+ High-Capacity Battery Cell with BMS Module Transfer (no unknown part warning).",
     estimatedTime: "20 - 30 Menit",
+    estimatedTimeEn: "20 - 30 Minutes",
     categoryLink: "/pricelist/iphone",
   },
   {
     id: "camera",
     name: "Kamera & Lensa",
+    nameEn: "Camera & Lens",
     code: "OPTICS // 9 & 8",
     side: "right",
     layerRange: "Layer 9 & 8",
@@ -133,13 +150,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: Camera,
     hotspot: { x: 26, y: 14 },
     symptoms: ["Kaca Lensa Pecah / Baret", "Kamera Bergetar / Suara Mendengung", "Hasil Foto Buram / Bercak"],
+    symptomsEn: ["Cracked / Scratched Lens Glass", "Shaking Camera / Humming OIS", "Blurry Photos / Dark Spots"],
     fixmiSolution: "Penggantian Kaca Safir Laser Cut & Modul Sensor Original di ruang steril bebas debu.",
+    fixmiSolutionEn: "Laser-cut Sapphire Lens & OEM Sensor Module replacement in cleanroom workstation.",
     estimatedTime: "30 - 45 Menit",
+    estimatedTimeEn: "30 - 45 Minutes",
     categoryLink: "/pricelist/iphone",
   },
   {
     id: "motherboard",
     name: "Logic Board & CPU",
+    nameEn: "Logic Board & CPU",
     code: "MOTHERBOARD // 7 & 6",
     side: "right",
     layerRange: "Layer 7 & 6",
@@ -150,13 +171,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: Cpu,
     hotspot: { x: 74, y: 32 },
     symptoms: ["Mati Total (Short Circuit)", "IC Power / Baseband No Service", "Restart Terus Menerus"],
+    symptomsEn: ["Dead Unit / Short Circuit", "Power IC / Baseband Searching...", "Continuous Bootloop / Restart"],
     fixmiSolution: "Pengerjaan Mikrosolder Mikroskop Level 4, Reballing CPU Dual-Layer, & Pemulihan Jalur.",
+    fixmiSolutionEn: "Level 4 Microscope Micro-soldering, Dual-Layer CPU Reballing & PCB Trace Recovery.",
     estimatedTime: "1 - 3 Hari (Diagnosa Teliti)",
+    estimatedTimeEn: "1 - 3 Days (Precision Bench)",
     categoryLink: "/pricelist/iphone",
   },
   {
     id: "speaker-housing",
     name: "Housing & Port",
+    nameEn: "Housing & Port",
     code: "CHASSIS // 4, 3, 1",
     side: "right",
     layerRange: "Layer 4, 3, 1",
@@ -167,8 +192,11 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: Volume2,
     hotspot: { x: 50, y: 88 },
     symptoms: ["Kaca Belakang Hancur", "Tidak Bisa Cas / Port Goyang", "Suara Speaker Kresek / Kecil"],
+    symptomsEn: ["Shattered Rear Glass", "No Charge / Loose Charging Port", "Crackling / Low Speaker Audio"],
     fixmiSolution: "Penggantian Backglass Laser Presisi Tanpa Bongkar Mesin & Ganti Fleksibel Charging Port.",
+    fixmiSolutionEn: "Precision Laser Back Glass Removal & OEM Charging Port Flex Replacement.",
     estimatedTime: "40 - 60 Menit",
+    estimatedTimeEn: "40 - 60 Minutes",
     categoryLink: "/pricelist/iphone",
   },
 ];
@@ -230,15 +258,19 @@ function InspectionCircleNode({
   callout,
   isActive,
   isRevealed,
+  isEn,
   onClick,
   onMouseEnter,
 }: {
   callout: ServiceCallout;
   isActive: boolean;
   isRevealed: boolean;
+  isEn: boolean;
   onClick: () => void;
   onMouseEnter?: () => void;
 }) {
+  const displayName = isEn ? callout.nameEn : callout.name;
+
   return (
     <div
       onClick={onClick}
@@ -258,7 +290,7 @@ function InspectionCircleNode({
         <div className="relative w-full h-full rounded-full overflow-hidden bg-[#0A0A0C] flex items-center justify-center">
           <Image
             src={callout.circleImage}
-            alt={callout.name}
+            alt={displayName}
             fill
             className="object-contain p-2.5 group-hover:scale-115 transition-transform duration-250 ease-out drop-shadow-md"
           />
@@ -272,10 +304,10 @@ function InspectionCircleNode({
       {/* Component Title Label Below Circle */}
       <div className="text-center">
         <span className="font-mono text-xs text-neutral-200 font-semibold tracking-wide block group-hover:text-primary transition-colors duration-150">
-          {callout.name}
+          {displayName}
         </span>
         <span className="font-mono text-[9px] text-neutral-400 uppercase tracking-wider block">
-          Klik untuk Detail
+          {isEn ? "Click for Details" : "Klik untuk Detail"}
         </span>
       </div>
     </div>
@@ -283,7 +315,8 @@ function InspectionCircleNode({
 }
 
 export default function ExplodedPhoneSection() {
-  const { dict, getLocalizedPath } = useI18n();
+  const { dict, locale, getLocalizedPath } = useI18n();
+  const isEn = locale === "en";
   const containerRef = useRef<HTMLDivElement>(null);
   const stageGridRef = useRef<HTMLDivElement>(null);
   const layersContainerRef = useRef<HTMLDivElement>(null);
@@ -702,6 +735,7 @@ export default function ExplodedPhoneSection() {
               const isActive = activeCalloutId === callout.id;
               const scale = 0.9 + t * 0.1;
               const isRevealed = t > 0.35;
+              const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
                 <div
@@ -719,6 +753,7 @@ export default function ExplodedPhoneSection() {
                     callout={callout}
                     isActive={isActive}
                     isRevealed={isRevealed}
+                    isEn={isEn}
                     onMouseEnter={() => {
                       if (isRevealed) {
                         setActiveCalloutId(callout.id);
@@ -796,6 +831,7 @@ export default function ExplodedPhoneSection() {
                 {SERVICE_CALLOUTS.map((callout) => {
                   const t = getCalloutTravelProgress(callout);
                   const isActive = activeCalloutId === callout.id;
+                  const displayName = isEn ? callout.nameEn : callout.name;
 
                   return (
                     <button
@@ -822,7 +858,7 @@ export default function ExplodedPhoneSection() {
                         willChange: "transform, opacity",
                       }}
                       className="group absolute flex items-center justify-center focus:outline-none cursor-pointer active:scale-90 transition-transform duration-150 ease-out"
-                      aria-label={`Pilih komponen ${callout.name}`}
+                      aria-label={`Select component ${displayName}`}
                     >
                       {/* Outer Glowing Pulsing Ring (Animasi Pulsa Kedip-kedip Aktif) */}
                       <span
@@ -850,7 +886,7 @@ export default function ExplodedPhoneSection() {
 
                       {/* Floating Tooltip Pill */}
                       <span className="absolute left-7 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-black/95 border border-primary/40 px-2 py-0.5 font-mono text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-xl">
-                        {callout.name}
+                        {displayName}
                       </span>
                     </button>
                   );
@@ -872,7 +908,7 @@ export default function ExplodedPhoneSection() {
                 {/* Sleek Instruction Badge */}
                 <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-200 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30 whitespace-nowrap shadow-xl flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                  Scroll Disini
+                  {dict.teardown.scrollHint}
                 </span>
               </div>
             </div>
@@ -885,6 +921,7 @@ export default function ExplodedPhoneSection() {
               const isActive = activeCalloutId === callout.id;
               const scale = 0.9 + t * 0.1;
               const isRevealed = t > 0.35;
+              const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
                 <div
@@ -902,6 +939,7 @@ export default function ExplodedPhoneSection() {
                     callout={callout}
                     isActive={isActive}
                     isRevealed={isRevealed}
+                    isEn={isEn}
                     onMouseEnter={() => {
                       if (isRevealed) {
                         setActiveCalloutId(callout.id);
@@ -924,6 +962,7 @@ export default function ExplodedPhoneSection() {
             {SERVICE_CALLOUTS.map((callout) => {
               const t = getCalloutTravelProgress(callout);
               const isActive = activeCalloutId === callout.id;
+              const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
                 <button
@@ -957,14 +996,14 @@ export default function ExplodedPhoneSection() {
                     <div className="relative w-full h-full rounded-full overflow-hidden bg-[#0A0A0C]">
                       <Image
                         src={callout.circleImage}
-                        alt={callout.name}
+                        alt={displayName}
                         fill
                         className="object-contain p-1"
                       />
                     </div>
                   </div>
                   <span className="font-mono text-[10px] text-neutral-300 whitespace-nowrap">
-                    {callout.name}
+                    {displayName}
                   </span>
                 </button>
               );
@@ -1005,7 +1044,7 @@ export default function ExplodedPhoneSection() {
               type="button"
               onClick={() => setModalCallout(null)}
               className="absolute top-5 right-5 p-2.5 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/15 active:scale-90 transition-[transform,background-color,color] duration-150 ease-out"
-              aria-label="Tutup Detail"
+              aria-label={dict.common.close}
             >
               <X className="w-5 h-5" />
             </button>
@@ -1015,7 +1054,7 @@ export default function ExplodedPhoneSection() {
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-primary/60 bg-primary/10 p-1 shrink-0 overflow-hidden shadow-[0_0_24px_rgba(255,107,0,0.35)] ring-2 ring-primary/20">
                 <Image
                   src={modalCallout.circleImage}
-                  alt={modalCallout.name}
+                  alt={isEn ? modalCallout.nameEn : modalCallout.name}
                   fill
                   className="object-contain p-2 drop-shadow-lg scale-110"
                 />
@@ -1025,10 +1064,10 @@ export default function ExplodedPhoneSection() {
                   {modalCallout.code}
                 </span>
                 <h3 className="text-xl sm:text-2xl font-bold text-[#f5f5f5] leading-tight mt-0.5">
-                  {modalCallout.name}
+                  {isEn ? modalCallout.nameEn : modalCallout.name}
                 </h3>
                 <span className="font-mono text-[11px] text-neutral-400 mt-1 inline-flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-primary" /> Estimasi: <strong className="text-white">{modalCallout.estimatedTime}</strong>
+                  <Clock className="w-3.5 h-3.5 text-primary" /> {dict.teardown.modalEstimate}: <strong className="text-white">{isEn ? modalCallout.estimatedTimeEn : modalCallout.estimatedTime}</strong>
                 </span>
               </div>
             </div>
@@ -1036,10 +1075,10 @@ export default function ExplodedPhoneSection() {
             {/* Symptoms / Gejala Kerusakan */}
             <div className="mb-4">
               <h4 className="font-mono text-xs uppercase tracking-wider text-neutral-400 mb-2">
-                GEJALA KERUSAKAN UMUM:
+                {dict.teardown.modalSymptoms.toUpperCase()}:
               </h4>
               <div className="space-y-2">
-                {modalCallout.symptoms.map((symptom, i) => (
+                {(isEn ? modalCallout.symptomsEn : modalCallout.symptoms).map((symptom, i) => (
                   <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-sm text-neutral-200 hover:border-white/10 transition-colors">
                     <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-pulse" />
                     <span>{symptom}</span>
@@ -1051,17 +1090,17 @@ export default function ExplodedPhoneSection() {
             {/* FIXMI Solution */}
             <div className="mb-6 p-4 rounded-2xl bg-primary/[0.06] border border-primary/25">
               <h4 className="font-mono text-xs uppercase tracking-wider text-primary mb-1 font-semibold flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> SOLUSI PERBAIKAN FIXMI:
+                <ShieldCheck className="w-4 h-4" /> {dict.teardown.modalFixmiSolution.toUpperCase()}:
               </h4>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                {modalCallout.fixmiSolution}
+                {isEn ? modalCallout.fixmiSolutionEn : modalCallout.fixmiSolution}
               </p>
             </div>
 
             {/* Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-white/10">
               <span className="font-mono text-xs text-emerald-400 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> Garansi Resmi FIXMI
+                <ShieldCheck className="w-4 h-4" /> {dict.common.officialWarranty}
               </span>
               <Link
                 href={getLocalizedPath(modalCallout.categoryLink)}
