@@ -207,9 +207,9 @@ export const enDictionary: Dictionary = {
     emptyGallery: "No showcase photos available in this category yet.",
   },
   footer: {
-    headStore: "Kedonganan Head Store",
+    headStore: "Toko Utama (Kedonganan)",
     branchStore: "Jimbaran Branch",
-    otherStore: "Nusa Dua Branch",
+    otherStore: "Denpasar Branch",
     openStatusOpen: "Open Now",
     openStatusClosed: "Closed",
     openHoursLabel: "Business Hours",

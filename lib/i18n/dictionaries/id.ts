@@ -207,9 +207,9 @@ export const idDictionary: Dictionary = {
     emptyGallery: "Belum ada foto dokumentasi di kategori ini.",
   },
   footer: {
-    headStore: "Head Store Kedonganan",
+    headStore: "Toko Utama (Kedonganan)",
     branchStore: "Cabang Jimbaran",
-    otherStore: "Cabang Nusa Dua",
+    otherStore: "Cabang Denpasar",
     openStatusOpen: "Buka Sekarang",
     openStatusClosed: "Tutup",
     openHoursLabel: "Jam Operasional",

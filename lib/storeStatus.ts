@@ -60,7 +60,7 @@ export function getWitaDate(customDate?: Date): Date {
  * Mengkalkulasi status live gerai FIXMI.
  */
 export function getStoreLiveStatus(
-  config: StoreHoursConfig = { openHour: 9, closeHourWeekday: 21, closeHourSunday: 18 },
+  config: StoreHoursConfig = { openHour: 9, closeHourWeekday: 21, closeHourSunday: 0 },
   customDate?: Date
 ): StoreLiveStatus {
   const wita = getWitaDate(customDate);
@@ -93,7 +93,21 @@ export function getStoreLiveStatus(
     };
   }
 
-  // 2. Cek Buka Sekarang
+  // 2. Cek Minggu Tutup
+  if (isSunday && config.closeHourSunday === 0) {
+    return {
+      isOpen: false,
+      isHoliday: false,
+      statusType: "closed",
+      label: "Tutup · Buka Senin 09.00 WITA",
+      detail: "Minggu Tutup · Buka kembali Senin 09.00 WITA",
+      badgeClass: "text-neutral-400 bg-neutral-800/60 border-white/[0.08]",
+      dotClass: "bg-neutral-500",
+      witaTimeFormatted,
+    };
+  }
+
+  // 3. Cek Buka Sekarang
   if (currentDecimalHour >= openHour && currentDecimalHour < closeHour) {
     // Cek apakah mendekati jam tutup (30 menit terakhir)
     if (closeHour - currentDecimalHour <= 0.5) {

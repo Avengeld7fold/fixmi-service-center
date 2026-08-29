@@ -31,7 +31,7 @@ interface Store {
 const STORES: Record<StoreKey, Store> = {
   head: {
     name: "FIXMI Service Center",
-    label: "Head Store",
+    label: "Toko Utama",
     region: "Kedonganan · Badung",
     city: "Kedonganan",
     rating: "4.9",
@@ -40,8 +40,9 @@ const STORES: Record<StoreKey, Store> = {
       "Link. Kubu Alit Kedonganan, Jl. Raya Uluwatu, Kedonganan, Kec. Kuta, Kabupaten Badung, Bali 80361",
     phone: "0819-9933-6722",
     hours: [
-      "Senin – Sabtu 09.00 – 21.00 WITA",
-      "Minggu 09.00 – 18.00 WITA",
+      "Senin – Jumat 09.00 – 21.00 WITA",
+      "Sabtu 09.00 – 21.00 WITA",
+      "Minggu Tutup",
     ],
     map: "Fixmi Service Center Kedonganan Jl Raya Uluwatu Bali 80361",
   },
@@ -54,8 +55,12 @@ const STORES: Record<StoreKey, Store> = {
     reviews: "190+",
     address:
       "Taman Griya, Jl. Nuansa Utama No. 33, Jimbaran, Kuta Selatan, Kabupaten Badung, Bali 80361",
-    phone: "0819-9933-6722",
-    hours: ["Senin – Sabtu 09.00 – 21.00 WITA", "Minggu 09.00 – 18.00 WITA"],
+    phone: "0851-2357-9557",
+    hours: [
+      "Senin – Jumat 09.00 – 21.00 WITA",
+      "Sabtu 09.00 – 21.00 WITA",
+      "Minggu Tutup",
+    ],
     map: "Fixmi Service Center Phone Taman Griya Jl Nuansa Utama Jimbaran Bali",
   },
   other: {
@@ -68,7 +73,11 @@ const STORES: Record<StoreKey, Store> = {
     address:
       "Cellular World Arena, Jl. Teuku Umar No. 57, Dauh Puri Kauh, Kec. Denpasar Barat, Kota Denpasar, Bali 80113",
     phone: "0819-9933-6722",
-    hours: ["Senin – Sabtu 09.00 – 21.00 WITA", "Minggu 09.00 – 18.00 WITA"],
+    hours: [
+      "Senin – Jumat 09.00 – 21.00 WITA",
+      "Sabtu 09.00 – 21.00 WITA",
+      "Minggu Tutup",
+    ],
     map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
   },
 };
