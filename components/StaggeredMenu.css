@@ -1,0 +1,317 @@
+/* ========================================
+   StaggeredMenu — CSS Styles
+   Modified for FIXMI Diagnostic Brand
+   ======================================== */
+
+.staggered-menu-wrapper {
+  position: relative;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.staggered-menu-wrapper.fixed-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 40;
+  overflow: hidden;
+}
+
+/* Backdrop — tappable dark overlay on the left gap */
+.sm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 54;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+[data-open] .sm-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ─── Toggle Button (Aligned naturally inside the flex row) ─── */
+.sm-toggle {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--fixmi-primary);
+  z-index: 60;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.sm-toggle:focus-visible {
+  outline: 2px solid var(--fixmi-primary);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ─── Hamburger 3-line Icon ─── */
+.sm-hamburger-box {
+  width: 24px;
+  height: 16px;
+  display: inline-block;
+  position: relative;
+}
+
+.sm-hamburger-inner,
+.sm-hamburger-inner::before,
+.sm-hamburger-inner::after {
+  width: 24px;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  position: absolute;
+  transition-property: transform, opacity, background-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+.sm-hamburger-inner {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sm-hamburger-inner::before {
+  content: "";
+  top: -7px;
+  left: 0;
+}
+
+.sm-hamburger-inner::after {
+  content: "";
+  bottom: -7px;
+  left: 0;
+}
+
+/* Hamburger active/open states */
+.sm-hamburger-inner.open {
+  transform: rotate(45deg);
+}
+
+.sm-hamburger-inner.open::before {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.sm-hamburger-inner.open::after {
+  transform: rotate(-90deg);
+  bottom: 0;
+}
+
+/* ─── Pre-layers (staggered color underlays) ─── */
+.sm-prelayers {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 85%;
+  max-width: 440px;
+  pointer-events: none;
+  z-index: 55;
+  opacity: 0;
+}
+
+[data-position="left"] .sm-prelayers {
+  right: auto;
+  left: 0;
+}
+
+.sm-prelayer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  transform: translateX(0);
+  opacity: 0;
+}
+
+/* ─── Panel ─── */
+.staggered-menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 85%;
+  max-width: 440px;
+  height: 100%;
+  height: 100dvh;
+  background: var(--fixmi-bg-primary);
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 1.5rem 1.5rem 1.5rem;
+  overflow-y: auto;
+  z-index: 56;
+  pointer-events: auto;
+  opacity: 0;
+}
+
+[data-position="left"] .staggered-menu-panel {
+  right: auto;
+  left: 0;
+}
+
+.sm-panel-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ─── Menu Items ─── */
+.sm-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sm-panel-itemWrap {
+  position: relative;
+  overflow: hidden;
+  line-height: 1.15;
+}
+
+.sm-panel-item {
+  position: relative;
+  color: var(--fixmi-text-primary);
+  font-family: var(--font-bayon), sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.375rem, 7.5vw, 3.25rem);
+  cursor: pointer;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  transition: color 0.25s;
+  display: inline-block;
+  text-decoration: none;
+  padding-right: 1.4em;
+  white-space: nowrap;
+}
+
+.sm-panel-itemLabel {
+  display: inline-block;
+  will-change: transform;
+  transform-origin: 50% 100%;
+}
+
+.sm-panel-item:hover,
+.sm-panel-item:focus-visible {
+  color: var(--sm-accent, var(--fixmi-primary));
+}
+
+/* Numbering */
+.sm-panel-list[data-numbering] {
+  counter-reset: smItem;
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item::after {
+  counter-increment: smItem;
+  content: counter(smItem, decimal-leading-zero);
+  position: absolute;
+  top: 0.1em;
+  right: 2.8em;
+  font-family: var(--font-neue-montreal), monospace;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--sm-accent, var(--fixmi-primary));
+  letter-spacing: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: var(--sm-num-opacity, 0);
+}
+
+/* ─── Socials ─── */
+.sm-socials {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sm-socials-title {
+  margin: 0;
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fixmi-text-muted);
+}
+
+.sm-socials-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sm-socials-link {
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--fixmi-text-secondary);
+  text-decoration: none;
+  position: relative;
+  padding: 8px 12px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.sm-socials-list .sm-socials-link {
+  opacity: 1;
+}
+
+.sm-socials-list:hover .sm-socials-link {
+  opacity: 0.35;
+}
+
+.sm-socials-list:hover .sm-socials-link:hover {
+  opacity: 1;
+  color: var(--sm-accent, var(--fixmi-primary));
+}
+
+.sm-socials-link:focus-visible {
+  outline: 2px solid var(--sm-accent, var(--fixmi-primary));
+  outline-offset: 3px;
+}
+
+.sm-socials-list:focus-within .sm-socials-link {
+  opacity: 0.35;
+}
+
+.sm-socials-list:focus-within .sm-socials-link:focus-visible {
+  opacity: 1;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .sm-panel-item,
+  .sm-socials-link,
+  .sm-toggle {
+    transition: none;
+  }
+}

@@ -1,0 +1,42 @@
+<svg width="400" height="780" viewBox="0 0 400 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Layer 2: Li-Ion Battery Cell & Wireless Charging Coil -->
+  <defs>
+    <linearGradient id="batteryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#1A1A1D"/>
+      <stop offset="50%" stopColor="#0E0E10"/>
+      <stop offset="100%" stopColor="#080809"/>
+    </linearGradient>
+    <linearGradient id="copperCoil" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FF9040"/>
+      <stop offset="50%" stopColor="#CC5500"/>
+      <stop offset="100%" stopColor="#993300"/>
+    </linearGradient>
+    <filter id="batteryGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" floodColor="#000000" floodOpacity="0.9"/>
+    </filter>
+  </defs>
+
+  <!-- L-Shaped High Capacity Battery Pack -->
+  <path d="M70,220 L230,220 L230,360 L280,360 L280,640 L70,640 Z" fill="url(#batteryGrad)" stroke="#333338" strokeWidth="2" filter="url(#batteryGlow)"/>
+  
+  <!-- Battery Pull Tabs & Warning Print -->
+  <rect x="75" y="225" width="30" height="8" rx="2" fill="#3A3A40"/>
+  <rect x="75" y="630" width="30" height="8" rx="2" fill="#3A3A40"/>
+  
+  <!-- Battery Spec Print Texture -->
+  <text x="85" y="270" fill="#888890" fontSize="10" fontFamily="sans-serif" fontWeight="bold">FIXMI LI-ION CELL</text>
+  <text x="85" y="290" fill="#555560" fontSize="8" fontFamily="monospace">4422 mAh / 3.86V / 17.1 Wh</text>
+  <text x="85" y="305" fill="#555560" fontSize="8" fontFamily="monospace">PREMIUM BATTERY REPLACEMENT</text>
+
+  <!-- Copper Wireless Charging Induction Coil (Center Stage) -->
+  <circle cx="200" cy="450" r="62" stroke="url(#copperCoil)" strokeWidth="10" strokeDasharray="3 1" fill="none" opacity="0.85"/>
+  <circle cx="200" cy="450" r="48" stroke="url(#copperCoil)" strokeWidth="8" strokeDasharray="3 1" fill="none" opacity="0.75"/>
+  <circle cx="200" cy="450" r="34" stroke="url(#copperCoil)" strokeWidth="6" strokeDasharray="3 1" fill="none" opacity="0.65"/>
+  
+  <!-- Ribbon Flex to Logic Board -->
+  <path d="M230,250 L310,250 L310,180" stroke="#FF6B00" strokeWidth="6" strokeLinecap="round" fill="none" opacity="0.9"/>
+  <rect x="304" y="170" width="12" height="15" rx="2" fill="#D4AF37"/>
+
+  <!-- Label Part Watermark -->
+  <text x="200" y="680" fill="#666" fontSize="11" fontFamily="monospace" textAnchor="middle" letterSpacing="3">PART 02 // BATTERY &amp; WIRELESS COIL</text>
+</svg>

@@ -1,0 +1,270 @@
+@import "tailwindcss";
+@source "../components";
+@source "../app";
+
+/* ============================
+   FIXMI Precision Design System
+   Instrument Grade theme
+   ============================ */
+
+:root {
+  /* Brand Colors */
+  --fixmi-primary: #FF6B00;                    /* Brand primary (#FF6B00) */
+  --fixmi-primary-light: #E85F00;              /* Brand hover (#E85F00) */
+  --fixmi-primary-dark: #CC5500;               /* Brand active (#CC5500) */
+  --fixmi-accent: #FF6B00;
+  --fixmi-accent-light: #E85F00;
+
+  /* Background Palette */
+  --fixmi-bg-primary: #121212;                 /* Background primary (#121212) */
+  --fixmi-bg-secondary: #181818;               /* Background secondary (#181818) */
+  --fixmi-bg-tertiary: #1E1E1E;                /* Surface (#1E1E1E) */
+  --fixmi-bg-glass: rgba(18, 18, 18, 0.75);
+  --fixmi-bg-glass-strong: rgba(18, 18, 18, 0.95);
+
+  /* Text & Ink values */
+  --fixmi-text-primary: #FAFAFA;                /* Heading (#FAFAFA) */
+  --fixmi-text-secondary: #D4D4D8;              /* Text (#D4D4D8) */
+  --fixmi-text-muted: #71717A;                  /* Text muted (#71717A) */
+  
+  /* Additional text colors */
+  --fixmi-text-heading-secondary: #F3F4F6;      /* Heading secondary (#F3F4F6) */
+  --fixmi-text-secondary-alt: #A1A1AA;          /* Text secondary (#A1A1AA) */
+
+  /* Borders & Dividers */
+  --fixmi-border: #303030;                     /* Border (#303030) */
+  --fixmi-divider: #2A2A2A;                    /* Divider (#2A2A2A) */
+
+  /* Panel / Card Surfaces */
+  --fixmi-panel: #1E1E1E;                      /* Surface (#1E1E1E) */
+  --fixmi-panel-raised: #252525;               /* Surface hover (#252525) */
+  --fixmi-panel-elevated: #2B2B2B;             /* Surface elevated (#2B2B2B) */
+  --fixmi-panel-border: #303030;               /* Border (#303030) */
+
+  /* Status Colors */
+  --fixmi-success: #22C55E;
+  --fixmi-warning: #FACC15;
+  --fixmi-error: #EF4444;
+  --fixmi-info: #3B82F6;
+}
+
+@theme inline {
+  --color-background: var(--fixmi-bg-primary);
+  --color-foreground: var(--fixmi-text-secondary);
+  --color-primary: var(--fixmi-primary);
+  --color-primary-light: var(--fixmi-primary-light);
+  --color-primary-dark: var(--fixmi-primary-dark);
+  --color-accent: var(--fixmi-accent);
+  --color-accent-light: var(--fixmi-accent-light);
+  --color-surface: var(--fixmi-bg-secondary);
+  --color-surface-alt: var(--fixmi-bg-tertiary);
+  --color-surface-elevated: var(--fixmi-panel-elevated);
+  --color-text-secondary: var(--fixmi-text-secondary-alt);
+  --color-text-muted: var(--fixmi-text-muted);
+  --color-border: var(--fixmi-border);
+  --color-border-light: var(--fixmi-divider);
+  --color-divider: var(--fixmi-divider);
+  --color-panel: var(--fixmi-panel);
+  --color-panel-raised: var(--fixmi-panel-raised);
+  --color-panel-border: var(--fixmi-panel-border);
+  --font-display: var(--font-neue-montreal);
+  --font-sans: var(--font-neue-montreal);
+  --font-mono: var(--font-mono);
+  --font-bayon: var(--font-bayon);
+}
+
+/* ============================
+   Base Styles
+   (reset margin/padding/box-sizing sudah ditangani preflight Tailwind;
+   jangan tambah reset `*` tanpa @layer karena akan menimpa semua utility)
+   ============================ */
+
+@layer base {
+  html {
+    /* JANGAN set scroll-behavior: smooth — konflik fatal dengan Lenis
+       (Lenis menulis scrollTop per frame; CSS smooth menganimasikan tiap
+       penulisan; keduanya saling lawan = scroll macet). Lenis yang memegang
+       smoothing di seluruh situs. */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /*
+      Proportional rem scaling — layout stacked (mobile/tablet, < 1024px).
+      Basis desain mobile 390px; clamp mencegah teks mikroskopis di layar
+      sangat kecil dan raksasa di tablet. Cap 18px (bukan 21px): tablet
+      768-1023px = layout mobile di-zoom 1.125×, bukan 1.31× yang terasa
+      kebesaran.
+    */
+    font-size: clamp(14px, calc(100vw / 390 * 16), 18px);
+  }
+
+  /*
+    Layout grid desktop (>= 1024px, breakpoint lg — sama dengan titik
+    layout berubah, sehingga tidak ada lompatan skala di tengah layout).
+    Basis desain desktop 1440px; seluruh halaman menskala proporsional
+    seperti zoom, dibatasi 16px di layar ultra-wide. Floor 13px (bukan
+    11.5px): di laptop 1024-1170px teks tidak lagi menciut sampai ±10px
+    (text-sm tabel harga sebelumnya terasa kekecilan).
+  */
+  @media (min-width: 1024px) {
+    html {
+      font-size: clamp(13px, calc(100vw / 1440 * 16), 16px);
+    }
+  }
+}
+
+body {
+  background: var(--fixmi-bg-primary);
+  color: var(--fixmi-text-secondary);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ============================
+   Typography calibration (Impeccable rules)
+   ============================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  color: var(--fixmi-text-primary);
+  letter-spacing: -0.02em; /* Display letter-spacing must be >= -0.04em */
+  text-wrap: balance;
+}
+
+p {
+  max-width: 72ch; /* Cap body line length at 65-75ch */
+  text-wrap: pretty;
+}
+
+/* ============================
+   Selection
+   ============================ */
+
+::selection {
+  background: rgba(245, 158, 11, 0.2); /* Brand primary highlight */
+  color: var(--fixmi-text-primary);
+}
+
+/* ============================
+   Scrollbar
+   ============================ */
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fixmi-border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(62.7% 0.22 41 / 0.5);
+}
+
+/* ============================
+   Utility Classes
+   ============================ */
+
+/* Tinggi hero = viewport - navbar (4.5rem). svh (small viewport height)
+   menghitung URL bar browser mobile sehingga konten bawah hero tidak
+   terpotong di iOS Safari; vh sebagai fallback browser lama. */
+.min-h-hero {
+  min-height: calc(100vh - 4.5rem);
+}
+@supports (height: 100svh) {
+  .min-h-hero {
+    min-height: calc(100svh - 4.5rem);
+  }
+}
+
+.fixmi-glass {
+  background: var(--fixmi-bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.fixmi-glass-strong {
+  background: var(--fixmi-bg-glass-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 
+   Hairline precision card - no soft drop shadows 
+   Max card border radius is 12px 
+*/
+.fixmi-card {
+  background: var(--fixmi-bg-secondary);
+  border: 1px solid var(--fixmi-border);
+  border-radius: 12px;
+  transition: border-color 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.fixmi-card:hover {
+  border-color: var(--fixmi-primary);
+  background: var(--fixmi-bg-tertiary);
+}
+
+/* Timeline Row Title Hover Interaction */
+.exp-timeline-row {
+  cursor: default;
+}
+.exp-timeline-row:hover .timeline-role-title {
+  color: var(--fixmi-primary) !important;
+}
+
+/* Entrance ringan untuk konten yang berganti (tab kategori admin, panel).
+   Dimatikan otomatis oleh rule prefers-reduced-motion di bawah. */
+.fade-rise {
+  animation: fadeRise 0.28s ease-out both;
+}
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================
+   Footer motion — readout refresh saat ganti toko (bukan entrance dekoratif).
+   Crossfade opacity murni: konten baru "menyala" halus, TANPA translateY-up
+   (gerak fade-up berjenjang = pola slop generic; sengaja dihindari). Rail
+   penunjuk (Footer.tsx) yang membawa continuity. Mati oleh reduced-motion.
+   ============================ */
+@keyframes footer-row-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.footer-spec > div {
+  animation: footer-row-in 0.26s ease-out both;
+  animation-delay: calc(var(--row, 0) * 45ms);
+}
+
+/* Sembunyikan tombol 'X' bawaan browser pada input type search */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/* Reduced Motion implementation */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

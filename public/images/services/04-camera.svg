@@ -1,0 +1,56 @@
+<svg width="400" height="780" viewBox="0 0 400 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Layer 4: Triple Camera System, OIS Gimbal, Flash & LiDAR Sensor -->
+  <defs>
+    <radialGradient id="lensGrad1" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stopColor="#1E88E5" stopOpacity="0.8"/>
+      <stop offset="60%" stopColor="#0D47A1" stopOpacity="0.9"/>
+      <stop offset="100%" stopColor="#051226"/>
+    </radialGradient>
+    <radialGradient id="lensGrad2" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stopColor="#8E24AA" stopOpacity="0.8"/>
+      <stop offset="60%" stopColor="#4A148C" stopOpacity="0.9"/>
+      <stop offset="100%" stopColor="#120424"/>
+    </radialGradient>
+    <radialGradient id="lensGrad3" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stopColor="#FF7043" stopOpacity="0.8"/>
+      <stop offset="60%" stopColor="#D84315" stopOpacity="0.9"/>
+      <stop offset="100%" stopColor="#2E0C04"/>
+    </radialGradient>
+    <filter id="cameraShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" floodColor="#000000" floodOpacity="0.95"/>
+    </filter>
+  </defs>
+
+  <!-- Triple Camera Bracket Plate (Top Left) -->
+  <rect x="36" y="36" width="150" height="155" rx="36" fill="#1C1C20" stroke="#FF6B00" strokeWidth="2" filter="url(#cameraShadow)"/>
+
+  <!-- Lens 1: Main 48MP Sensor with OIS -->
+  <circle cx="85" cy="85" r="32" fill="#0A0A0C" stroke="#444" strokeWidth="3"/>
+  <circle cx="85" cy="85" r="24" fill="url(#lensGrad1)"/>
+  <circle cx="85" cy="85" r="10" fill="#000" stroke="#64B5F6" strokeWidth="1.5"/>
+  <circle cx="78" cy="78" r="4" fill="#FFF" opacity="0.6"/>
+
+  <!-- Lens 2: Ultra Wide Sensor -->
+  <circle cx="85" cy="145" r="32" fill="#0A0A0C" stroke="#444" strokeWidth="3"/>
+  <circle cx="85" cy="145" r="24" fill="url(#lensGrad2)"/>
+  <circle cx="85" cy="145" r="10" fill="#000" stroke="#BA68C8" strokeWidth="1.5"/>
+  <circle cx="78" cy="138" r="4" fill="#FFF" opacity="0.6"/>
+
+  <!-- Lens 3: Telephoto Periscope Sensor -->
+  <circle cx="145" cy="115" r="32" fill="#0A0A0C" stroke="#444" strokeWidth="3"/>
+  <circle cx="145" cy="115" r="24" fill="url(#lensGrad3)"/>
+  <circle cx="145" cy="115" r="10" fill="#000" stroke="#FFAB91" strokeWidth="1.5"/>
+  <circle cx="138" cy="108" r="4" fill="#FFF" opacity="0.6"/>
+
+  <!-- True Tone Flash & LiDAR Scanner -->
+  <circle cx="145" cy="65" r="14" fill="#FFF7C2" stroke="#E6C657" strokeWidth="2"/>
+  <circle cx="145" cy="65" r="5" fill="#FFE082"/>
+  <circle cx="145" cy="160" r="9" fill="#111" stroke="#333" strokeWidth="2"/>
+
+  <!-- Flexible Camera Connector Ribbon -->
+  <path d="M45,150 L20,150 L20,300 L60,300" stroke="#FF6B00" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.85"/>
+  <rect x="55" y="292" width="16" height="16" rx="2" fill="#D4AF37"/>
+
+  <!-- Label Part Watermark -->
+  <text x="200" y="680" fill="#666" fontSize="11" fontFamily="monospace" textAnchor="middle" letterSpacing="3">PART 04 // TRIPLE CAMERA &amp; OIS</text>
+</svg>
