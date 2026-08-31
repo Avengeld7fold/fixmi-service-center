@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import FixmiLoader from "./FixmiLoader";
 import { useAssetPreloader } from "./useAssetPreloader";
 
 /**
- * LoadingGate — bungkus aplikasi.
+ * LoadingGate — overlay loading animasi presisi tinggi untuk FIXMI.
  *
- * SEMENTARA DIMATIKAN DENGAN FLAG `DISABLE_LOADER_IN_DEV = true`
- * agar proses pengembangan & testing berjalan instant tanpa perlu menunggu animasi loading.
- * Ubah kembali menjadi `false` saat aplikasi siap dipublikasikan/live.
+ * Mengunci tampilan awal sampai seluruh font, logo, dan aset WebGL
+ * selesai dimuat, lalu memutar transisi reveal yang halus ke konten utama.
  */
-const DISABLE_LOADER_IN_DEV = true;
+const DISABLE_LOADER_IN_DEV = false;
 
 const CRITICAL_ASSETS = [
   "/fixmi-logo.png",
@@ -21,23 +21,27 @@ const CRITICAL_ASSETS = [
 ];
 
 export default function LoadingGate({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname() || "";
+  const isAdmin = pathname.startsWith("/admin");
+
   const { progress } = useAssetPreloader(CRITICAL_ASSETS, {
     waitForFonts: true,
     waitForWindowLoad: false,
   });
-  const [revealed, setRevealed] = useState(DISABLE_LOADER_IN_DEV);
+
+  const [revealed, setRevealed] = useState(DISABLE_LOADER_IN_DEV || isAdmin);
 
   useEffect(() => {
-    if (DISABLE_LOADER_IN_DEV) {
+    if (DISABLE_LOADER_IN_DEV || isAdmin) {
       (window as unknown as Record<string, unknown>).__fixmiLoaded = true;
       window.dispatchEvent(new Event("fixmi:loaded"));
     }
-  }, []);
+  }, [isAdmin]);
 
   return (
     <>
       {children}
-      {!revealed && (
+      {!revealed && !isAdmin && (
         <FixmiLoader
           progress={progress}
           onDone={() => {
@@ -46,8 +50,8 @@ export default function LoadingGate({ children }: { children: React.ReactNode })
             (window as unknown as Record<string, unknown>).__fixmiLoaded = true;
             window.dispatchEvent(new Event("fixmi:loaded"));
           }}
-          background="#020202"
-          minDuration={800}
+          background="#121212"
+          minDuration={900}
         />
       )}
     </>
