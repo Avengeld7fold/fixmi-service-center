@@ -6,12 +6,12 @@ import FixmiLoader from "./FixmiLoader";
 import { useAssetPreloader } from "./useAssetPreloader";
 
 /**
- * LoadingGate — overlay loading animasi presisi tinggi untuk FIXMI.
+ * LoadingGate — overlay loading animasi untuk FIXMI.
  *
- * Mengunci tampilan awal sampai seluruh font, logo, dan aset WebGL
- * selesai dimuat, lalu memutar transisi reveal yang halus ke konten utama.
+ * `DISABLE_LOADER_IN_DEV = true` mematikan layar loading animasi
+ * sehingga website langsung tampil secara instan tanpa menunggu loading screen.
  */
-const DISABLE_LOADER_IN_DEV = false;
+const DISABLE_LOADER_IN_DEV = true;
 
 const CRITICAL_ASSETS = [
   "/fixmi-logo.png",
