@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
 import FixmiLoader from "./FixmiLoader";
 import { useAssetPreloader } from "./useAssetPreloader";
 
 /**
- * LoadingGate — overlay loading animasi untuk FIXMI.
+ * LoadingGate — bungkus aplikasi.
  *
- * `DISABLE_LOADER_IN_DEV = true` mematikan layar loading animasi
- * sehingga website langsung tampil secara instan tanpa menunggu loading screen.
+ * SEMENTARA DIMATIKAN DENGAN FLAG `DISABLE_LOADER_IN_DEV = true`
+ * agar proses pengembangan & testing berjalan instant tanpa perlu menunggu animasi loading.
+ * Ubah kembali menjadi `false` saat aplikasi siap dipublikasikan/live.
  */
 const DISABLE_LOADER_IN_DEV = true;
 
@@ -21,27 +21,23 @@ const CRITICAL_ASSETS = [
 ];
 
 export default function LoadingGate({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname() || "";
-  const isAdmin = pathname.startsWith("/admin");
-
   const { progress } = useAssetPreloader(CRITICAL_ASSETS, {
     waitForFonts: true,
     waitForWindowLoad: false,
   });
-
-  const [revealed, setRevealed] = useState(DISABLE_LOADER_IN_DEV || isAdmin);
+  const [revealed, setRevealed] = useState(DISABLE_LOADER_IN_DEV);
 
   useEffect(() => {
-    if (DISABLE_LOADER_IN_DEV || isAdmin) {
+    if (DISABLE_LOADER_IN_DEV) {
       (window as unknown as Record<string, unknown>).__fixmiLoaded = true;
       window.dispatchEvent(new Event("fixmi:loaded"));
     }
-  }, [isAdmin]);
+  }, []);
 
   return (
     <>
       {children}
-      {!revealed && !isAdmin && (
+      {!revealed && (
         <FixmiLoader
           progress={progress}
           onDone={() => {
@@ -50,8 +46,8 @@ export default function LoadingGate({ children }: { children: React.ReactNode })
             (window as unknown as Record<string, unknown>).__fixmiLoaded = true;
             window.dispatchEvent(new Event("fixmi:loaded"));
           }}
-          background="#121212"
-          minDuration={900}
+          background="#020202"
+          minDuration={800}
         />
       )}
     </>
