@@ -42,8 +42,8 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero Section with cursor-none to hide browser pointer */}
-      <section className="relative flex min-h-hero items-center justify-center cursor-none">
+      {/* Hero Section */}
+      <section className="relative flex min-h-hero items-center justify-center">
         {/* Background gradient orbs — desktop only; di layar kecil tampak sebagai banding kotak samar */}
         <div className="pointer-events-none absolute inset-0 hidden lg:block">
           <div className="absolute left-1/4 top-1/4 h-[31.25rem] w-[31.25rem] rounded-full bg-primary/5 blur-[7.5rem]" />

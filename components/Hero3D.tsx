@@ -518,7 +518,7 @@ export default function Hero3D() {
 
   return (
     <div 
-      className="w-full h-full relative overflow-hidden select-none cursor-none touch-pan-y"
+      className="w-full h-full relative overflow-hidden select-none touch-pan-y"
     >
       {!textures ? (
         <DiagnosticLoader progress={progress} />

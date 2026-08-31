@@ -62,7 +62,7 @@ export default function WaveDividerSection() {
     */
     <section
       ref={sectionRef}
-      className="relative w-full cursor-none"
+      className="relative w-full"
       style={{ background: "transparent" }}
     >
       {/* Wave wrapper: transparan di atas, menyatu rapat tanpa celah/belang */}
