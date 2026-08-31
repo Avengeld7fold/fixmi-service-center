@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MoveLeft, MoveRight, Search, X } from "lucide-react";
 import { formatThousands, type ServiceType } from "@/lib/data";
 import { useI18n } from "@/lib/i18n/context";
+import { whatsappUrl } from "@/lib/constants";
 
 interface PriceTableProps {
   service: ServiceType;
@@ -185,15 +186,26 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                   </td>
                   {variants.map((v) => {
                     const price = row.prices[v.Key];
+                    const waMsg = isEn
+                      ? `Hello FIXMI Service Center, I would like to check the repair cost for:\n\n• Device: ${row.DeviceModel}\n• Service: ${service.Name} (${v.Label})\n\nPlease let me know the price & turnaround time. Thank you!`
+                      : `Halo FIXMI Service Center, saya mau tanya estimasi biaya perbaikan:\n\n• Perangkat: ${row.DeviceModel}\n• Layanan: ${service.Name} (${v.Label})\n\nMohon info estimasi harga dan pengerjaannya. Terima kasih!`;
+
                     return (
                       <td
                         key={v.Key}
                         className="border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-right font-mono text-sm tabular-nums whitespace-nowrap"
                       >
-                        {price == null ? (
-                          <span className="text-text-muted/40" aria-label={isEn ? "Not available" : "Tidak tersedia"}>
-                            –
-                          </span>
+                        {price == null || price === 0 ? (
+                          <a
+                            href={whatsappUrl(waMsg)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={isEn ? `Check price via WhatsApp for ${row.DeviceModel}` : `Tanya harga via WhatsApp untuk ${row.DeviceModel}`}
+                            className="inline-flex items-center gap-1 rounded-md border border-primary/25 bg-primary/[0.05] px-2.5 py-1 font-sans text-xs font-medium text-primary transition-all duration-150 hover:border-primary/60 hover:bg-primary/[0.12] hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/60"
+                          >
+                            <span>{isEn ? "Ask Price" : "Tanya Harga"}</span>
+                            <span aria-hidden="true" className="font-mono text-[0.6875rem]">↗</span>
+                          </a>
                         ) : (
                           <>
                             <span className="mr-1.5 text-[0.6875rem] text-primary/80">Rp</span>

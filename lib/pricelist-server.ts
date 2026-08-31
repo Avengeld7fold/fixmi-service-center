@@ -1,6 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { Category, ServiceType, Variant, DevicePrice } from "./data";
+import { SKELETON_PRICELIST } from "./pricelist-skeleton";
 
 // ============================================================
 // Resolusi Title & Icon per jenis service (dikelola di kode, §4.3)
@@ -83,58 +84,82 @@ export async function getPricelistLastUpdated(): Promise<string> {
 
 /**
  * Baca & validasi pricelist dari filesystem, lalu perkaya tiap jenis service
- * dengan title & icon hasil resolusi kode. Melempar Error bila struktur korup
- * (ditangkap oleh halaman → pesan ramah, bukan crash).
+ * dengan title & icon hasil resolusi kode.
+ *
+ * JIKA file data/pricelist.json tidak ditemukan, kosong, atau rusak:
+ * Sistem otomatis menggunakan SKELETON_PRICELIST sebagai graceful fallback
+ * sehingga seluruh kartu kategori (iPhone, iPad, MacBook, iWatch, Android),
+ * gambar, dan model perangkat tetap tampil 100% di UI dengan tombol Tanya Harga via WA.
  */
 export async function getPricelist(): Promise<Category[]> {
-  const raw = await readFile(PRICELIST_PATH, "utf8");
-  const parsed = JSON.parse(raw);
-  assert(Array.isArray(parsed), "root harus array kategori");
+  try {
+    const raw = await readFile(PRICELIST_PATH, "utf8");
+    if (!raw.trim()) {
+      return SKELETON_PRICELIST;
+    }
 
-  return parsed.map((cat: unknown): Category => {
-    assert(cat && typeof cat === "object", "kategori bukan objek");
-    const c = cat as Record<string, unknown>;
-    assert(typeof c.Name === "string" && typeof c.Slug === "string", "kategori tanpa Name/Slug");
-    assert(Array.isArray(c.service_types), `service_types kategori ${c.Slug} bukan array`);
+    const parsed = JSON.parse(raw);
+    assert(Array.isArray(parsed) && parsed.length > 0, "root harus array kategori non-kosong");
 
-    const service_types = (c.service_types as unknown[]).map((st): ServiceType => {
-      const s = st as Record<string, unknown>;
-      assert(typeof s.Name === "string" && typeof s.Slug === "string", "service tanpa Name/Slug");
-      assert(Array.isArray(s.variants), `variants ${c.Slug}/${s.Slug} bukan array`);
-      assert(Array.isArray(s.device_prices), `device_prices ${c.Slug}/${s.Slug} bukan array`);
+    // Map categories dari JSON
+    const categories = parsed.map((cat: unknown): Category => {
+      assert(cat && typeof cat === "object", "kategori bukan objek");
+      const c = cat as Record<string, unknown>;
+      assert(typeof c.Name === "string" && typeof c.Slug === "string", "kategori tanpa Name/Slug");
+      assert(Array.isArray(c.service_types), `service_types kategori ${c.Slug} bukan array`);
 
-      const brand = typeof s.Brand === "string" && s.Brand.trim() ? s.Brand.trim() : undefined;
-      const series = typeof s.Series === "string" && s.Series.trim() ? s.Series.trim() : undefined;
-      const { title, icon: fallbackIcon } = resolveServiceMeta(s.Slug, s.Name, c.Name as string, !!brand);
-      const icon = typeof s.icon === "string" && s.icon.trim() ? s.icon.trim() : fallbackIcon;
+      // Cari skeleton category untuk fallback jika service_types kosong
+      const skeletonCat = SKELETON_PRICELIST.find((sk) => sk.Slug === c.Slug);
+
+      const rawServiceTypes = (c.service_types as unknown[]).length > 0
+        ? (c.service_types as unknown[])
+        : (skeletonCat?.service_types || []);
+
+      const service_types = rawServiceTypes.map((st): ServiceType => {
+        const s = st as Record<string, unknown>;
+        assert(typeof s.Name === "string" && typeof s.Slug === "string", "service tanpa Name/Slug");
+        assert(Array.isArray(s.variants), `variants ${c.Slug}/${s.Slug} bukan array`);
+        assert(Array.isArray(s.device_prices), `device_prices ${c.Slug}/${s.Slug} bukan array`);
+
+        const brand = typeof s.Brand === "string" && s.Brand.trim() ? s.Brand.trim() : undefined;
+        const series = typeof s.Series === "string" && s.Series.trim() ? s.Series.trim() : undefined;
+        const { title, icon: fallbackIcon } = resolveServiceMeta(s.Slug, s.Name, c.Name as string, !!brand);
+        const icon = typeof s.icon === "string" && s.icon.trim() ? s.icon.trim() : fallbackIcon;
+        return {
+          Name: s.Name,
+          Slug: s.Slug,
+          ...(brand ? { Brand: brand } : {}),
+          ...(series ? { Series: series } : {}),
+          variants: s.variants as Variant[],
+          device_prices: s.device_prices as DevicePrice[],
+          title,
+          icon,
+        };
+      });
+
+      const brand_icons: Record<string, string> = {};
+      if (c.brand_icons && typeof c.brand_icons === "object") {
+        for (const [b, ic] of Object.entries(c.brand_icons as Record<string, unknown>)) {
+          if (typeof b === "string" && b.trim() && typeof ic === "string" && ic.trim()) {
+            brand_icons[b.trim()] = ic.trim();
+          }
+        }
+      }
+
       return {
-        Name: s.Name,
-        Slug: s.Slug,
-        ...(brand ? { Brand: brand } : {}),
-        ...(series ? { Series: series } : {}),
-        variants: s.variants as Variant[],
-        device_prices: s.device_prices as DevicePrice[],
-        title,
-        icon,
+        Name: c.Name,
+        Slug: c.Slug,
+        description: typeof c.description === "string" && c.description.trim() ? c.description : (skeletonCat?.description || ""),
+        Image: typeof c.Image === "string" && c.Image.trim() ? c.Image : (skeletonCat?.Image || null),
+        brand_icons: Object.keys(brand_icons).length > 0 ? brand_icons : undefined,
+        service_types,
       };
     });
 
-    const brand_icons: Record<string, string> = {};
-    if (c.brand_icons && typeof c.brand_icons === "object") {
-      for (const [b, ic] of Object.entries(c.brand_icons as Record<string, unknown>)) {
-        if (typeof b === "string" && b.trim() && typeof ic === "string" && ic.trim()) {
-          brand_icons[b.trim()] = ic.trim();
-        }
-      }
-    }
-
-    return {
-      Name: c.Name,
-      Slug: c.Slug,
-      description: typeof c.description === "string" ? c.description : "",
-      Image: typeof c.Image === "string" ? c.Image : null,
-      brand_icons: Object.keys(brand_icons).length > 0 ? brand_icons : undefined,
-      service_types,
-    };
-  });
+    return categories;
+  } catch (error) {
+    // Log gracefully di server & kembalikan struktur skeleton
+    console.warn("Notice: data/pricelist.json not found or unreadable, using SKELETON_PRICELIST fallback.", error);
+    return SKELETON_PRICELIST;
+  }
 }
