@@ -83,13 +83,14 @@ export async function getPricelistLastUpdated(): Promise<string> {
 }
 
 /**
- * Baca & validasi pricelist dari filesystem, lalu perkaya tiap jenis service
- * dengan title & icon hasil resolusi kode.
+ * Baca & validasi pricelist dari filesystem.
  *
- * JIKA file data/pricelist.json tidak ditemukan, kosong, atau rusak:
- * Sistem otomatis menggunakan SKELETON_PRICELIST sebagai graceful fallback
- * sehingga seluruh kartu kategori (iPhone, iPad, MacBook, iWatch, Android),
- * gambar, dan model perangkat tetap tampil 100% di UI dengan tombol Tanya Harga via WA.
+ * JIKA file data/pricelist.json TIDAK DITEMUKAN / KOSONG:
+ * Sistem mengembalikan SKELETON_PRICELIST (kartu kategori & gambar tetap tampil,
+ * tetapi TANPA akordeon/tabel hardcoded).
+ *
+ * JIKA file data/pricelist.json DITEMUKAN:
+ * Akordeon dan tabel harga dirender murni dari isi service_types yang terdaftar di file.
  */
 export async function getPricelist(): Promise<Category[]> {
   try {
@@ -101,21 +102,14 @@ export async function getPricelist(): Promise<Category[]> {
     const parsed = JSON.parse(raw);
     assert(Array.isArray(parsed) && parsed.length > 0, "root harus array kategori non-kosong");
 
-    // Map categories dari JSON
+    // Map categories murni dari JSON
     const categories = parsed.map((cat: unknown): Category => {
       assert(cat && typeof cat === "object", "kategori bukan objek");
       const c = cat as Record<string, unknown>;
       assert(typeof c.Name === "string" && typeof c.Slug === "string", "kategori tanpa Name/Slug");
       assert(Array.isArray(c.service_types), `service_types kategori ${c.Slug} bukan array`);
 
-      // Cari skeleton category untuk fallback jika service_types kosong
-      const skeletonCat = SKELETON_PRICELIST.find((sk) => sk.Slug === c.Slug);
-
-      const rawServiceTypes = (c.service_types as unknown[]).length > 0
-        ? (c.service_types as unknown[])
-        : (skeletonCat?.service_types || []);
-
-      const service_types = rawServiceTypes.map((st): ServiceType => {
+      const service_types = (c.service_types as unknown[]).map((st): ServiceType => {
         const s = st as Record<string, unknown>;
         assert(typeof s.Name === "string" && typeof s.Slug === "string", "service tanpa Name/Slug");
         assert(Array.isArray(s.variants), `variants ${c.Slug}/${s.Slug} bukan array`);
@@ -149,8 +143,8 @@ export async function getPricelist(): Promise<Category[]> {
       return {
         Name: c.Name,
         Slug: c.Slug,
-        description: typeof c.description === "string" && c.description.trim() ? c.description : (skeletonCat?.description || ""),
-        Image: typeof c.Image === "string" && c.Image.trim() ? c.Image : (skeletonCat?.Image || null),
+        description: typeof c.description === "string" ? c.description : "",
+        Image: typeof c.Image === "string" ? c.Image : null,
         brand_icons: Object.keys(brand_icons).length > 0 ? brand_icons : undefined,
         service_types,
       };
@@ -158,7 +152,6 @@ export async function getPricelist(): Promise<Category[]> {
 
     return categories;
   } catch (error) {
-    // Log gracefully di server & kembalikan struktur skeleton
     console.warn("Notice: data/pricelist.json not found or unreadable, using SKELETON_PRICELIST fallback.", error);
     return SKELETON_PRICELIST;
   }
