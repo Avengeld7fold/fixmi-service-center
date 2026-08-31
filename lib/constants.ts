@@ -3,8 +3,8 @@
 export const WHATSAPP_NUMBER = "6281999336722";
 
 export const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/fixmi.id",
-  tiktok: "https://tiktok.com/@fixmi.id",
+  instagram: "https://www.instagram.com/fixmi_id/",
+  tiktok: "https://www.tiktok.com/@fixmiservicecenter",
   facebook: "https://facebook.com/fixmibali",
 };
 

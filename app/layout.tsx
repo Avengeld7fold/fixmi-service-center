@@ -176,8 +176,9 @@ const JSON_LD_STRUCTURED_DATA = {
         },
       ],
       sameAs: [
-        "https://www.instagram.com/fixmi.id",
-        "https://www.tiktok.com/@fixmi.id",
+        "https://www.instagram.com/fixmi_id/",
+        "https://www.tiktok.com/@fixmiservicecenter",
+        "https://www.facebook.com/fixmibali",
       ],
     },
     {

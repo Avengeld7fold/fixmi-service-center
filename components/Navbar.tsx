@@ -7,12 +7,12 @@ import { useLenis } from "lenis/react";
 import StaggeredMenu from "./StaggeredMenu";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useI18n } from "@/lib/i18n/context";
-import { whatsappUrl } from "@/lib/constants";
+import { whatsappUrl, SOCIAL_LINKS } from "@/lib/constants";
 
 const SOCIAL_ITEMS = [
-  { label: "Instagram", link: "https://instagram.com/fixmi.id" },
+  { label: "Instagram", link: SOCIAL_LINKS.instagram },
   { label: "WhatsApp", link: whatsappUrl() },
-  { label: "TikTok", link: "https://tiktok.com/@fixmi.id" },
+  { label: "TikTok", link: SOCIAL_LINKS.tiktok },
 ];
 
 export default function Navbar() {
