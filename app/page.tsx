@@ -6,7 +6,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useI18n } from "@/lib/i18n/context";
-import { whatsappUrl } from "@/lib/constants";
+import { whatsappUrl, SOCIAL_LINKS } from "@/lib/constants";
 
 export default function Home() {
   const { dict, locale } = useI18n();
@@ -162,7 +162,7 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 pointer-events-auto mt-4 sm:mt-6 md:mt-0 md:-translate-y-14">
             {/* Instagram */}
             <a
-              href="https://instagram.com"
+              href={SOCIAL_LINKS.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center w-11 h-11 rounded-full border border-border text-text-secondary transition-all duration-300 hover:scale-110 hover:border-primary hover:text-primary"
@@ -176,7 +176,7 @@ export default function Home() {
             </a>
             {/* TikTok */}
             <a
-              href="https://tiktok.com"
+              href={SOCIAL_LINKS.tiktok}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center w-11 h-11 rounded-full border border-border text-text-secondary transition-all duration-300 hover:scale-110 hover:border-primary hover:text-primary"

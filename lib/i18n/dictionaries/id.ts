@@ -380,6 +380,7 @@ export const idDictionary: Dictionary = {
     },
   },
   footer: {
+    tagline: "Phone Service · Sparepart · Tech Academy",
     locatorHeading: "Temukan toko kami",
     locatorSubheading:
       "Tiga gerai di Bali. Pilih lokasi untuk alamat lengkap, jam buka, dan arahkan rute langsung dari peta.",
@@ -391,6 +392,8 @@ export const idDictionary: Dictionary = {
     otherStoreRegion: "Denpasar Barat",
     openStatusOpen: "Buka Sekarang",
     openStatusClosed: "Tutup",
+    openStatusClosingSoon: "Segera Tutup",
+    openStatusHoliday: "Libur",
     openHoursLabel: "Jam Buka",
     hoursMonSat: "Senin – Sabtu 09.00 – 21.00 WITA",
     hoursSun: "Minggu Tutup",

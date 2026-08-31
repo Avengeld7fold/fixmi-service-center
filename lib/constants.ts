@@ -2,6 +2,12 @@
 // Format internasional tanpa "+" atau spasi. 0819-9933-6722 → 6281999336722.
 export const WHATSAPP_NUMBER = "6281999336722";
 
+export const SOCIAL_LINKS = {
+  instagram: "https://instagram.com/fixmi.id",
+  tiktok: "https://tiktok.com/@fixmi.id",
+  facebook: "https://facebook.com/fixmibali",
+};
+
 export const DEFAULT_WA_MESSAGE = `Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:
 
 • Tipe Gadget: 

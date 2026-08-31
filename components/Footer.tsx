@@ -1,16 +1,17 @@
 "use client";
 
 /**
- * FIXMI — Footer (Store Locator)
+ * FIXMI — Footer (Store Locator & Direct Booking Terminal)
  *
- * Visual Craftsmanship: Minimalist Card Frame & Accent Arrow
- * Active Indicator Rail removed in favor of clean card frame contrast & glowing arrow.
+ * Visual Craftsmanship: Minimalist Card Frame, Live Operational Status Pill & Glowing Accent Arrow
  */
 
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
+import { SOCIAL_LINKS } from "@/lib/constants";
+import { getStoreLiveStatus } from "@/lib/storeStatus";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 type StoreKey = "head" | "branch" | "other";
@@ -26,6 +27,9 @@ interface Store {
   phone: string;
   hours: string[];
   map: string; // query untuk Google Maps
+  openHour: number;
+  closeHourWeekday: number;
+  closeHourSunday: number;
 }
 
 const ORDER: StoreKey[] = ["head", "branch", "other"];
@@ -34,30 +38,30 @@ const DISPLAY = "var(--font-bayon), sans-serif";
 const SOCIALS: { label: string; href: string; path: string }[] = [
   {
     label: "Instagram",
-    href: "https://instagram.com",
+    href: SOCIAL_LINKS.instagram,
     path: "M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.68a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32Zm0 10.16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.4-10.4a1.44 1.44 0 1 0 0-2.88 1.44 1.44 0 0 0 0 2.88Z",
   },
   {
     label: "TikTok",
-    href: "https://tiktok.com",
+    href: SOCIAL_LINKS.tiktok,
     path: "M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .56.04.82.12v-3.5a6.37 6.37 0 0 0-.82-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.51a8.27 8.27 0 0 0 4.76 1.5v-3.4a4.85 4.85 0 0 1-1-.92z",
   },
   {
     label: "Facebook",
-    href: "https://facebook.com",
+    href: SOCIAL_LINKS.facebook,
     path: "M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.08 24 18.09 24 12.07",
   },
 ];
 
 export default function Footer() {
   const pathname = usePathname();
-  const { dict } = useI18n();
+  const { dict, locale } = useI18n();
   const [active, setActive] = useState<StoreKey>("head");
 
   // Halaman admin dan contact/book now punya store locator sendiri — footer global disembunyikan
   if (pathname.startsWith("/admin") || pathname === "/contact" || pathname === "/en/contact") return null;
 
-  const isEn = pathname.startsWith("/en");
+  const isEn = locale === "en";
 
   const STORES: Record<StoreKey, Store> = {
     head: {
@@ -72,6 +76,9 @@ export default function Footer() {
       phone: "0819-9933-6722",
       hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
       map: "Fixmi Service Center Kedonganan Jl Raya Uluwatu Bali 80361",
+      openHour: 9,
+      closeHourWeekday: 21,
+      closeHourSunday: 0,
     },
     branch: {
       name: "FIXMI Taman Griya",
@@ -85,6 +92,9 @@ export default function Footer() {
       phone: "0851-2357-9557",
       hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
       map: "Fixmi Service Center Phone Taman Griya Jl Nuansa Utama Jimbaran Bali",
+      openHour: 9,
+      closeHourWeekday: 21,
+      closeHourSunday: 0,
     },
     other: {
       name: "Mobicare by FIXMI",
@@ -98,6 +108,9 @@ export default function Footer() {
       phone: "0819-9933-6722",
       hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
       map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
+      openHour: 9,
+      closeHourWeekday: 21,
+      closeHourSunday: 0,
     },
   };
 
@@ -110,6 +123,36 @@ export default function Footer() {
       ? `Hello FIXMI Service Center, I would like to consult about gadget repair:\n\n• Device Model: \n• Issue / Damage: `
       : `Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:\n\n• Tipe Gadget: \n• Kendala / Kerusakan: `;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const getStatusBadge = (storeConfig: { openHour: number; closeHourWeekday: number; closeHourSunday: number }) => {
+    const live = getStoreLiveStatus(storeConfig);
+    if (live.isHoliday) {
+      return {
+        text: dict.footer.openStatusHoliday,
+        badgeClass: "text-amber-400 bg-amber-500/10 border-amber-500/25",
+        dotClass: "bg-amber-400",
+      };
+    }
+    if (live.statusType === "open") {
+      return {
+        text: dict.footer.openStatusOpen,
+        badgeClass: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
+        dotClass: "bg-emerald-400 shadow-[0_0_8px_#34d399]",
+      };
+    }
+    if (live.statusType === "closing_soon") {
+      return {
+        text: dict.footer.openStatusClosingSoon,
+        badgeClass: "text-amber-400 bg-amber-500/10 border-amber-500/25",
+        dotClass: "bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse",
+      };
+    }
+    return {
+      text: dict.footer.openStatusClosed,
+      badgeClass: "text-neutral-400 bg-neutral-800/60 border-white/[0.08]",
+      dotClass: "bg-neutral-500",
+    };
   };
 
   return (
@@ -130,8 +173,7 @@ export default function Footer() {
             </span>
           </div>
           <p className="text-sm text-neutral-400">
-            Phone Service <span className="text-primary font-semibold">·</span> Sparepart{" "}
-            <span className="text-primary font-semibold">·</span> Tech Academy
+            {dict.footer.tagline}
           </p>
         </div>
 
@@ -152,10 +194,16 @@ export default function Footer() {
           <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_1.2fr] lg:gap-12">
             {/* Directory + spec */}
             <div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {ORDER.map((key) => {
                   const st = STORES[key];
                   const on = key === active;
+                  const status = getStatusBadge({
+                    openHour: st.openHour,
+                    closeHourWeekday: st.closeHourWeekday,
+                    closeHourSunday: st.closeHourSunday,
+                  });
+
                   return (
                     <button
                       key={key}
@@ -163,44 +211,66 @@ export default function Footer() {
                       type="button"
                       onClick={() => setActive(key)}
                       aria-pressed={on}
-                      className={`group flex w-full items-center justify-between gap-4 rounded-xl border px-4.5 py-3.5 text-left outline-none transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                      className={`group relative flex w-full items-center justify-between gap-4 rounded-xl border p-4 sm:px-5 sm:py-4 text-left outline-none transition-all duration-200 ease-out active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-primary/60 ${
                         on
-                          ? "border-white/[0.16] bg-white/[0.05] shadow-sm"
-                          : "border-transparent bg-transparent hover:border-white/[0.08] hover:bg-white/[0.03]"
+                          ? "border-primary/40 bg-gradient-to-r from-white/[0.07] to-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_10px_30px_-10px_rgba(255,107,0,0.12)]"
+                          : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.14] hover:bg-white/[0.04]"
                       }`}
                     >
-                      <span className="min-w-0">
+                      {/* Active Indicator Accent Glow */}
+                      {on && (
                         <span
-                          className={`block text-[0.95rem] transition-colors duration-150 ${
-                            on ? "font-semibold text-[#f5f5f5]" : "font-medium text-neutral-300 group-hover:text-[#f5f5f5]"
-                          }`}
-                        >
-                          {st.label}
-                        </span>
+                          className="absolute left-0 top-3.5 bottom-3.5 w-1 rounded-r-full bg-primary shadow-[0_0_10px_var(--fixmi-primary)]"
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      <div className="min-w-0 flex-1 pl-1">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                          <span
+                            className={`text-[0.95rem] sm:text-base transition-colors duration-150 ${
+                              on ? "font-bold text-[#f5f5f5]" : "font-medium text-neutral-300 group-hover:text-[#f5f5f5]"
+                            }`}
+                          >
+                            {st.label}
+                          </span>
+
+                          {/* Real-time Live Operational Status Pill */}
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[0.6875rem] font-medium tracking-wide ${status.badgeClass}`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full ${status.dotClass}`} />
+                            <span>{status.text}</span>
+                          </span>
+                        </div>
+
                         <span
-                          className={`mt-0.5 block truncate text-xs transition-colors duration-150 ${
-                            on ? "text-neutral-400" : "text-neutral-500"
+                          className={`mt-1 block truncate text-xs sm:text-[0.8125rem] transition-colors duration-150 ${
+                            on ? "text-neutral-300" : "text-neutral-400 group-hover:text-neutral-300"
                           }`}
                         >
                           {st.region}
                         </span>
-                      </span>
-                      <svg
-                        viewBox="0 0 24 24"
-                        className={`h-4 w-4 shrink-0 transition-[transform,opacity] duration-250 ease-out ${
-                          on
-                            ? "text-primary translate-x-0 opacity-100"
-                            : "-translate-x-1 text-neutral-500 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M5 12h14M13 6l6 6-6 6" />
-                      </svg>
+                      </div>
+
+                      <div className="shrink-0 flex items-center justify-center pl-2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          className={`h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200 ease-out ${
+                            on
+                              ? "text-primary translate-x-0 opacity-100 drop-shadow-[0_0_6px_rgba(255,107,0,0.5)]"
+                              : "-translate-x-1.5 text-neutral-500 opacity-40 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-neutral-300"
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      </div>
                     </button>
                   );
                 })}
@@ -307,6 +377,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={soc.label}
+                title={soc.label}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 transition-[background-color,color,transform] duration-150 ease-out hover:bg-white/[0.06] hover:text-primary active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

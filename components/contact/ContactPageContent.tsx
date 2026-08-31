@@ -3,6 +3,7 @@
 import ServiceRequestForm from "@/components/contact/ServiceRequestForm";
 import StoreLocator from "@/components/contact/StoreLocator";
 import { useI18n } from "@/lib/i18n/context";
+import { SOCIAL_LINKS } from "@/lib/constants";
 
 const SECTION = "mx-auto w-full max-w-[80rem] px-4 sm:px-6 md:px-10 lg:px-14";
 const DISPLAY = "var(--font-bayon), sans-serif";
@@ -61,9 +62,9 @@ export default function ContactPageContent() {
           <div className="mt-12 sm:mt-16 border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-500">
             <p>© {new Date().getFullYear()} FIXMI Service Center. {dict.common.allRightsReserved}</p>
             <div className="flex items-center gap-4 text-neutral-400">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Instagram</a>
-              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">TikTok</a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Facebook</a>
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Instagram</a>
+              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">TikTok</a>
+              <a href={SOCIAL_LINKS.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Facebook</a>
             </div>
           </div>
         </div>

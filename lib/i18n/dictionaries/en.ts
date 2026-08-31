@@ -380,6 +380,7 @@ export const enDictionary: Dictionary = {
     },
   },
   footer: {
+    tagline: "Phone Service · Sparepart · Tech Academy",
     locatorHeading: "Find Our Stores",
     locatorSubheading:
       "Three service centers across Bali. Select a location for full address, opening hours, and direct navigation.",
@@ -391,6 +392,8 @@ export const enDictionary: Dictionary = {
     otherStoreRegion: "West Denpasar",
     openStatusOpen: "Open Now",
     openStatusClosed: "Closed",
+    openStatusClosingSoon: "Closing Soon",
+    openStatusHoliday: "Holiday",
     openHoursLabel: "Opening Hours",
     hoursMonSat: "Monday – Saturday 09:00 AM – 09:00 PM WITA",
     hoursSun: "Sunday Closed",

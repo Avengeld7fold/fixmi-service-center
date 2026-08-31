@@ -232,6 +232,7 @@ export interface Dictionary {
     };
   };
   footer: {
+    tagline: string;
     locatorHeading: string;
     locatorSubheading: string;
     headStore: string;
@@ -242,6 +243,8 @@ export interface Dictionary {
     otherStoreRegion: string;
     openStatusOpen: string;
     openStatusClosed: string;
+    openStatusClosingSoon: string;
+    openStatusHoliday: string;
     openHoursLabel: string;
     hoursMonSat: string;
     hoursSun: string;
