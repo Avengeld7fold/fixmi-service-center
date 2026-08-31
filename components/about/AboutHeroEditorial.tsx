@@ -80,7 +80,7 @@ export default function AboutHeroEditorial() {
       id: 3,
       title: dict.about.cards[2]?.title || "Pusat Solusi Gadget Bali",
       subtitle: dict.about.cards[2]?.subtitle || "Kedonganan, Kuta, dan Denpasar",
-      src: "/images/services/1.webp",
+      src: "/images/toko1.webp",
       tag: dict.about.cards[2]?.tag || "INTEGRATED ECOSYSTEM",
       desktopOffset: "lg:self-end lg:z-30",
       tiltClass: "",
