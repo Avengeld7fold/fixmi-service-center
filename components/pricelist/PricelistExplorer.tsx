@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -28,28 +28,53 @@ function prefersReducedMotion() {
 export default function PricelistExplorer({
   categories,
   lastUpdated,
+  initialCategorySlug,
 }: {
   categories: Category[];
   lastUpdated?: string;
+  initialCategorySlug?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { dict, getLocalizedPath } = useI18n();
   const [warrantyOpen, setWarrantyOpen] = useState(false);
 
-  // Kategori aktif = sumber kebenaran dari URL (?device=slug); slug tak dikenal → kategori pertama.
-  const requested = searchParams.get("device");
+  // Slugs valid dari data categories
   const slugs = categories.map((c) => c.Slug);
+
+  // Deteksi slug aktif dari:
+  // 1. props initialCategorySlug (server segment)
+  // 2. pathname (misal /pricelist/iphone atau /en/pricelist/iphone)
+  // 3. searchParams ?device=slug (backward compatibility)
+  // 4. fallback ke category pertama
+  let pathSlug = "";
+  const pathParts = pathname.split("/").filter(Boolean);
+  const lastPart = pathParts[pathParts.length - 1];
+  if (lastPart && slugs.includes(lastPart)) {
+    pathSlug = lastPart;
+  }
+
+  const legacyParam = searchParams.get("device");
   const activeSlug =
-    requested && slugs.includes(requested) ? requested : categories[0]?.Slug ?? "";
+    (initialCategorySlug && slugs.includes(initialCategorySlug) ? initialCategorySlug : "") ||
+    pathSlug ||
+    (legacyParam && slugs.includes(legacyParam) ? legacyParam : "") ||
+    categories[0]?.Slug ||
+    "";
+
+  // Backward compatibility: jika user mengakses url lama ?device=slug, redirect mulus ke clean path
+  useEffect(() => {
+    if (legacyParam && slugs.includes(legacyParam)) {
+      router.replace(getLocalizedPath(`/pricelist/${legacyParam}`), { scroll: false });
+    }
+  }, [legacyParam, slugs, router, getLocalizedPath]);
+
   const activeCategory = categories.find((c) => c.Slug === activeSlug) ?? categories[0];
 
   const selectCategory = (slug: string) => {
     if (slug === activeSlug) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("device", slug);
-    // push (bukan replace) agar tombol back mengembalikan kategori sebelumnya (§8.2).
-    router.push(getLocalizedPath(`/pricelist?${params.toString()}`), { scroll: false });
+    router.push(getLocalizedPath(`/pricelist/${slug}`), { scroll: false });
   };
 
   // Entrance header: badge → judul → subtitle (sekali).
