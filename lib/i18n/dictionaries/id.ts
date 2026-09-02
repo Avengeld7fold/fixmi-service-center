@@ -29,9 +29,9 @@ export const idDictionary: Dictionary = {
   hero: {
     badge: "FIXMI SERVICE CENTER BALI",
     titleBroken: "HP KAMU RUSAK?",
-    subtitlePrefix: "CERTIFIED REPAIR.",
-    subtitleMiddle: "TRANSPARENT PRICING.",
-    subtitleSuffix: "OFFICIAL WARRANTY.",
+    subtitlePrefix: "YOUR TRUSTED",
+    subtitleMiddle: "SMART DEVICE REPAIR",
+    subtitleSuffix: "SERVICE!",
     titleSolusinya1: "FIXMI BALI",
     titleSolusinya2: "SOLUSINYA!",
     taglineDescription:
