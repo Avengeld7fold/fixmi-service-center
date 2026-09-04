@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { gsap } from "gsap";
 import { FluidSim } from "./hero/FluidSim";
+import { useI18n } from "@/lib/i18n/context";
 
 // Vertex shader
 const vertexShader = `
@@ -133,19 +134,21 @@ interface TexturesState {
 }
 
 function DiagnosticLoader({ progress }: { progress: number }) {
+  const { dict } = useI18n();
+
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-background z-20">
-      <div className="mb-2 text-xs uppercase tracking-widest text-primary animate-pulse">
-        INITIALIZING WEBGL 2.5D SHADER
+      <div className="mb-2 text-xs uppercase tracking-widest text-primary font-bold animate-pulse">
+        {dict.common.loading.toUpperCase()}
       </div>
-      <div className="w-64 h-1 bg-surface-alt border border-border rounded overflow-hidden">
+      <div className="w-52 sm:w-60 h-1 bg-surface-alt border border-border rounded-full overflow-hidden">
         <div
-          className="h-full bg-primary transition-all duration-150 ease-out"
+          className="h-full bg-primary transition-all duration-150 ease-out shadow-[0_0_8px_var(--fixmi-primary)]"
           style={{ width: `${progress}%` }}
         />
       </div>
-      <div className="mt-2 text-[0.625rem] text-text-muted uppercase">
-        Texture Bindings: {Math.round(progress)}%
+      <div className="mt-2 text-[0.6875rem] text-text-muted font-mono tabular-nums">
+        {Math.round(progress)}%
       </div>
     </div>
   );
