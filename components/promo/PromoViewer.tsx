@@ -54,99 +54,36 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
     };
   }, [selectedIndex]);
 
-  // Luxury Digital Service Pass (when no flyer banners are uploaded)
+  // Clean, executive-grade empty state matching FIXMI design language
   if (!promos || promos.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-2xl py-4 sm:py-8">
-        {/* The Luxury Voucher Pass Card */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/[0.1] bg-gradient-to-b from-[#18181b] via-[#131316] to-[#0e0e10] p-6 sm:p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.08)]">
-          {/* Subtle ambient orange backlight */}
-          <div
-            className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full bg-primary/10 blur-3xl"
-            aria-hidden="true"
-          />
-
-          {/* Ticket Header */}
-          <div className="relative z-10 flex items-center justify-between border-b border-white/[0.08] pb-4 sm:pb-5 mb-6">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              <span className="font-mono text-xs font-semibold tracking-wider text-white/70 uppercase">
-                FIXMI DIGITAL PASS
-              </span>
-            </div>
-            <span className="font-mono text-[0.6875rem] text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full font-medium">
-              DIRECT PRIVILEGE
-            </span>
-          </div>
-
-          {/* Voucher Main Content */}
-          <div className="relative z-10 text-center sm:text-left mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary mb-4 sm:hidden">
-              <Tag className="w-6 h-6 stroke-[1.5]" />
-            </div>
-
-            <h3
-              className="font-bayon text-2xl sm:text-3xl text-white tracking-tight leading-tight uppercase mb-3 font-mono"
-              style={{ fontFamily: "var(--font-bayon), sans-serif" }}
-            >
-              {isEn ? "EXCLUSIVE REPAIR PRIVILEGE" : "KONSULTASI & PENAWARAN SPESIAL"}
-            </h3>
-
-            <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-xl">
-              {isEn
-                ? "Currently, no seasonal campaign banners are running. However, you are always entitled to our transparent pricing estimate, free front-desk diagnosis, and custom service bundle rates."
-                : "Saat ini belum ada flyer promo berkala yang dirilis. Namun, Anda tetap berhak mendapatkan estimasi biaya transparan, diagnosa meja depan 100% gratis, dan penawaran paket servis langsung dari teknisi kami."}
-            </p>
-
-            {/* 3 Core Guarantees Chips */}
-            <div className="mt-5 flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-[0.6875rem] sm:text-xs font-mono text-neutral-300">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                <span className="text-primary font-bold">✓</span> {isEn ? "Free Diagnostic" : "Diagnosa Gratis"}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                <span className="text-primary font-bold">✓</span> {isEn ? "Up to 90-Day Warranty" : "Garansi s/d 90 Hari"}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                <span className="text-primary font-bold">✓</span> {isEn ? "Original Parts" : "Suku Cadang Berkualitas"}
-              </span>
-            </div>
-          </div>
-
-          {/* Ticket Perforation Line with Side Notches */}
-          <div className="relative my-6 -mx-6 sm:-mx-8 md:-mx-10 flex items-center">
-            {/* Left notch cutout */}
-            <div className="w-5 h-7 rounded-r-full bg-[#121212] border-r border-t border-b border-white/[0.1] -ml-px" />
-            {/* Dashed line */}
-            <div className="flex-1 border-t border-dashed border-white/[0.15] mx-2" />
-            {/* Right notch cutout */}
-            <div className="w-5 h-7 rounded-l-full bg-[#121212] border-l border-t border-b border-white/[0.1] -mr-px" />
-          </div>
-
-          {/* Ticket Action Footer */}
-          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[0.6875rem] uppercase text-text-muted">KODE AKSES:</span>
-              <span className="font-mono text-xs font-bold tracking-widest text-primary bg-black/40 border border-white/[0.08] px-2.5 py-1 rounded-md select-all">
-                FIXMI-SPECIAL
-              </span>
-            </div>
-
-            <a
-              href={whatsappUrl(
-                isEn
-                  ? "Hello FIXMI Service Center, I would like to inquire about exclusive special offers and device repair promo."
-                  : "Halo FIXMI Service Center, saya ingin menanyakan penawaran spesial dan promo servis untuk perangkat saya."
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-hover hover:shadow-[0_8px_25px_rgba(255,107,0,0.35)] active:scale-95"
-            >
-              <MessageCircle className="h-4 w-4 fill-white/20" />
-              <span>{isEn ? "Claim via WhatsApp" : "Klaim via WhatsApp"}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </a>
-          </div>
+      <div className="flex flex-col items-center justify-center py-16 sm:py-24 px-4 text-center rounded-2xl border border-white/[0.06] bg-[#141414]/50 backdrop-blur-sm">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 mb-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
+          <Tag className="h-8 w-8 text-primary stroke-[1.5]" />
         </div>
+        <h3
+          className="text-lg sm:text-xl font-medium text-white mb-2"
+          style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
+        >
+          {isEn ? "Offers & Promo Information" : "Informasi Penawaran & Promo"}
+        </h3>
+        <p className="text-xs sm:text-sm text-text-secondary max-w-md leading-relaxed mb-6">
+          {dict.promo.emptyPromo}
+        </p>
+        <a
+          href={whatsappUrl(
+            isEn
+              ? "Halo FIXMI Service Center, saya ingin menanyakan penawaran menarik dan promo servis untuk gadget saya."
+              : "Halo FIXMI Service Center, saya ingin menanyakan penawaran menarik dan promo servis untuk gadget saya."
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2.5 text-xs sm:text-sm font-medium text-primary transition-all duration-300 hover:bg-primary hover:text-white hover:shadow-[0_0_20px_rgba(255,107,0,0.25)]"
+        >
+          <MessageCircle className="h-4 w-4" />
+          <span>{isEn ? "Contact Us on WhatsApp" : "Hubungi Kami via WhatsApp"}</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </a>
       </div>
     );
   }
