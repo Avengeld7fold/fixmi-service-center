@@ -54,36 +54,72 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
     };
   }, [selectedIndex]);
 
-  // Clean, executive-grade empty state matching FIXMI design language
+  // Clean, executive-grade empty state matching FIXMI design language with elevated UI/UX polish
   if (!promos || promos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 sm:py-24 px-4 text-center rounded-2xl border border-white/[0.06] bg-[#141414]/50 backdrop-blur-sm">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 mb-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
-          <Tag className="h-8 w-8 text-primary stroke-[1.5]" />
+      <div className="relative overflow-hidden flex flex-col items-center justify-center py-20 sm:py-28 px-6 text-center rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.035] via-white/[0.015] to-transparent backdrop-blur-xl shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.08)]">
+        {/* Soft Ambient Radial Backlight Glow */}
+        <div
+          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 sm:w-[32rem] h-64 rounded-full bg-primary/[0.09] blur-[90px]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_35%,rgba(255,107,0,0.04),transparent_70%)]"
+          aria-hidden="true"
+        />
+
+        {/* Architectural Crosshair Corner Markers */}
+        <span className="pointer-events-none absolute top-3.5 left-4 font-mono text-[11px] font-light text-white/20 select-none">
+          +
+        </span>
+        <span className="pointer-events-none absolute top-3.5 right-4 font-mono text-[11px] font-light text-white/20 select-none">
+          +
+        </span>
+        <span className="pointer-events-none absolute bottom-3.5 left-4 font-mono text-[11px] font-light text-white/20 select-none">
+          +
+        </span>
+        <span className="pointer-events-none absolute bottom-3.5 right-4 font-mono text-[11px] font-light text-white/20 select-none">
+          +
+        </span>
+
+        {/* Glowing Frosted Jewel Icon Token */}
+        <div className="relative z-10 mx-auto mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center">
+          <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl transition-all duration-700" />
+          <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-primary/30 bg-gradient-to-b from-primary/15 via-white/[0.04] to-white/[0.01] shadow-[0_8px_24px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-xl">
+            <Tag className="h-7 w-7 sm:h-8 sm:w-8 text-primary stroke-[1.75]" />
+          </div>
         </div>
+
+        {/* Heading in Neue Montreal */}
         <h3
-          className="text-lg sm:text-xl font-medium text-white mb-2"
+          className="relative z-10 text-xl sm:text-2xl md:text-[1.625rem] font-semibold text-white tracking-[-0.02em] mb-3 leading-snug"
           style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
         >
           {isEn ? "Offers & Promo Information" : "Informasi Penawaran & Promo"}
         </h3>
-        <p className="text-xs sm:text-sm text-text-secondary max-w-md leading-relaxed mb-6">
+
+        {/* Subtitle with better leading and scale */}
+        <p className="relative z-10 text-sm sm:text-base text-neutral-400 max-w-lg mx-auto leading-relaxed mb-8">
           {dict.promo.emptyPromo}
         </p>
-        <a
-          href={whatsappUrl(
-            isEn
-              ? "Halo FIXMI Service Center, saya ingin menanyakan penawaran menarik dan promo servis untuk gadget saya."
-              : "Halo FIXMI Service Center, saya ingin menanyakan penawaran menarik dan promo servis untuk gadget saya."
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2.5 text-xs sm:text-sm font-medium text-primary transition-all duration-300 hover:bg-primary hover:text-white hover:shadow-[0_0_20px_rgba(255,107,0,0.25)]"
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span>{isEn ? "Contact Us on WhatsApp" : "Hubungi Kami via WhatsApp"}</span>
-          <ArrowRight className="h-3.5 w-3.5" />
-        </a>
+
+        {/* High-Impact Tactile WhatsApp CTA Button */}
+        <div className="relative z-10 flex justify-center">
+          <a
+            href={whatsappUrl(
+              isEn
+                ? "Halo FIXMI Service Center, saya ingin menanyakan penawaran menarik dan promo servis untuk gadget saya."
+                : "Halo FIXMI Service Center, saya ingin menanyakan penawaran menarik dan promo servis untuk gadget saya."
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-primary px-7 py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_20px_rgba(255,107,0,0.35)] transition-all duration-300 hover:bg-primary-hover hover:shadow-[0_8px_30px_rgba(255,107,0,0.55)] hover:-translate-y-0.5 active:scale-95"
+          >
+            <MessageCircle className="h-4 w-4 fill-white/20 transition-transform duration-300 group-hover:scale-110" />
+            <span>{isEn ? "Contact Us on WhatsApp" : "Hubungi Kami via WhatsApp"}</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </a>
+        </div>
       </div>
     );
   }
