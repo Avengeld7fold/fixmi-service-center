@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, ZoomIn, Tag, MessageCircle, ArrowRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, MessageCircle, ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
 import { whatsappUrl } from "@/lib/constants";
 import type { PromoImageItem } from "@/lib/promo-server";
@@ -54,57 +54,44 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
     };
   }, [selectedIndex]);
 
-  // Clean, executive-grade empty state matching FIXMI design language with elevated UI/UX polish
+  // Ultra-Clean Snug Banner (adopted from Pricelist empty card pattern)
   if (!promos || promos.length === 0) {
     return (
-      <div className="relative overflow-hidden flex flex-col items-center justify-center py-20 sm:py-28 px-6 text-center rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.035] via-white/[0.015] to-transparent backdrop-blur-xl shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.08)]">
-        {/* Soft Ambient Radial Backlight Glow */}
-        <div
-          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 sm:w-[32rem] h-64 rounded-full bg-primary/[0.09] blur-[90px]"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_35%,rgba(255,107,0,0.04),transparent_70%)]"
-          aria-hidden="true"
-        />
+      <div className="relative overflow-hidden rounded-[16px] lg:rounded-[20px] border border-panel-border bg-panel p-5 sm:p-6 lg:py-7 lg:px-8 transition-colors duration-200">
+        <div className="flex flex-col items-start gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            {/* Status Pill Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 text-[0.6875rem] font-mono tracking-wider text-neutral-300 uppercase mb-2.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span>{isEn ? "Offers & Promo Information" : "Informasi Penawaran & Promo"}</span>
+            </div>
 
-        {/* Architectural Crosshair Corner Markers */}
-        <span className="pointer-events-none absolute top-3.5 left-4 font-mono text-[11px] font-light text-white/20 select-none">
-          +
-        </span>
-        <span className="pointer-events-none absolute top-3.5 right-4 font-mono text-[11px] font-light text-white/20 select-none">
-          +
-        </span>
-        <span className="pointer-events-none absolute bottom-3.5 left-4 font-mono text-[11px] font-light text-white/20 select-none">
-          +
-        </span>
-        <span className="pointer-events-none absolute bottom-3.5 right-4 font-mono text-[11px] font-light text-white/20 select-none">
-          +
-        </span>
+            <h3
+              className="font-bayon text-xl sm:text-2xl lg:text-[1.75rem] text-white uppercase tracking-tight leading-tight"
+              style={{ fontFamily: "var(--font-bayon), sans-serif" }}
+            >
+              {isEn ? (
+                <>
+                  Exclusive Offers{" "}
+                  <span className="text-primary">Coming Soon</span>
+                </>
+              ) : (
+                <>
+                  Promo & Penawaran Khusus{" "}
+                  <span className="text-primary">Segera Hadir</span>
+                </>
+              )}
+            </h3>
 
-        {/* Glowing Frosted Jewel Icon Token */}
-        <div className="relative z-10 mx-auto mb-6 flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center">
-          <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl transition-all duration-700" />
-          <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-primary/30 bg-gradient-to-b from-primary/15 via-white/[0.04] to-white/[0.01] shadow-[0_8px_24px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-xl">
-            <Tag className="h-7 w-7 sm:h-8 sm:w-8 text-primary stroke-[1.75]" />
+            <p
+              className="mt-2 text-xs sm:text-sm leading-relaxed text-text-secondary max-w-xl"
+              style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
+            >
+              {dict.promo.emptyPromo}
+            </p>
           </div>
-        </div>
 
-        {/* Heading in Neue Montreal */}
-        <h3
-          className="relative z-10 text-xl sm:text-2xl md:text-[1.625rem] font-semibold text-white tracking-[-0.02em] mb-3 leading-snug"
-          style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
-        >
-          {isEn ? "Offers & Promo Information" : "Informasi Penawaran & Promo"}
-        </h3>
-
-        {/* Subtitle with better leading and scale */}
-        <p className="relative z-10 text-sm sm:text-base text-neutral-400 max-w-lg mx-auto leading-relaxed mb-8">
-          {dict.promo.emptyPromo}
-        </p>
-
-        {/* High-Impact Tactile WhatsApp CTA Button */}
-        <div className="relative z-10 flex justify-center">
+          {/* Direct WhatsApp Action Button */}
           <a
             href={whatsappUrl(
               isEn
@@ -113,11 +100,15 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
             )}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2.5 rounded-full bg-primary px-7 py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_20px_rgba(255,107,0,0.35)] transition-all duration-300 hover:bg-primary-hover hover:shadow-[0_8px_30px_rgba(255,107,0,0.55)] hover:-translate-y-0.5 active:scale-95"
+            className="group relative inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2.5 rounded-xl bg-primary px-5 sm:px-6 py-3 text-xs sm:text-sm font-semibold text-white tracking-[-0.01em] transition-all duration-150 ease-out hover:bg-primary-light hover:brightness-105 active:scale-[0.98] shadow-[0_4px_16px_rgba(255,107,0,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
-            <MessageCircle className="h-4 w-4 fill-white/20 transition-transform duration-300 group-hover:scale-110" />
-            <span>{isEn ? "Contact Us on WhatsApp" : "Hubungi Kami via WhatsApp"}</span>
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            <MessageCircle className="h-4 w-4 text-white stroke-[2]" aria-hidden="true" />
+            <span>{isEn ? "Inquire on WhatsApp" : "Hubungi via WhatsApp"}</span>
+            <ArrowRight
+              className="h-3.5 w-3.5 text-white/80 transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-white"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
           </a>
         </div>
       </div>
