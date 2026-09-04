@@ -449,13 +449,13 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
           {/* CTA Action Button (e.g. CONTACT NOW) */}
           {ctaItem && (
-            <div className="sm-cta-wrap pt-2">
+            <div className="sm-cta-wrap pt-1">
               <a
-                className="flex items-center justify-center gap-2.5 w-full min-h-[50px] px-6 py-3.5 rounded-xl bg-primary text-[#121212] font-bold text-sm tracking-[0.1em] uppercase no-underline transition-transform duration-200 active:scale-[0.98] hover:brightness-105"
+                className="inline-flex items-center justify-center gap-2 self-start min-h-[40px] px-5 py-2 rounded-xl bg-primary text-[#121212] font-bold text-xs tracking-[0.08em] uppercase no-underline transition-all duration-200 active:scale-[0.97] hover:brightness-105"
                 style={{
                   fontFamily: "var(--font-neue-montreal), sans-serif",
                   boxShadow:
-                    "0 6px 20px -4px rgba(255, 107, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+                    "0 4px 14px -3px rgba(255, 107, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35)",
                 }}
                 href={ctaItem.link}
                 aria-label={ctaItem.ariaLabel || ctaItem.label}
@@ -463,15 +463,15 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
               >
                 <span>{ctaItem.label}</span>
                 <svg
-                  width="16"
-                  height="16"
+                  width="14"
+                  height="14"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-4 h-4 text-[#121212] shrink-0"
+                  className="w-3.5 h-3.5 text-[#121212] shrink-0"
                 >
                   <line x1="7" y1="17" x2="17" y2="7" />
                   <polyline points="7 7 17 7 17 17" />
