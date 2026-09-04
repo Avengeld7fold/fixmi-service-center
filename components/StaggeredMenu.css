@@ -52,13 +52,12 @@
   z-index: 60;
   padding: 0;
   pointer-events: auto;
-  border-radius: 50%;
-  transition: color 0.25s ease, background-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .sm-toggle:hover {
   color: var(--fixmi-primary) !important;
-  background-color: rgba(255, 255, 255, 0.08);
+  background: transparent;
 }
 
 .sm-toggle:active {
@@ -68,7 +67,7 @@
 .sm-toggle:focus-visible {
   outline: 2px solid var(--fixmi-primary);
   outline-offset: 4px;
-  border-radius: 50%;
+  border-radius: 4px;
 }
 
 /* ─── Hamburger 3-line Icon ─── */
