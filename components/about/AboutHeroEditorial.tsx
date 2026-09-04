@@ -208,7 +208,19 @@ export default function AboutHeroEditorial() {
             }}
             className="text-[clamp(2.25rem,7vw,3.125rem)] md:text-[clamp(3.125rem,5.5vw,4rem)] lg:text-[clamp(4rem,5vw,4.75rem)] mb-8 lg:mb-10"
           >
-            {dict.about.headline}
+            {(() => {
+              const parts = dict.about.headline.split(" ");
+              if (parts.length >= 2) {
+                const prefix = parts.slice(0, -1).join(" ");
+                const last = parts[parts.length - 1];
+                return (
+                  <>
+                    {prefix} <span className="text-primary">{last}</span>
+                  </>
+                );
+              }
+              return dict.about.headline;
+            })()}
           </h1>
 
           {/* ── 01 / THE DRIVE ── */}
