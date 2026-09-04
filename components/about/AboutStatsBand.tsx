@@ -87,58 +87,94 @@ export default function AboutStatsBand() {
   );
 
   return (
-    <section className="relative w-full py-8 sm:py-10 md:py-14">
-      {/* Soft ambient backlight aura behind the pods */}
-      <div
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 max-w-4xl h-48 rounded-full bg-primary/[0.04] blur-3xl"
-        aria-hidden="true"
-      />
-
-      <div className="relative z-10 mx-auto w-full max-w-[90rem] px-4 sm:px-6 md:px-12 lg:px-16">
+    <section className="relative w-full py-10 sm:py-14 md:py-20">
+      <div className="mx-auto w-full max-w-[90rem] px-4 sm:px-6 md:px-12 lg:px-16">
         <div
           ref={containerRef}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6"
+          className="relative border-y border-white/[0.08] py-8 sm:py-10 md:py-14"
         >
-          {statsData.map((item, idx) => (
-            <div
-              key={idx}
-              className="stat-block group relative flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.035] to-white/[0.01] backdrop-blur-xl p-4 sm:p-6 lg:p-7 shadow-[0_12px_30px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-primary/40 hover:bg-white/[0.05] hover:shadow-[0_20px_40px_-15px_rgba(255,107,0,0.15)] hover:-translate-y-1 overflow-hidden"
-            >
-              {/* Card internal hover glow */}
+          {/* Subtle warm backlight aura behind the grid */}
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(255,107,0,0.035),transparent_70%)]"
+            aria-hidden="true"
+          />
+
+          {/* Architectural Crosshair Corner Markers */}
+          <span className="pointer-events-none absolute -top-2.5 -left-1.5 font-mono text-xs font-light text-white/30 select-none">
+            +
+          </span>
+          <span className="pointer-events-none absolute -top-2.5 -right-1.5 font-mono text-xs font-light text-white/30 select-none">
+            +
+          </span>
+          <span className="pointer-events-none absolute -bottom-2.5 -left-1.5 font-mono text-xs font-light text-white/30 select-none">
+            +
+          </span>
+          <span className="pointer-events-none absolute -bottom-2.5 -right-1.5 font-mono text-xs font-light text-white/30 select-none">
+            +
+          </span>
+
+          {/* Desktop Crosshairs along intersection points */}
+          <span className="hidden lg:block pointer-events-none absolute -top-2.5 left-1/4 -translate-x-1/2 font-mono text-xs font-light text-white/25 select-none">
+            +
+          </span>
+          <span className="hidden lg:block pointer-events-none absolute -top-2.5 left-2/4 -translate-x-1/2 font-mono text-xs font-light text-white/25 select-none">
+            +
+          </span>
+          <span className="hidden lg:block pointer-events-none absolute -top-2.5 left-3/4 -translate-x-1/2 font-mono text-xs font-light text-white/25 select-none">
+            +
+          </span>
+          <span className="hidden lg:block pointer-events-none absolute -bottom-2.5 left-1/4 -translate-x-1/2 font-mono text-xs font-light text-white/25 select-none">
+            +
+          </span>
+          <span className="hidden lg:block pointer-events-none absolute -bottom-2.5 left-2/4 -translate-x-1/2 font-mono text-xs font-light text-white/25 select-none">
+            +
+          </span>
+          <span className="hidden lg:block pointer-events-none absolute -bottom-2.5 left-3/4 -translate-x-1/2 font-mono text-xs font-light text-white/25 select-none">
+            +
+          </span>
+
+          {/* 4-column Blueprint Spec Grid */}
+          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4">
+            {statsData.map((item, idx) => (
               <div
-                className="pointer-events-none absolute -top-10 -right-10 w-24 h-24 rounded-full bg-primary/0 blur-2xl transition-all duration-500 group-hover:bg-primary/20"
-                aria-hidden="true"
-              />
-
-              {/* Card top bar: micro status indicator + watermark index */}
-              <div className="relative z-10 flex items-center justify-between mb-3 sm:mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors duration-300" />
-                <span className="font-mono text-[0.6875rem] sm:text-xs font-semibold tracking-wider text-white/20 select-none transition-colors duration-300 group-hover:text-primary/70">
-                  {`0${idx + 1}`}
-                </span>
-              </div>
-
-              {/* Stat number */}
-              <div className="relative z-10">
-                <div
-                  className="font-bayon text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] text-primary leading-none tracking-tight mb-2 font-mono"
-                  style={{ fontFamily: "var(--font-bayon), sans-serif" }}
-                >
-                  <span className="stat-number-text">
-                    0{item.suffix}
-                  </span>
+                key={idx}
+                className={`stat-block group relative flex flex-col justify-between ${
+                  idx === 0
+                    ? "pr-4 sm:pr-8 pb-8 lg:pb-0 border-r border-b lg:border-b-0 border-white/[0.08]"
+                    : idx === 1
+                    ? "pl-4 sm:pl-8 pb-8 lg:pb-0 lg:px-8 border-b lg:border-b-0 lg:border-r border-white/[0.08]"
+                    : idx === 2
+                    ? "pr-4 sm:pr-8 pt-8 lg:pt-0 lg:px-8 border-r border-white/[0.08]"
+                    : "pl-4 sm:pl-8 pt-8 lg:pt-0 lg:pl-8"
+                }`}
+              >
+                {/* Tech spec index */}
+                <div className="flex items-center gap-1.5 mb-2 sm:mb-3 font-mono text-[0.6875rem] text-white/25 transition-colors duration-300 group-hover:text-primary/70 select-none">
+                  <span>// 0{idx + 1}</span>
                 </div>
-                <h3 className="text-xs sm:text-sm md:text-base font-semibold text-white tracking-[-0.01em] leading-snug">
-                  {item.label}
-                </h3>
-              </div>
 
-              {/* Sublabel */}
-              <p className="relative z-10 mt-2 text-[0.6875rem] sm:text-xs text-text-secondary leading-relaxed">
-                {item.sublabel}
-              </p>
-            </div>
-          ))}
+                {/* Stat number */}
+                <div>
+                  <div
+                    className="font-bayon text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] text-primary leading-none tracking-tight mb-2 sm:mb-2.5 font-mono"
+                    style={{ fontFamily: "var(--font-bayon), sans-serif" }}
+                  >
+                    <span className="stat-number-text">
+                      0{item.suffix}
+                    </span>
+                  </div>
+                  <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-white tracking-[-0.01em] leading-snug">
+                    {item.label}
+                  </h3>
+                </div>
+
+                {/* Sublabel */}
+                <p className="mt-2 text-[0.6875rem] sm:text-xs md:text-sm text-text-secondary leading-relaxed">
+                  {item.sublabel}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
