@@ -87,51 +87,58 @@ export default function AboutStatsBand() {
   );
 
   return (
-    <section className="relative w-full py-6 sm:py-8 md:py-12">
-      <div className="mx-auto w-full max-w-[90rem] px-4 sm:px-6 md:px-12 lg:px-16">
+    <section className="relative w-full py-8 sm:py-10 md:py-14">
+      {/* Soft ambient backlight aura behind the pods */}
+      <div
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 max-w-4xl h-48 rounded-full bg-primary/[0.04] blur-3xl"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto w-full max-w-[90rem] px-4 sm:px-6 md:px-12 lg:px-16">
         <div
           ref={containerRef}
-          className="relative rounded-2xl sm:rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.035] to-white/[0.01] backdrop-blur-xl p-6 sm:p-8 md:p-10 lg:p-12 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.1)] overflow-hidden"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6"
         >
-          {/* Subtle ambient orange backlight aura */}
-          <div
-            className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 rounded-full bg-primary/10 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,107,0,0.06),transparent_70%)]"
-            aria-hidden="true"
-          />
-
-          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 sm:gap-x-6 lg:gap-x-8">
-            {statsData.map((item, idx) => (
+          {statsData.map((item, idx) => (
+            <div
+              key={idx}
+              className="stat-block group relative flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.035] to-white/[0.01] backdrop-blur-xl p-4 sm:p-6 lg:p-7 shadow-[0_12px_30px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-primary/40 hover:bg-white/[0.05] hover:shadow-[0_20px_40px_-15px_rgba(255,107,0,0.15)] hover:-translate-y-1 overflow-hidden"
+            >
+              {/* Card internal hover glow */}
               <div
-                key={idx}
-                className={`stat-block relative flex flex-col justify-between ${
-                  idx % 2 === 0
-                    ? "pl-0 lg:pl-6 border-l-0 lg:border-l lg:border-white/[0.08] lg:first:border-l-0 lg:first:pl-0"
-                    : "pl-4 sm:pl-6 border-l border-white/[0.08]"
-                }`}
-              >
-                <div>
-                  <div
-                    className="font-bayon text-2xl sm:text-3xl md:text-4xl lg:text-[3rem] text-primary leading-none tracking-tight mb-1.5 sm:mb-2 font-mono"
-                    style={{ fontFamily: "var(--font-bayon), sans-serif" }}
-                  >
-                    <span className="stat-number-text">
-                      0{item.suffix}
-                    </span>
-                  </div>
-                  <h3 className="text-xs sm:text-sm md:text-base font-semibold text-white tracking-[-0.01em] leading-snug">
-                    {item.label}
-                  </h3>
-                </div>
-                <p className="mt-1.5 text-[0.6875rem] sm:text-xs text-text-secondary leading-relaxed">
-                  {item.sublabel}
-                </p>
+                className="pointer-events-none absolute -top-10 -right-10 w-24 h-24 rounded-full bg-primary/0 blur-2xl transition-all duration-500 group-hover:bg-primary/20"
+                aria-hidden="true"
+              />
+
+              {/* Card top bar: micro status indicator + watermark index */}
+              <div className="relative z-10 flex items-center justify-between mb-3 sm:mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors duration-300" />
+                <span className="font-mono text-[0.6875rem] sm:text-xs font-semibold tracking-wider text-white/20 select-none transition-colors duration-300 group-hover:text-primary/70">
+                  {`0${idx + 1}`}
+                </span>
               </div>
-            ))}
-          </div>
+
+              {/* Stat number */}
+              <div className="relative z-10">
+                <div
+                  className="font-bayon text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] text-primary leading-none tracking-tight mb-2 font-mono"
+                  style={{ fontFamily: "var(--font-bayon), sans-serif" }}
+                >
+                  <span className="stat-number-text">
+                    0{item.suffix}
+                  </span>
+                </div>
+                <h3 className="text-xs sm:text-sm md:text-base font-semibold text-white tracking-[-0.01em] leading-snug">
+                  {item.label}
+                </h3>
+              </div>
+
+              {/* Sublabel */}
+              <p className="relative z-10 mt-2 text-[0.6875rem] sm:text-xs text-text-secondary leading-relaxed">
+                {item.sublabel}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
