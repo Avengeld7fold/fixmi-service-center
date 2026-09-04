@@ -141,6 +141,14 @@
   will-change: transform;
   backface-visibility: hidden;
   opacity: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -10px 0 25px rgba(0, 0, 0, 0.45);
+}
+
+[data-position="left"] .sm-prelayer {
+  border-left: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 10px 0 25px rgba(0, 0, 0, 0.45);
 }
 
 /* ─── Panel ─── */
@@ -164,11 +172,16 @@
   transform: translate3d(0, 0, 0);
   will-change: transform;
   backface-visibility: hidden;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -12px 0 35px rgba(0, 0, 0, 0.6);
 }
 
 [data-position="left"] .staggered-menu-panel {
   right: auto;
   left: 0;
+  border-left: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 12px 0 35px rgba(0, 0, 0, 0.6);
 }
 
 .sm-panel-inner {
