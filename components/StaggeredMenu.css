@@ -29,6 +29,7 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
+  will-change: opacity;
 }
 
 [data-open] .sm-backdrop {
@@ -136,7 +137,9 @@
   right: 0;
   height: 100%;
   width: 100%;
-  transform: translateX(0);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
   opacity: 0;
 }
 
@@ -154,9 +157,13 @@
   flex-direction: column;
   padding: 5rem 1.5rem 1.5rem 1.5rem;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   z-index: 56;
   pointer-events: auto;
   opacity: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 [data-position="left"] .staggered-menu-panel {

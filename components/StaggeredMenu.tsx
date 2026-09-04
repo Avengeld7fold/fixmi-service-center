@@ -32,7 +32,6 @@ interface StaggeredMenuProps {
   displaySocials?: boolean;
   displayItemNumbering?: boolean;
   className?: string;
-  logoUrl?: string;
   menuButtonColor?: string;
   openMenuButtonColor?: string;
   accentColor?: string;
@@ -43,6 +42,15 @@ interface StaggeredMenuProps {
   onMenuClose?: () => void;
   onNavigate?: (href: string) => void;
 }
+
+const getPrelayerColors = (colors?: string[]): string[] => {
+  const raw = colors && colors.length ? colors.slice(0, 4) : ["#1e1e22", "#35353c"];
+  const arr = [...raw];
+  if (arr.length >= 3) {
+    arr.splice(Math.floor(arr.length / 2), 1);
+  }
+  return arr;
+};
 
 export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   position = "right",
@@ -73,8 +81,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   const closeTweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
   const colorTweenRef = useRef<gsap.core.Tween | null>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
-  const busyRef = useRef(false);
-  const itemEntranceTweenRef = useRef<gsap.core.Tween | null>(null);
+
+  const prelayerColors = React.useMemo(() => getPrelayerColors(colors), [colors]);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -91,7 +99,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       preLayerElsRef.current = preLayers;
 
       const offscreen = position === "left" ? -100 : 100;
-      gsap.set([panel, ...preLayers], { xPercent: offscreen, opacity: 1 });
+      gsap.set([panel, ...preLayers], { xPercent: offscreen, opacity: 1, force3D: true });
       if (preContainer) {
         gsap.set(preContainer, { xPercent: 0, opacity: 1 });
       }
@@ -110,7 +118,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       closeTweenRef.current.kill();
       closeTweenRef.current = null;
     }
-    itemEntranceTweenRef.current?.kill();
+    gsap.killTweensOf([panel, ...layers]);
 
     const itemEls = Array.from(panel.querySelectorAll(".sm-panel-itemLabel"));
     const numberEls = Array.from(
@@ -124,9 +132,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     const panelStart = offscreen;
 
     if (itemEls.length) {
-      // rotate kecil (4°, bukan 10°) + opacity dipulihkan (close men-fade-kan
-      // label) — masuknya terasa mulus, tidak "terlempar".
-      gsap.set(itemEls, { yPercent: 140, rotate: 4, opacity: 1 });
+      gsap.set(itemEls, { yPercent: 140, rotate: 10, force3D: true });
     }
     if (numberEls.length) {
       gsap.set(numberEls, { "--sm-num-opacity": 0 } as gsap.TweenVars);
@@ -145,22 +151,21 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
     const tl = gsap.timeline({ paused: true });
 
-    // expo.out: deselerasi panjang yang terasa "meluncur" halus, bukan berhenti kaku.
     layerStates.forEach((ls, i) => {
       tl.fromTo(
         ls.el,
-        { xPercent: ls.start },
-        { xPercent: 0, duration: 0.55, ease: "expo.out" },
-        i * 0.06
+        { xPercent: ls.start, force3D: true },
+        { xPercent: 0, duration: 0.5, ease: "power4.out", force3D: true },
+        i * 0.07
       );
     });
-    const lastTime = layerStates.length ? (layerStates.length - 1) * 0.06 : 0;
-    const panelInsertTime = lastTime + (layerStates.length ? 0.06 : 0);
-    const panelDuration = 0.7;
+    const lastTime = layerStates.length ? (layerStates.length - 1) * 0.07 : 0;
+    const panelInsertTime = lastTime + (layerStates.length ? 0.08 : 0);
+    const panelDuration = 0.65;
     tl.fromTo(
       panel,
-      { xPercent: panelStart },
-      { xPercent: 0, duration: panelDuration, ease: "expo.out" },
+      { xPercent: panelStart, force3D: true },
+      { xPercent: 0, duration: panelDuration, ease: "power4.out", force3D: true },
       panelInsertTime
     );
 
@@ -172,9 +177,10 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         {
           yPercent: 0,
           rotate: 0,
-          duration: 0.85,
-          ease: "expo.out",
-          stagger: { each: 0.07, from: "start" },
+          duration: 1,
+          ease: "power4.out",
+          force3D: true,
+          stagger: { each: 0.1, from: "start" },
         },
         itemsStart
       );
@@ -234,95 +240,51 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   }, [position]);
 
   const playOpen = useCallback(() => {
-    if (busyRef.current) return;
-    busyRef.current = true;
+    closeTweenRef.current?.kill();
+    const panel = panelRef.current;
+    const layers = preLayerElsRef.current;
+    if (panel) gsap.killTweensOf([...layers, panel]);
+
     const tl = buildOpenTimeline();
-    if (tl) {
-      tl.eventCallback("onComplete", () => {
-        busyRef.current = false;
-      });
-      tl.play(0);
-    } else {
-      busyRef.current = false;
-    }
+    tl?.play(0);
   }, [buildOpenTimeline]);
 
   const playClose = useCallback(() => {
     openTlRef.current?.kill();
     openTlRef.current = null;
-    itemEntranceTweenRef.current?.kill();
 
     const panel = panelRef.current;
     const layers = preLayerElsRef.current;
     if (!panel) return;
 
+    const all = [...layers, panel];
     closeTweenRef.current?.kill();
-    const offscreen = position === "left" ? -100 : 100;
-    const itemLabels = Array.from(panel.querySelectorAll(".sm-panel-itemLabel"));
+    gsap.killTweensOf(all);
 
-    // Tutup berlapis (kebalikan buka): label memudar turun dulu, panel
-    // meluncur keluar, lapisan warna menyusul — bukan hentakan serentak.
-    const tl = gsap.timeline({
+    const offscreen = position === "left" ? -100 : 100;
+    closeTweenRef.current = gsap.to(all, {
+      xPercent: offscreen,
+      duration: 0.32,
+      ease: "power3.in",
+      overwrite: "auto",
+      force3D: true,
       onComplete: () => {
-        // Reset ke pose awal buka (harus cocok dengan buildOpenTimeline).
-        if (itemLabels.length) gsap.set(itemLabels, { yPercent: 140, rotate: 4, opacity: 1 });
-        const numberEls = Array.from(
-          panel.querySelectorAll(".sm-panel-list[data-numbering] .sm-panel-item")
+        const itemEls = panel.querySelectorAll(".sm-panel-itemLabel");
+        if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10, force3D: true });
+        const numberEls = panel.querySelectorAll(
+          ".sm-panel-list[data-numbering] .sm-panel-item"
         );
         if (numberEls.length) {
           gsap.set(numberEls, { "--sm-num-opacity": 0 } as gsap.TweenVars);
         }
         const socialTitle = panel.querySelector(".sm-socials-title");
-        const socialLinks = Array.from(panel.querySelectorAll(".sm-socials-link"));
+        const socialLinks = panel.querySelectorAll(".sm-socials-link");
         const ctaWrap = panel.querySelector(".sm-cta-wrap");
         if (ctaWrap) gsap.set(ctaWrap, { y: 20, opacity: 0 });
         if (socialTitle) gsap.set(socialTitle, { opacity: 0 });
-        if (socialLinks) gsap.set(socialLinks, { y: 25, opacity: 0 });
-        busyRef.current = false;
+        if (socialLinks.length) gsap.set(socialLinks, { y: 25, opacity: 0 });
       },
     });
-
-    const ctaWrap = panel.querySelector(".sm-cta-wrap");
-    if (ctaWrap) {
-      tl.to(
-        ctaWrap,
-        {
-          y: 15,
-          opacity: 0,
-          duration: 0.2,
-          ease: "power2.in",
-        },
-        0
-      );
-    }
-
-    if (itemLabels.length) {
-      tl.to(
-        itemLabels,
-        {
-          yPercent: 20,
-          opacity: 0,
-          duration: 0.25,
-          ease: "power2.in",
-          stagger: { each: 0.025, from: "end" },
-        },
-        0
-      );
-    }
-    tl.to(
-      panel,
-      { xPercent: offscreen, duration: 0.5, ease: "power3.inOut", overwrite: "auto" },
-      0.1
-    );
-    layers.forEach((el, i) => {
-      tl.to(
-        el,
-        { xPercent: offscreen, duration: 0.5, ease: "power3.inOut", overwrite: "auto" },
-        0.14 + i * 0.05
-      );
-    });
-
-    closeTweenRef.current = tl;
   }, [position]);
 
   const animateColor = useCallback(
@@ -395,7 +357,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside, { passive: true });
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -426,21 +388,12 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       data-open={open || undefined}
     >
       {/* Backdrop */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className="sm-backdrop" onClick={closeMenu} />
+      <div className="sm-backdrop" onClick={closeMenu} aria-hidden="true" />
 
       <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
-        {(() => {
-          const raw = colors && colors.length ? colors.slice(0, 4) : ["#1e1e22", "#35353c"];
-          const arr = [...raw];
-          if (arr.length >= 3) {
-            const mid = Math.floor(arr.length / 2);
-            arr.splice(mid, 1);
-          }
-          return arr.map((c, i) => (
-            <div key={i} className="sm-prelayer" style={{ background: c }} />
-          ));
-        })()}
+        {prelayerColors.map((c, i) => (
+          <div key={i} className="sm-prelayer" style={{ background: c }} />
+        ))}
       </div>
 
       {/* Toggle button — standard 3-line hamburger */}
