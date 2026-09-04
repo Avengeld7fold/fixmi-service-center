@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, ZoomIn, ImageOff } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
 import type { GalleryImage } from "@/lib/gallery-server";
 
@@ -53,22 +53,41 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
     };
   }, [selectedIndex]);
 
-  // Clean, executive-grade empty state
+  // Ultra-Clean Snug Banner (adopted from Pricelist empty card pattern, without WhatsApp CTA)
   if (!images || images.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 sm:py-28 px-4 text-center rounded-2xl border border-white/[0.06] bg-[#141414]/50 backdrop-blur-sm">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 mb-5">
-          <ImageOff className="h-8 w-8 text-neutral-500 stroke-[1.5]" />
+      <div className="relative overflow-hidden rounded-[16px] lg:rounded-[20px] border border-panel-border bg-panel p-5 sm:p-6 lg:py-7 lg:px-8 transition-colors duration-200">
+        <div className="max-w-2xl">
+          {/* Status Pill Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 text-[0.6875rem] font-mono tracking-wider text-neutral-300 uppercase mb-2.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <span>{isEn ? "Documentation Archive" : "Dokumentasi & Portofolio"}</span>
+          </div>
+
+          <h3
+            className="font-bayon text-xl sm:text-2xl lg:text-[1.75rem] text-white uppercase tracking-tight leading-tight"
+            style={{ fontFamily: "var(--font-bayon), sans-serif" }}
+          >
+            {isEn ? (
+              <>
+                Documentation Photos{" "}
+                <span className="text-primary">Coming Soon</span>
+              </>
+            ) : (
+              <>
+                Foto Dokumentasi Servis{" "}
+                <span className="text-primary">Segera Hadir</span>
+              </>
+            )}
+          </h3>
+
+          <p
+            className="mt-2 text-xs sm:text-sm leading-relaxed text-text-secondary max-w-xl"
+            style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
+          >
+            {dict.gallery.emptyGallery}
+          </p>
         </div>
-        <h3
-          className="text-lg sm:text-xl font-medium text-white mb-2"
-          style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
-        >
-          {isEn ? "Technical Documentation Archive" : "Arsip Dokumentasi Teknis"}
-        </h3>
-        <p className="text-xs sm:text-sm text-text-secondary max-w-md leading-relaxed">
-          {dict.gallery.emptyGallery}
-        </p>
       </div>
     );
   }
