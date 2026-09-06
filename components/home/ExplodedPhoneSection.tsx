@@ -35,7 +35,7 @@ interface LayerDefinition {
 }
 
 const ALL_13_LAYERS: LayerDefinition[] = [
-  { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "speaker-housing" },
+  { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "backglass" },
   { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "nfc" },
   { step: 3,  fileNumber: 11, file: "/images/services/Housing.webp", name: "Titanium Housing Chassis", subName: "Rangka & Sasis Bodi", calloutId: "speaker-housing" },
   { step: 4,  fileNumber: 10, file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", subName: "Konektor Fleksibel Cas", calloutId: "speaker-housing" },
@@ -74,6 +74,35 @@ interface ServiceCallout {
 }
 
 const SERVICE_CALLOUTS: ServiceCallout[] = [
+  {
+    id: "backglass",
+    name: "Back Glass",
+    nameEn: "Rear Back Glass",
+    code: "CHASSIS // BACKGLASS",
+    side: "left",
+    layerRange: "Layer 1 (Backglass)",
+    minStep: 1,
+    revealStart: 0.00,
+    revealEnd: 0.08,
+    circleImage: "/images/services/Backglass.webp",
+    icon: Smartphone,
+    hotspot: { x: 50, y: 72 },
+    symptoms: [
+      "Kaca Belakang Retak / Pecah",
+      "Serpihan Kaca Mengelupas",
+      "Bodi Belakang Baret / Renggang"
+    ],
+    symptomsEn: [
+      "Cracked / Shattered Rear Glass",
+      "Peeling Broken Glass Shards",
+      "Scratched / Loose Back Cover"
+    ],
+    fixmiSolution: "Penggantian Kaca Belakang Laser Presisi Tanpa Bongkar Mesin Bergaransi.",
+    fixmiSolutionEn: "Precision Laser Rear Glass Replacement without Disassembly.",
+    estimatedTime: "40 - 60 Menit",
+    estimatedTimeEn: "40 - 60 Minutes",
+    categoryLink: "/pricelist/iphone",
+  },
   {
     id: "nfc",
     name: "NFC & MagSafe",
@@ -192,10 +221,10 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     circleImage: "/images/services/Housing.webp",
     icon: Volume2,
     hotspot: { x: 50, y: 88 },
-    symptoms: ["Kaca Belakang Hancur", "Tidak Bisa Cas / Port Goyang", "Suara Speaker Kresek / Kecil"],
-    symptomsEn: ["Shattered Rear Glass", "No Charge / Loose Charging Port", "Crackling / Low Speaker Audio"],
-    fixmiSolution: "Penggantian Backglass Laser Presisi Tanpa Bongkar Mesin & Ganti Fleksibel Charging Port.",
-    fixmiSolutionEn: "Precision Laser Back Glass Removal & OEM Charging Port Flex Replacement.",
+    symptoms: ["Bodi Bengkok / Dent Parah", "Tidak Bisa Cas / Port Goyang", "Suara Speaker Kresek / Kecil"],
+    symptomsEn: ["Bent / Severely Dented Frame", "No Charge / Loose Charging Port", "Crackling / Low Speaker Audio"],
+    fixmiSolution: "Pelurusan Presisi / Ganti Housing Titanium & Modul Port Fleksibel USB-C Original.",
+    fixmiSolutionEn: "Precision Titanium Housing Replacement & OEM Charging Port Flex Replacement.",
     estimatedTime: "40 - 60 Menit",
     estimatedTimeEn: "40 - 60 Minutes",
     categoryLink: "/pricelist/iphone",
@@ -327,7 +356,7 @@ export default function ExplodedPhoneSection() {
   const targetProgressRef = useRef<number>(0);
   const currentProgressRef = useRef<number>(0);
 
-  const [activeCalloutId, setActiveCalloutId] = useState<string>("nfc");
+  const [activeCalloutId, setActiveCalloutId] = useState<string>("backglass");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isAssembled, setIsAssembled] = useState<boolean>(false);
@@ -590,6 +619,7 @@ export default function ExplodedPhoneSection() {
 
   // ── Hitung Progress Perjalanan Mulus (Travel Progress 0.0 -> 1.0) untuk Setiap Komponen ──
   const getCalloutTravelProgress = (callout: ServiceCallout) => {
+    if (callout.id === "backglass") return 1;
     if (scrollProgress < callout.revealStart) return 0;
     if (scrollProgress >= callout.revealEnd) return 1;
     const raw = (scrollProgress - callout.revealStart) / (callout.revealEnd - callout.revealStart);
@@ -730,7 +760,7 @@ export default function ExplodedPhoneSection() {
           </svg>
 
           {/* ── LEFT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
-          <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
+          <div className="hidden lg:flex lg:col-span-3 flex-col gap-4 sm:gap-5 lg:gap-6 justify-around items-center min-h-[520px]">
             {SERVICE_CALLOUTS.filter((p) => p.side === "left").map((callout) => {
               const t = getCalloutTravelProgress(callout);
               const isActive = activeCalloutId === callout.id;
