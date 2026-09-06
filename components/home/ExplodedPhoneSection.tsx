@@ -743,6 +743,16 @@ export default function ExplodedPhoneSection() {
     return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
   };
 
+  // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.88 -> 0.98) ──
+  // Menggunakan fungsi smoothstep (3x^2 - 2x^3) untuk transisi perlahan, mulus tanpa lonjakan
+  const rawFade =
+    scrollProgress <= 0.88
+      ? 1
+      : scrollProgress >= 0.98
+      ? 0
+      : (0.98 - scrollProgress) / (0.98 - 0.88);
+  const assemblyFade = Math.min(1, Math.max(0, rawFade * rawFade * (3 - 2 * rawFade)));
+
   return (
     <div ref={containerRef} className="relative w-full bg-[#121212] text-white select-none py-12 sm:py-16 lg:py-20">
       
@@ -772,9 +782,17 @@ export default function ExplodedPhoneSection() {
 
           {/* Active Sparepart / Service Component Pill Mengikuti Lingkaran & Garis Oranye yang Aktif */}
           <div className="mt-3.5 sm:mt-4 inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200">
-            <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
+            <span
+              className={`h-2 w-2 rounded-full ${
+                isAssembled ? "bg-emerald-400 shadow-[0_0_10px_#34d399]" : "bg-primary animate-ping"
+              }`}
+            />
             <span className="text-white font-bold tracking-wide transition-colors duration-150">
-              {activeCallout?.name || "Layar & Glass"}
+              {isAssembled
+                ? isEn
+                  ? "iPhone Fully Assembled"
+                  : "iPhone Terakit Sempurna"
+                : activeCallout?.name || "Layar & Glass"}
             </span>
           </div>
         </div>
@@ -843,14 +861,20 @@ export default function ExplodedPhoneSection() {
 
                 // Hitung subkurva yang tumbuh dari Lingkaran (p0) mengarah dan mendarat tepat pada Dot Ponsel (p3)
                 const { pathD, tipX, tipY } = getCubicBezierSubcurve(p0, p1, p2, p3, t);
+                const lineOpacity = Math.min(1, t * 1.5) * assemblyFade;
+                if (lineOpacity <= 0.01) return null;
 
                 return (
                   <g
                     key={`${callout.id}-${dotIdx}`}
-                    style={{ opacity: Math.min(1, t * 1.5) }}
-                    className="cursor-pointer group/line"
-                    onMouseEnter={() => setActiveCalloutId(callout.id)}
-                    onClick={() => setActiveCalloutId(callout.id)}
+                    style={{ opacity: lineOpacity }}
+                    className="cursor-pointer group/line transition-opacity duration-150"
+                    onMouseEnter={() => {
+                      if (assemblyFade > 0.1) setActiveCalloutId(callout.id);
+                    }}
+                    onClick={() => {
+                      if (assemblyFade > 0.1) setActiveCalloutId(callout.id);
+                    }}
                   >
                     {/* Invisible broad stroke hit area for easy clicking on the line */}
                     <path
@@ -858,7 +882,7 @@ export default function ExplodedPhoneSection() {
                       fill="none"
                       stroke="transparent"
                       strokeWidth={28}
-                      className="cursor-pointer pointer-events-auto"
+                      className={`cursor-pointer ${assemblyFade > 0.1 ? "pointer-events-auto" : "pointer-events-none"}`}
                     />
 
                     {/* Organic Wave / Curved Dashed Line (Tumbuh Mulai dari Dot iPhone ke Lingkaran) */}
@@ -897,7 +921,8 @@ export default function ExplodedPhoneSection() {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
               const scale = 0.9 + t * 0.1;
-              const isRevealed = t > 0.35 || isActive;
+              const isRevealed = (t > 0.35 || isActive) && assemblyFade > 0.1;
+              const calloutOpacity = (isActive ? 1 : t) * assemblyFade;
               const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
@@ -906,7 +931,7 @@ export default function ExplodedPhoneSection() {
                   id={`callout-circle-${callout.id}`}
                   style={{
                     transform: `scale(${scale})`,
-                    opacity: isActive ? 1 : t,
+                    opacity: calloutOpacity,
                     pointerEvents: isRevealed ? "auto" : "none",
                     willChange: "transform, opacity",
                   }}
@@ -1002,7 +1027,8 @@ export default function ExplodedPhoneSection() {
 
                   return spots.map((spot, spotIdx) => {
                     const t = getHotspotTravelProgress(callout, spot);
-                    if (t <= 0.01) return null;
+                    const dotOpacity = t * assemblyFade;
+                    if (dotOpacity <= 0.01) return null;
 
                     const spotLabel = isEn
                       ? (spot.labelEn || displayName)
@@ -1014,13 +1040,13 @@ export default function ExplodedPhoneSection() {
                         id={`callout-hotspot-dot-${callout.id}-${spotIdx}`}
                         type="button"
                         onMouseEnter={() => {
-                          if (t > 0.3) {
+                          if (t > 0.3 && assemblyFade > 0.1) {
                             setActiveCalloutId(callout.id);
                           }
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (t > 0.3) {
+                          if (t > 0.3 && assemblyFade > 0.1) {
                             // Klik pada dot mengaktifkan highlight lingkaran & garis tanpa membuka kartu modal
                             setActiveCalloutId(callout.id);
                           }
@@ -1029,8 +1055,8 @@ export default function ExplodedPhoneSection() {
                           left: `${spot.x}%`,
                           top: `${spot.y}%`,
                           transform: `translate(-50%, -50%) scale(${t})`,
-                          opacity: t,
-                          pointerEvents: t > 0.4 ? "auto" : "none",
+                          opacity: dotOpacity,
+                          pointerEvents: dotOpacity > 0.4 ? "auto" : "none",
                           willChange: "transform, opacity",
                         }}
                         className="group absolute flex items-center justify-center focus:outline-none cursor-pointer active:scale-90 transition-transform duration-150 ease-out"
@@ -1070,22 +1096,26 @@ export default function ExplodedPhoneSection() {
                 })}
               </div>
 
-              {/* Minimalist Apple-Style Scroll Cue (Hanya muncul sebelum perakitan dimulai & memudar halus saat discroll) */}
+              {/* Minimalist Apple-Style Scroll Cue (Hanya muncul sebelum perakitan dimulai atau saat terakit penuh sebagai petunjuk) */}
               <div
                 className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-none transition-[transform,opacity] duration-300 ease-out flex flex-col items-center gap-1.5 ${
-                  scrollProgress < 0.05
+                  scrollProgress < 0.05 || isAssembled
                     ? "opacity-100 translate-y-0 scale-100"
                     : "opacity-0 translate-y-3 scale-95"
                 }`}
               >
                 {/* Animated Mouse Wheel Capsule */}
                 <div className="w-5 h-8 rounded-full border border-primary/70 bg-black/60 backdrop-blur-md flex justify-center pt-1.5 shadow-[0_0_18px_rgba(255,107,0,0.4)]">
-                  <span className="w-1 h-2 rounded-full bg-primary animate-bounce" />
+                  <span className={`w-1 h-2 rounded-full bg-primary ${isAssembled ? "animate-pulse" : "animate-bounce"}`} />
                 </div>
                 {/* Sleek Instruction Badge */}
                 <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-200 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30 whitespace-nowrap shadow-xl flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                  {dict.teardown.scrollHint}
+                  {isAssembled
+                    ? isEn
+                      ? "Scroll to Disassemble"
+                      : "Scroll untuk Membongkar"
+                    : dict.teardown.scrollHint}
                 </span>
               </div>
             </div>
@@ -1097,7 +1127,8 @@ export default function ExplodedPhoneSection() {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
               const scale = 0.9 + t * 0.1;
-              const isRevealed = t > 0.35 || isActive;
+              const isRevealed = (t > 0.35 || isActive) && assemblyFade > 0.1;
+              const calloutOpacity = (isActive ? 1 : t) * assemblyFade;
               const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
@@ -1106,7 +1137,7 @@ export default function ExplodedPhoneSection() {
                   id={`callout-circle-${callout.id}`}
                   style={{
                     transform: `scale(${scale})`,
-                    opacity: isActive ? 1 : t,
+                    opacity: calloutOpacity,
                     pointerEvents: isRevealed ? "auto" : "none",
                     willChange: "transform, opacity",
                   }}
@@ -1135,7 +1166,13 @@ export default function ExplodedPhoneSection() {
           </div>
 
           {/* ── MOBILE CIRCULAR HORIZONTAL BAR ── */}
-          <div className="flex lg:hidden col-span-1 w-full justify-start sm:justify-center gap-3 overflow-x-auto py-3 px-2 scrollbar-none touch-pan-x select-none">
+          <div
+            style={{
+              opacity: assemblyFade,
+              pointerEvents: assemblyFade > 0.1 ? "auto" : "none",
+            }}
+            className="flex lg:hidden col-span-1 w-full justify-start sm:justify-center gap-3 overflow-x-auto py-3 px-2 scrollbar-none touch-pan-x select-none transition-opacity duration-200 ease-out"
+          >
             {SERVICE_CALLOUTS.map((callout) => {
               const t = getCalloutTravelProgress(callout);
               const isActive = activeCalloutId === callout.id;
