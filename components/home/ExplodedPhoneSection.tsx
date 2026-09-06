@@ -159,12 +159,12 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     id: "battery",
     name: "Baterai & MagSafe",
     nameEn: "Battery & MagSafe",
-    code: "POWER // 5 & 2",
+    code: "POWER // BATTERY",
     side: "left",
-    layerRange: "Layer 5 & 2",
-    minStep: 9,
-    revealStart: 0.58,
-    revealEnd: 0.74,
+    layerRange: "Layer 12 (Battery)",
+    minStep: 12,
+    revealStart: 0.80,
+    revealEnd: 0.94,
     circleImage: "/images/services/Battery.webp",
     icon: BatteryCharging,
     hotspot: { x: 40, y: 55 },
@@ -183,14 +183,14 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "OPTICS // DUAL-CAM",
     side: "right",
     layerRange: "Layer 9 & 10 (Dual-Camera)",
-    minStep: 5,
-    revealStart: 0.28,
-    revealEnd: 0.46,
+    minStep: 9,
+    revealStart: 0.58,
+    revealEnd: 0.74,
     circleImage: "/images/services/Back-Camera.webp",
     icon: Camera,
-    hotspot: { x: 62, y: 16 },
+    hotspot: { x: 65, y: 17 },
     hotspots: [
-      { x: 62, y: 16, label: "Kamera Belakang", labelEn: "Back Camera" },
+      { x: 65, y: 17, label: "Kamera Belakang", labelEn: "Back Camera" },
       { x: 50, y: 6, label: "Kamera Depan", labelEn: "Front Camera" },
     ],
     symptoms: [
@@ -584,28 +584,37 @@ export default function ExplodedPhoneSection() {
 
         const nodeRect = circleNodeEl.getBoundingClientRect();
 
-        // Posisi dot tengah pada iPhone
-        const dotX = phoneRect.left - gridRect.left + (phoneRect.width * callout.hotspot.x) / 100;
-        const dotY = phoneRect.top - gridRect.top + (phoneRect.height * callout.hotspot.y) / 100;
-
-        // Posisi anchor akhir lingkaran persis pada tepi lingkaran
+        // Posisi anchor awal kurva persis pada tepi lingkaran yang menghadap ke ponsel
         const finalCircleX =
           callout.side === "left"
             ? nodeRect.right - gridRect.left + 3
             : nodeRect.left - gridRect.left - 3;
         const finalCircleY = nodeRect.top - gridRect.top + nodeRect.height / 2;
 
-        const dots =
+        // Hitung koordinat dot: prioritaskan pengukuran presisi dari DOM rect elemen button
+        const spots =
           callout.hotspots && callout.hotspots.length > 0
-            ? callout.hotspots.map((h) => ({
-                dotX: phoneRect.left - gridRect.left + (phoneRect.width * h.x) / 100,
-                dotY: phoneRect.top - gridRect.top + (phoneRect.height * h.y) / 100,
-              }))
-            : undefined;
+            ? callout.hotspots
+            : [{ x: callout.hotspot.x, y: callout.hotspot.y }];
+
+        const dots = spots.map((spot, spotIdx) => {
+          const btnEl = document.getElementById(`callout-hotspot-dot-${callout.id}-${spotIdx}`);
+          if (btnEl) {
+            const btnRect = btnEl.getBoundingClientRect();
+            return {
+              dotX: btnRect.left - gridRect.left + btnRect.width / 2,
+              dotY: btnRect.top - gridRect.top + btnRect.height / 2,
+            };
+          }
+          return {
+            dotX: phoneRect.left - gridRect.left + (phoneRect.width * spot.x) / 100,
+            dotY: phoneRect.top - gridRect.top + (phoneRect.height * spot.y) / 100,
+          };
+        });
 
         newMap[callout.id] = {
-          dotX,
-          dotY,
+          dotX: dots[0].dotX,
+          dotY: dots[0].dotY,
           finalCircleX,
           finalCircleY,
           dx: 0,
@@ -617,16 +626,13 @@ export default function ExplodedPhoneSection() {
       setSpatialMap(newMap);
     };
 
-    // Throttle: posisi dot/lingkaran RELATIF terhadap grid tidak berubah saat scroll murni
-    // (semua elemen bergeser bersama). Listener scroll hanya penjaga untuk layout shift,
-    // jadi cukup dijalankan maksimal sekali per 200ms (trailing) — bukan 9x gBCR per event.
     let throttleTimer: ReturnType<typeof setTimeout> | null = null;
     const throttledUpdate = () => {
       if (throttleTimer !== null) return;
       throttleTimer = setTimeout(() => {
         throttleTimer = null;
         updateSpatialMap();
-      }, 200);
+      }, 150);
     };
 
     updateSpatialMap();
@@ -634,9 +640,9 @@ export default function ExplodedPhoneSection() {
     window.addEventListener("scroll", throttledUpdate, { passive: true });
 
     const t1 = setTimeout(updateSpatialMap, 50);
-    const t2 = setTimeout(updateSpatialMap, 200);
-    const t3 = setTimeout(updateSpatialMap, 600);
-    const t4 = setTimeout(updateSpatialMap, 1200);
+    const t2 = setTimeout(updateSpatialMap, 150);
+    const t3 = setTimeout(updateSpatialMap, 400);
+    const t4 = setTimeout(updateSpatialMap, 800);
 
     return () => {
       window.removeEventListener("resize", throttledUpdate);
@@ -647,7 +653,7 @@ export default function ExplodedPhoneSection() {
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, []);
+  }, [activeCalloutId]);
 
   // ── Hitung Progress Perjalanan Mulus (Travel Progress 0.0 -> 1.0) untuk Setiap Komponen ──
   const getCalloutTravelProgress = (callout: ServiceCallout) => {
@@ -717,7 +723,8 @@ export default function ExplodedPhoneSection() {
             </defs>
 
             {SERVICE_CALLOUTS.map((callout) => {
-              const t = getCalloutTravelProgress(callout);
+              const isActive = activeCalloutId === callout.id;
+              const t = isActive ? 1 : getCalloutTravelProgress(callout);
               const spatial = spatialMap[callout.id];
               if (!spatial || t <= 0.01) return null;
 
@@ -726,29 +733,29 @@ export default function ExplodedPhoneSection() {
                   ? spatial.dots
                   : [{ dotX: spatial.dotX, dotY: spatial.dotY }];
 
-              const isActive = activeCalloutId === callout.id;
-
               return originDots.map((dot, dotIdx) => {
-                // Titik Awal: Dot pada iPhone
-                const p0 = { x: dot.dotX, y: dot.dotY };
-                // Titik Akhir: Tepi Lingkaran Target
-                const p3 = { x: spatial.finalCircleX, y: spatial.finalCircleY };
+                // Titik Awal (p0): Tepi Lingkaran Target (Callout Node di kolom samping)
+                const p0 = { x: spatial.finalCircleX, y: spatial.finalCircleY };
+                // Titik Akhir (p3): Titik Hotspot pada Gambar Ponsel
+                const p3 = { x: dot.dotX, y: dot.dotY };
 
-                // Control Points Kurva Gelombang Organik
+                // Control Points Kurva Organik: Mengalir dari Lingkaran (p0) Mengarah ke Hotspot Ponsel (p3)
                 let p1: { x: number; y: number };
                 let p2: { x: number; y: number };
 
                 if (callout.side === "left") {
-                  const dx = p0.x - p3.x;
-                  p1 = { x: p0.x - dx * 0.45, y: p0.y };
-                  p2 = { x: p3.x + dx * 0.35, y: p3.y };
-                } else {
+                  // Lingkaran di kiri (p0.x < p3.x): keluar ke kanan (+dx), masuk ke dot dari kiri (-dx)
                   const dx = p3.x - p0.x;
                   p1 = { x: p0.x + dx * 0.45, y: p0.y };
                   p2 = { x: p3.x - dx * 0.35, y: p3.y };
+                } else {
+                  // Lingkaran di kanan (p0.x > p3.x): keluar ke kiri (-dx), masuk ke dot dari kanan (+dx)
+                  const dx = p0.x - p3.x;
+                  p1 = { x: p0.x - dx * 0.45, y: p0.y };
+                  p2 = { x: p3.x + dx * 0.35, y: p3.y };
                 }
 
-                // Hitung subkurva yang tumbuh dari dot iPhone (p0) mengarah ke lingkaran (p3) saat scroll t berjalan
+                // Hitung subkurva yang tumbuh dari Lingkaran (p0) mengarah dan mendarat tepat pada Dot Ponsel (p3)
                 const { pathD, tipX, tipY } = getCubicBezierSubcurve(p0, p1, p2, p3, t);
 
                 return (
@@ -801,10 +808,10 @@ export default function ExplodedPhoneSection() {
           {/* ── LEFT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-4 sm:gap-5 lg:gap-6 justify-around items-center min-h-[520px]">
             {SERVICE_CALLOUTS.filter((p) => p.side === "left").map((callout) => {
-              const t = getCalloutTravelProgress(callout);
               const isActive = activeCalloutId === callout.id;
+              const t = getCalloutTravelProgress(callout);
               const scale = 0.9 + t * 0.1;
-              const isRevealed = t > 0.35;
+              const isRevealed = t > 0.35 || isActive;
               const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
@@ -813,7 +820,7 @@ export default function ExplodedPhoneSection() {
                   id={`callout-circle-${callout.id}`}
                   style={{
                     transform: `scale(${scale})`,
-                    opacity: t,
+                    opacity: isActive ? 1 : t,
                     pointerEvents: isRevealed ? "auto" : "none",
                     willChange: "transform, opacity",
                   }}
@@ -899,8 +906,8 @@ export default function ExplodedPhoneSection() {
               {/* Interactive Pulsing Hotspot Dots */}
               <div className="absolute inset-0 z-40 pointer-events-auto">
                 {SERVICE_CALLOUTS.map((callout) => {
-                  const t = getCalloutTravelProgress(callout);
                   const isActive = activeCalloutId === callout.id;
+                  const t = isActive ? 1 : getCalloutTravelProgress(callout);
                   const displayName = isEn ? callout.nameEn : callout.name;
 
                   const spots =
@@ -916,6 +923,7 @@ export default function ExplodedPhoneSection() {
                     return (
                       <button
                         key={`${callout.id}-${spotIdx}`}
+                        id={`callout-hotspot-dot-${callout.id}-${spotIdx}`}
                         type="button"
                         onMouseEnter={() => {
                           if (t > 0.3) {
@@ -998,10 +1006,10 @@ export default function ExplodedPhoneSection() {
           {/* ── RIGHT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
             {SERVICE_CALLOUTS.filter((p) => p.side === "right").map((callout) => {
-              const t = getCalloutTravelProgress(callout);
               const isActive = activeCalloutId === callout.id;
+              const t = getCalloutTravelProgress(callout);
               const scale = 0.9 + t * 0.1;
-              const isRevealed = t > 0.35;
+              const isRevealed = t > 0.35 || isActive;
               const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
@@ -1010,7 +1018,7 @@ export default function ExplodedPhoneSection() {
                   id={`callout-circle-${callout.id}`}
                   style={{
                     transform: `scale(${scale})`,
-                    opacity: t,
+                    opacity: isActive ? 1 : t,
                     pointerEvents: isRevealed ? "auto" : "none",
                     willChange: "transform, opacity",
                   }}
