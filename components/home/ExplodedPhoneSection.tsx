@@ -34,9 +34,9 @@ interface LayerDefinition {
 }
 
 const ALL_13_LAYERS: LayerDefinition[] = [
-  { step: 1,  fileNumber: 13, file: "/images/services/13.webp", name: "Ceramic Shield Front Glass", subName: "Kaca Depan & Pelindung", calloutId: "screen" },
-  { step: 2,  fileNumber: 12, file: "/images/services/12.webp", name: "Super Retina XDR OLED Display", subName: "Panel Layar 120Hz ProMotion", calloutId: "screen" },
-  { step: 3,  fileNumber: 11, file: "/images/services/11.webp", name: "Internal Thermal Shield Plate", subName: "Pelat Pendingin & Bracket", calloutId: "screen" },
+  { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "speaker-housing" },
+  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "battery" },
+  { step: 3,  fileNumber: 11, file: "/images/services/Housing.webp", name: "Titanium Housing Chassis", subName: "Rangka & Sasis Bodi", calloutId: "speaker-housing" },
   { step: 4,  fileNumber: 10, file: "/images/services/10.webp", name: "TrueDepth & Face ID Array", subName: "Kamera Depan & Biometrik", calloutId: "faceid" },
   { step: 5,  fileNumber: 9,  file: "/images/services/9.webp",  name: "True Tone Flash & LiDAR Sensor", subName: "Flash & Sensor Kedalaman", calloutId: "camera" },
   { step: 6,  fileNumber: 8,  file: "/images/services/8.webp",  name: "Triple Camera Module & OIS", subName: "Sistem 3 Lensa & Sensor", calloutId: "camera" },
