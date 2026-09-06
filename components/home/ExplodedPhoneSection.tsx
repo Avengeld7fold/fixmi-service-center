@@ -45,7 +45,7 @@ const ALL_13_LAYERS: LayerDefinition[] = [
   { step: 7,  fileNumber: 7,  file: "/images/services/Flex-Power.webp", name: "Power Button & Volume Flex Cable", subName: "Fleksibel Tombol Power & Volume", calloutId: "motherboard" },
   { step: 8,  fileNumber: 6,  file: "/images/services/Logicboard.webp", name: "Logic Board Main PCB", subName: "Papan Sirkuit Utama & Chipset", calloutId: "motherboard" },
   { step: 9,  fileNumber: 5,  file: "/images/services/Back-Camera.webp", name: "Rear Triple Camera Module", subName: "Sistem Lensa Kamera Belakang", calloutId: "camera" },
-  { step: 10, fileNumber: 4,  file: "/images/services/Front-Camera.webp", name: "TrueDepth Front Camera & Face ID", subName: "Kamera Depan & Sensor Biometrik", calloutId: "faceid" },
+  { step: 10, fileNumber: 4,  file: "/images/services/Front-Camera.webp", name: "TrueDepth Front Camera & Face ID", subName: "Kamera Depan & Sensor Biometrik", calloutId: "camera" },
   { step: 11, fileNumber: 3,  file: "/images/services/Ear-Speaker.webp", name: "Ear Speaker & Sensor Assembly", subName: "Speaker Atas & Sensor Telinga", calloutId: "speaker-housing" },
   { step: 12, fileNumber: 2,  file: "/images/services/Battery.webp", name: "High-Capacity Li-Ion Battery", subName: "Baterai Utama & Modul BMS", calloutId: "battery" },
   { step: 13, fileNumber: 1,  file: "/images/services/LCD.webp", name: "Super Retina OLED Display & Glass", subName: "Layar Sentuh & Panel Depan", calloutId: "screen" },
@@ -65,6 +65,7 @@ interface ServiceCallout {
   circleImage: string;
   icon: typeof Smartphone;
   hotspot: { x: number; y: number };
+  hotspots?: { x: number; y: number; label?: string; labelEn?: string }[];
   symptoms: string[];
   symptomsEn: string[];
   fixmiSolution: string;
@@ -179,19 +180,31 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     id: "camera",
     name: "Kamera & Lensa",
     nameEn: "Camera & Lens",
-    code: "OPTICS // 9 & 8",
+    code: "OPTICS // DUAL-CAM",
     side: "right",
-    layerRange: "Layer 9 & 8",
+    layerRange: "Layer 9 & 10 (Dual-Camera)",
     minStep: 5,
-    revealStart: 0.30,
+    revealStart: 0.28,
     revealEnd: 0.46,
     circleImage: "/images/services/Back-Camera.webp",
     icon: Camera,
-    hotspot: { x: 26, y: 14 },
-    symptoms: ["Kaca Lensa Pecah / Baret", "Kamera Bergetar / Suara Mendengung", "Hasil Foto Buram / Bercak"],
-    symptomsEn: ["Cracked / Scratched Lens Glass", "Shaking Camera / Humming OIS", "Blurry Photos / Dark Spots"],
-    fixmiSolution: "Penggantian Kaca Safir Laser Cut & Modul Sensor Original di ruang steril bebas debu.",
-    fixmiSolutionEn: "Laser-cut Sapphire Lens & OEM Sensor Module replacement in cleanroom workstation.",
+    hotspot: { x: 62, y: 16 },
+    hotspots: [
+      { x: 62, y: 16, label: "Kamera Belakang", labelEn: "Back Camera" },
+      { x: 50, y: 6, label: "Kamera Depan", labelEn: "Front Camera" },
+    ],
+    symptoms: [
+      "Kamera Belakang / Depan Buram / Blank Hitam",
+      "Kaca Lensa Kamera Retak / Pecah",
+      "Kamera Bergetar / Suara Mendengung (OIS Rusak)"
+    ],
+    symptomsEn: [
+      "Rear / Front Camera Black Screen or Blurry",
+      "Cracked / Shattered Lens Glass",
+      "Shaking Camera / Humming OIS Malfunction"
+    ],
+    fixmiSolution: "Penggantian Modul Kamera Belakang & Depan OEM Serta Kaca Lensa Safir Laser Cut Bebas Debu.",
+    fixmiSolutionEn: "OEM Front & Rear Camera Module Replacement & Dust-Free Laser Sapphire Lens.",
     estimatedTime: "30 - 45 Menit",
     estimatedTimeEn: "30 - 45 Minutes",
     categoryLink: "/pricelist/iphone",
@@ -247,6 +260,7 @@ interface NodeSpatialInfo {
   finalCircleY: number;
   dx: number;
   dy: number;
+  dots?: { dotX: number; dotY: number }[];
 }
 
 // ── De Casteljau Subcurve: Menghitung Kurva Parsial yang Tumbuh Mulus dari Titik iPhone ke Lingkaran ──
@@ -581,6 +595,14 @@ export default function ExplodedPhoneSection() {
             : nodeRect.left - gridRect.left - 3;
         const finalCircleY = nodeRect.top - gridRect.top + nodeRect.height / 2;
 
+        const dots =
+          callout.hotspots && callout.hotspots.length > 0
+            ? callout.hotspots.map((h) => ({
+                dotX: phoneRect.left - gridRect.left + (phoneRect.width * h.x) / 100,
+                dotY: phoneRect.top - gridRect.top + (phoneRect.height * h.y) / 100,
+              }))
+            : undefined;
+
         newMap[callout.id] = {
           dotX,
           dotY,
@@ -588,6 +610,7 @@ export default function ExplodedPhoneSection() {
           finalCircleY,
           dx: 0,
           dy: 0,
+          dots,
         };
       });
 
@@ -698,73 +721,80 @@ export default function ExplodedPhoneSection() {
               const spatial = spatialMap[callout.id];
               if (!spatial || t <= 0.01) return null;
 
-              // Titik Awal: Dot pada iPhone
-              const p0 = { x: spatial.dotX, y: spatial.dotY };
-              // Titik Akhir: Tepi Lingkaran Target
-              const p3 = { x: spatial.finalCircleX, y: spatial.finalCircleY };
-
-              // Control Points Kurva Gelombang Organik
-              let p1: { x: number; y: number };
-              let p2: { x: number; y: number };
-
-              if (callout.side === "left") {
-                const dx = p0.x - p3.x;
-                p1 = { x: p0.x - dx * 0.45, y: p0.y };
-                p2 = { x: p3.x + dx * 0.35, y: p3.y };
-              } else {
-                const dx = p3.x - p0.x;
-                p1 = { x: p0.x + dx * 0.45, y: p0.y };
-                p2 = { x: p3.x - dx * 0.35, y: p3.y };
-              }
-
-              // Hitung subkurva yang tumbuh dari dot iPhone (p0) mengarah ke lingkaran (p3) saat scroll t berjalan
-              const { pathD, tipX, tipY } = getCubicBezierSubcurve(p0, p1, p2, p3, t);
+              const originDots =
+                spatial.dots && spatial.dots.length > 0
+                  ? spatial.dots
+                  : [{ dotX: spatial.dotX, dotY: spatial.dotY }];
 
               const isActive = activeCalloutId === callout.id;
 
-              return (
-                <g
-                  key={callout.id}
-                  style={{ opacity: Math.min(1, t * 1.5) }}
-                  className="cursor-pointer group/line"
-                  onMouseEnter={() => setActiveCalloutId(callout.id)}
-                  onClick={() => setActiveCalloutId(callout.id)}
-                >
-                  {/* Invisible broad stroke hit area for easy clicking on the line */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke="transparent"
-                    strokeWidth={28}
-                    className="cursor-pointer pointer-events-auto"
-                  />
+              return originDots.map((dot, dotIdx) => {
+                // Titik Awal: Dot pada iPhone
+                const p0 = { x: dot.dotX, y: dot.dotY };
+                // Titik Akhir: Tepi Lingkaran Target
+                const p3 = { x: spatial.finalCircleX, y: spatial.finalCircleY };
 
-                  {/* Organic Wave / Curved Dashed Line (Tumbuh Mulai dari Dot iPhone ke Lingkaran) */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke={isActive ? "url(#activeLineGrad)" : "rgba(255, 255, 255, 0.4)"}
-                    strokeWidth={isActive ? 2.5 : 1.5}
-                    strokeDasharray={isActive ? "6 5" : "4 4"}
-                    strokeLinecap="round"
-                    filter={isActive ? "url(#activeLineGlow)" : undefined}
-                    className={`transition-[stroke,stroke-width] duration-200 pointer-events-none ${
-                      isActive ? "animate-pulse" : "group-hover/line:stroke-primary/80"
-                    }`}
-                  />
+                // Control Points Kurva Gelombang Organik
+                let p1: { x: number; y: number };
+                let p2: { x: number; y: number };
 
-                  {/* Leading Pulse Dot on Tip of Growing Line */}
-                  <circle
-                    cx={tipX}
-                    cy={tipY}
-                    r={isActive ? 4.5 : 3}
-                    fill={isActive ? "#FF6B00" : "rgba(255, 255, 255, 0.9)"}
-                    stroke={isActive ? "#FFFFFF" : "none"}
-                    strokeWidth={1.5}
-                    className="pointer-events-none"
-                  />
-                </g>
-              );
+                if (callout.side === "left") {
+                  const dx = p0.x - p3.x;
+                  p1 = { x: p0.x - dx * 0.45, y: p0.y };
+                  p2 = { x: p3.x + dx * 0.35, y: p3.y };
+                } else {
+                  const dx = p3.x - p0.x;
+                  p1 = { x: p0.x + dx * 0.45, y: p0.y };
+                  p2 = { x: p3.x - dx * 0.35, y: p3.y };
+                }
+
+                // Hitung subkurva yang tumbuh dari dot iPhone (p0) mengarah ke lingkaran (p3) saat scroll t berjalan
+                const { pathD, tipX, tipY } = getCubicBezierSubcurve(p0, p1, p2, p3, t);
+
+                return (
+                  <g
+                    key={`${callout.id}-${dotIdx}`}
+                    style={{ opacity: Math.min(1, t * 1.5) }}
+                    className="cursor-pointer group/line"
+                    onMouseEnter={() => setActiveCalloutId(callout.id)}
+                    onClick={() => setActiveCalloutId(callout.id)}
+                  >
+                    {/* Invisible broad stroke hit area for easy clicking on the line */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="transparent"
+                      strokeWidth={28}
+                      className="cursor-pointer pointer-events-auto"
+                    />
+
+                    {/* Organic Wave / Curved Dashed Line (Tumbuh Mulai dari Dot iPhone ke Lingkaran) */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke={isActive ? "url(#activeLineGrad)" : "rgba(255, 255, 255, 0.4)"}
+                      strokeWidth={isActive ? 2.5 : 1.5}
+                      strokeDasharray={isActive ? "6 5" : "4 4"}
+                      strokeLinecap="round"
+                      filter={isActive ? "url(#activeLineGlow)" : undefined}
+                      className={`transition-[stroke,stroke-width] duration-200 pointer-events-none ${
+                        isActive ? "animate-pulse" : "group-hover/line:stroke-primary/80"
+                      }`}
+                    />
+
+                    {/* Leading Pulse Dot on Tip of Growing Line */}
+                    <circle
+                      cx={tipX}
+                      cy={tipY}
+                      r={isActive ? 4.5 : 3}
+                      fill={isActive ? "#FF6B00" : "rgba(255, 255, 255, 0.9)"}
+                      stroke={isActive ? "#FFFFFF" : "none"}
+                      strokeWidth={1.5}
+                      className="pointer-events-none"
+                    />
+                  </g>
+                );
+              });
             })}
           </svg>
 
@@ -873,63 +903,74 @@ export default function ExplodedPhoneSection() {
                   const isActive = activeCalloutId === callout.id;
                   const displayName = isEn ? callout.nameEn : callout.name;
 
-                  return (
-                    <button
-                      key={callout.id}
-                      type="button"
-                      onMouseEnter={() => {
-                        if (t > 0.3) {
-                          setActiveCalloutId(callout.id);
-                        }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (t > 0.3) {
-                          // Klik pada dot mengaktifkan highlight lingkaran & garis tanpa membuka kartu modal
-                          setActiveCalloutId(callout.id);
-                        }
-                      }}
-                      style={{
-                        left: `${callout.hotspot.x}%`,
-                        top: `${callout.hotspot.y}%`,
-                        transform: `translate(-50%, -50%) scale(${t})`,
-                        opacity: t,
-                        pointerEvents: t > 0.4 ? "auto" : "none",
-                        willChange: "transform, opacity",
-                      }}
-                      className="group absolute flex items-center justify-center focus:outline-none cursor-pointer active:scale-90 transition-transform duration-150 ease-out"
-                      aria-label={`Select component ${displayName}`}
-                    >
-                      {/* Outer Glowing Pulsing Ring (Animasi Pulsa Kedip-kedip Aktif) */}
-                      <span
-                        className={`absolute w-10 h-10 rounded-full transition-[transform,background-color] duration-200 ease-out ${
-                          isActive
-                            ? "bg-primary/60 scale-125 animate-ping"
-                            : "bg-white/30 animate-pulse group-hover:bg-primary/40 group-hover:scale-110"
-                        }`}
-                      />
-                      {/* Middle Solid White/Orange Ring */}
-                      <span
-                        className={`relative flex items-center justify-center w-5 h-5 rounded-full border transition-[background-color,border-color,box-shadow] duration-200 ease-out ${
-                          isActive
-                            ? "bg-primary border-white shadow-[0_0_16px_#FF6B00]"
-                            : "bg-neutral-900 border-white group-hover:border-primary"
-                        }`}
+                  const spots =
+                    callout.hotspots && callout.hotspots.length > 0
+                      ? callout.hotspots
+                      : [{ x: callout.hotspot.x, y: callout.hotspot.y, label: displayName, labelEn: displayName }];
+
+                  return spots.map((spot, spotIdx) => {
+                    const spotLabel = isEn
+                      ? (spot.labelEn || displayName)
+                      : (spot.label || displayName);
+
+                    return (
+                      <button
+                        key={`${callout.id}-${spotIdx}`}
+                        type="button"
+                        onMouseEnter={() => {
+                          if (t > 0.3) {
+                            setActiveCalloutId(callout.id);
+                          }
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (t > 0.3) {
+                            // Klik pada dot mengaktifkan highlight lingkaran & garis tanpa membuka kartu modal
+                            setActiveCalloutId(callout.id);
+                          }
+                        }}
+                        style={{
+                          left: `${spot.x}%`,
+                          top: `${spot.y}%`,
+                          transform: `translate(-50%, -50%) scale(${t})`,
+                          opacity: t,
+                          pointerEvents: t > 0.4 ? "auto" : "none",
+                          willChange: "transform, opacity",
+                        }}
+                        className="group absolute flex items-center justify-center focus:outline-none cursor-pointer active:scale-90 transition-transform duration-150 ease-out"
+                        aria-label={`Select component ${spotLabel}`}
                       >
-                        {/* Inner Core Bullet */}
+                        {/* Outer Glowing Pulsing Ring (Animasi Pulsa Kedip-kedip Aktif) */}
                         <span
-                          className={`w-2 h-2 rounded-full transition-colors duration-150 ${
-                            isActive ? "bg-white" : "bg-primary"
+                          className={`absolute w-10 h-10 rounded-full transition-[transform,background-color] duration-200 ease-out ${
+                            isActive
+                              ? "bg-primary/60 scale-125 animate-ping"
+                              : "bg-white/30 animate-pulse group-hover:bg-primary/40 group-hover:scale-110"
                           }`}
                         />
-                      </span>
+                        {/* Middle Solid White/Orange Ring */}
+                        <span
+                          className={`relative flex items-center justify-center w-5 h-5 rounded-full border transition-[background-color,border-color,box-shadow] duration-200 ease-out ${
+                            isActive
+                              ? "bg-primary border-white shadow-[0_0_16px_#FF6B00]"
+                              : "bg-neutral-900 border-white group-hover:border-primary"
+                          }`}
+                        >
+                          {/* Inner Core Bullet */}
+                          <span
+                            className={`w-2 h-2 rounded-full transition-colors duration-150 ${
+                              isActive ? "bg-white" : "bg-primary"
+                            }`}
+                          />
+                        </span>
 
-                      {/* Floating Tooltip Pill */}
-                      <span className="absolute left-7 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-black/95 border border-primary/40 px-2 py-0.5 font-mono text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-xl">
-                        {displayName}
-                      </span>
-                    </button>
-                  );
+                        {/* Floating Tooltip Pill */}
+                        <span className="absolute left-7 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-black/95 border border-primary/40 px-2 py-0.5 font-mono text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-xl z-50">
+                          {spotLabel}
+                        </span>
+                      </button>
+                    );
+                  });
                 })}
               </div>
 
