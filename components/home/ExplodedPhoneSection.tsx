@@ -984,6 +984,13 @@ export default function ExplodedPhoneSection() {
                   ? "brightness(1.18) contrast(1.08) drop-shadow(0 0 18px rgba(255,107,0,0.25))"
                   : "brightness(0.68) blur(0.6px)";
 
+                // Komponen internal dengan bagian offside (kabel fleksibel / konektor menonjol keluar sasis)
+                // Memudar halus saat LCD menutup sasis sehingga saat ponsel terakit sempurna siluetnya 100% rapi
+                const isOffsideLayer =
+                  layer.file.includes("NFC") ||
+                  layer.file.includes("Flex-Charger") ||
+                  layer.file.includes("Taptic-Engine");
+
                 return (
                   <div
                     key={layer.fileNumber}
@@ -999,7 +1006,12 @@ export default function ExplodedPhoneSection() {
                     }}
                   >
                     {/* Layer PNG/WebP Graphic */}
-                    <div className="relative w-full h-full">
+                    <div
+                      className="relative w-full h-full transition-opacity duration-200 ease-out"
+                      style={{
+                        opacity: isOffsideLayer ? assemblyFade : 1,
+                      }}
+                    >
                       <Image
                         src={layer.file}
                         alt={layer.name}
