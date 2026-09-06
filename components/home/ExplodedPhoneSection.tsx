@@ -18,6 +18,7 @@ import {
   Wrench, 
   Volume2, 
   ScanFace,
+  Nfc,
   X,
   Clock,
   Info
@@ -35,7 +36,7 @@ interface LayerDefinition {
 
 const ALL_13_LAYERS: LayerDefinition[] = [
   { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "speaker-housing" },
-  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "battery" },
+  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "nfc" },
   { step: 3,  fileNumber: 11, file: "/images/services/Housing.webp", name: "Titanium Housing Chassis", subName: "Rangka & Sasis Bodi", calloutId: "speaker-housing" },
   { step: 4,  fileNumber: 10, file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", subName: "Konektor Fleksibel Cas", calloutId: "speaker-housing" },
   { step: 5,  fileNumber: 9,  file: "/images/services/Loud-Speaker.webp", name: "Bottom Loudspeaker Module", subName: "Modul Speaker Bawah", calloutId: "speaker-housing" },
@@ -74,22 +75,22 @@ interface ServiceCallout {
 
 const SERVICE_CALLOUTS: ServiceCallout[] = [
   {
-    id: "screen",
-    name: "Layar & Glass",
-    nameEn: "Screen & Glass",
-    code: "DISPLAY // 13 & 12",
+    id: "nfc",
+    name: "NFC & MagSafe",
+    nameEn: "NFC & MagSafe",
+    code: "INDUCTION // NFC",
     side: "left",
-    layerRange: "Layer 13 & 12",
-    minStep: 1,
+    layerRange: "Layer 12 (NFC)",
+    minStep: 2,
     revealStart: 0.00,
     revealEnd: 0.12,
-    circleImage: "/images/services/LCD.webp",
-    icon: Smartphone,
-    hotspot: { x: 50, y: 18 },
-    symptoms: ["Kaca Retak / Pecah", "Garis Hijau / Blank Hitam", "Ghost Touch / Tidak Responsif"],
-    symptomsEn: ["Cracked / Shattered Glass", "Green Lines / Black Screen", "Ghost Touch / Unresponsive Panel"],
-    fixmiSolution: "Penggantian Layar OLED Original + Pemindahan IC Touch & Kalibrasi TrueTone.",
-    fixmiSolutionEn: "OEM OLED Display Replacement + Touch IC Transfer & TrueTone Calibration.",
+    circleImage: "/images/services/NFC.webp",
+    icon: Nfc,
+    hotspot: { x: 50, y: 48 },
+    symptoms: ["NFC / Apple Pay Tidak Terdeteksi", "Wireless Charging Lambat / Terputus", "Koil MagSafe Rusak / Terkelupas"],
+    symptomsEn: ["NFC / Apple Pay Failure", "Wireless Charging Intermittent / Slow", "Damaged MagSafe Inductive Coil"],
+    fixmiSolution: "Penggantian Modul Koil Fleksibel NFC & Induksi Wireless Charging OEM Bergaransi.",
+    fixmiSolutionEn: "OEM Precision Replacement of NFC Antenna & MagSafe Inductive Coil.",
     estimatedTime: "25 - 40 Menit",
     estimatedTimeEn: "25 - 40 Minutes",
     categoryLink: "/pricelist/iphone",
@@ -326,7 +327,7 @@ export default function ExplodedPhoneSection() {
   const targetProgressRef = useRef<number>(0);
   const currentProgressRef = useRef<number>(0);
 
-  const [activeCalloutId, setActiveCalloutId] = useState<string>("screen");
+  const [activeCalloutId, setActiveCalloutId] = useState<string>("nfc");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isAssembled, setIsAssembled] = useState<boolean>(false);
