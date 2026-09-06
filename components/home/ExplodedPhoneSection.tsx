@@ -52,6 +52,16 @@ const ALL_13_LAYERS: LayerDefinition[] = [
 ];
 
 // ── 6 Layanan Callout Lingkaran dengan Rentang Scroll Perjalanan (revealStart -> revealEnd) ──
+interface ServiceHotspot {
+  x: number;
+  y: number;
+  label?: string;
+  labelEn?: string;
+  step?: number;
+  revealStart?: number;
+  revealEnd?: number;
+}
+
 interface ServiceCallout {
   id: string;
   name: string;
@@ -65,7 +75,7 @@ interface ServiceCallout {
   circleImage: string;
   icon: typeof Smartphone;
   hotspot: { x: number; y: number };
-  hotspots?: { x: number; y: number; label?: string; labelEn?: string }[];
+  hotspots?: ServiceHotspot[];
   symptoms: string[];
   symptomsEn: string[];
   fixmiSolution: string;
@@ -190,8 +200,24 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     icon: Camera,
     hotspot: { x: 65, y: 17 },
     hotspots: [
-      { x: 65, y: 17, label: "Kamera Belakang", labelEn: "Back Camera" },
-      { x: 50, y: 6, label: "Kamera Depan", labelEn: "Front Camera" },
+      {
+        x: 65,
+        y: 17,
+        label: "Kamera Belakang",
+        labelEn: "Back Camera",
+        step: 9,
+        revealStart: 0.58,
+        revealEnd: 0.67,
+      },
+      {
+        x: 50,
+        y: 6,
+        label: "Kamera Depan",
+        labelEn: "Front Camera",
+        step: 10,
+        revealStart: 0.67,
+        revealEnd: 0.76,
+      },
     ],
     symptoms: [
       "Kamera Belakang / Depan Buram / Blank Hitam",
@@ -665,6 +691,30 @@ export default function ExplodedPhoneSection() {
     return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
   };
 
+  // ── Hitung Progress Perjalanan Mulus (Travel Progress 0.0 -> 1.0) untuk Titik Hotspot Individual (Sequential Per-Dot) ──
+  const getHotspotTravelProgress = (
+    callout: ServiceCallout,
+    spot?: ServiceHotspot
+  ) => {
+    if (callout.id === "backglass") return 1;
+
+    const minStep = spot?.step ?? callout.minStep;
+    const start = spot?.revealStart ?? callout.revealStart;
+    const end = spot?.revealEnd ?? callout.revealEnd;
+
+    // Saat scroll membongkar/merakit, cegah kemunculan titik sebelum step fisiknya tiba di stage ponsel
+    // Misal: Step 9 (Back Camera) muncul terlebih dahulu dengan 1 garis, lalu Step 10 (Front Camera) menyusul di step 10
+    if (currentStep < minStep && scrollProgress < start) {
+      return 0;
+    }
+
+    if (scrollProgress < start) return 0;
+    if (scrollProgress >= end) return 1;
+
+    const raw = (scrollProgress - start) / (end - start);
+    return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
+  };
+
   return (
     <div ref={containerRef} className="relative w-full bg-[#121212] text-white select-none py-12 sm:py-16 lg:py-20">
       
@@ -723,17 +773,25 @@ export default function ExplodedPhoneSection() {
             </defs>
 
             {SERVICE_CALLOUTS.map((callout) => {
-              const isActive = activeCalloutId === callout.id;
-              const t = isActive ? 1 : getCalloutTravelProgress(callout);
               const spatial = spatialMap[callout.id];
-              if (!spatial || t <= 0.01) return null;
+              if (!spatial) return null;
 
               const originDots =
                 spatial.dots && spatial.dots.length > 0
                   ? spatial.dots
                   : [{ dotX: spatial.dotX, dotY: spatial.dotY }];
 
+              const spots =
+                callout.hotspots && callout.hotspots.length > 0
+                  ? callout.hotspots
+                  : [{ x: callout.hotspot.x, y: callout.hotspot.y }];
+
               return originDots.map((dot, dotIdx) => {
+                const spot = spots[dotIdx];
+                const t = getHotspotTravelProgress(callout, spot);
+                if (t <= 0.01) return null;
+
+                const isActive = activeCalloutId === callout.id;
                 // Titik Awal (p0): Tepi Lingkaran Target (Callout Node di kolom samping)
                 const p0 = { x: spatial.finalCircleX, y: spatial.finalCircleY };
                 // Titik Akhir (p3): Titik Hotspot pada Gambar Ponsel
@@ -907,7 +965,6 @@ export default function ExplodedPhoneSection() {
               <div className="absolute inset-0 z-40 pointer-events-auto">
                 {SERVICE_CALLOUTS.map((callout) => {
                   const isActive = activeCalloutId === callout.id;
-                  const t = isActive ? 1 : getCalloutTravelProgress(callout);
                   const displayName = isEn ? callout.nameEn : callout.name;
 
                   const spots =
@@ -916,6 +973,9 @@ export default function ExplodedPhoneSection() {
                       : [{ x: callout.hotspot.x, y: callout.hotspot.y, label: displayName, labelEn: displayName }];
 
                   return spots.map((spot, spotIdx) => {
+                    const t = getHotspotTravelProgress(callout, spot);
+                    if (t <= 0.01) return null;
+
                     const spotLabel = isEn
                       ? (spot.labelEn || displayName)
                       : (spot.label || displayName);
