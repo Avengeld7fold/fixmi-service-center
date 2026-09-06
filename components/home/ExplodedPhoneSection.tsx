@@ -37,7 +37,7 @@ interface LayerDefinition {
 
 const ALL_13_LAYERS: LayerDefinition[] = [
   { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "backglass" },
-  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "nfc" },
+  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "backglass" },
   { step: 3,  fileNumber: 11, file: "/images/services/Housing.webp", name: "Titanium Housing Chassis", subName: "Rangka & Sasis Bodi", calloutId: "speaker-housing" },
   { step: 4,  fileNumber: 10, file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", subName: "Konektor Fleksibel Cas", calloutId: "flex-charger" },
   { step: 5,  fileNumber: 9,  file: "/images/services/Loud-Speaker.webp", name: "Bottom Loudspeaker Module", subName: "Modul Speaker Bawah", calloutId: "speaker-housing" },
@@ -88,52 +88,51 @@ interface ServiceCallout {
 const SERVICE_CALLOUTS: ServiceCallout[] = [
   {
     id: "backglass",
-    name: "Back Glass",
-    nameEn: "Rear Back Glass",
-    code: "CHASSIS // BACKGLASS",
+    name: "Back Glass & NFC",
+    nameEn: "Back Glass & NFC",
+    code: "CHASSIS // BACKGLASS & NFC",
     side: "left",
-    layerRange: "Layer 1 (Backglass)",
+    layerRange: "Layer 1 & 2 (Backglass & NFC)",
     minStep: 1,
     revealStart: 0.00,
-    revealEnd: 0.08,
+    revealEnd: 0.16,
     circleImage: "/images/services/Backglass.webp",
     icon: Smartphone,
     hotspot: { x: 50, y: 72 },
+    hotspots: [
+      {
+        x: 50,
+        y: 72,
+        label: "Kaca Belakang",
+        labelEn: "Back Glass",
+        step: 1,
+        revealStart: 0.00,
+        revealEnd: 0.08,
+      },
+      {
+        x: 50,
+        y: 48,
+        label: "NFC & MagSafe",
+        labelEn: "NFC & MagSafe",
+        step: 2,
+        revealStart: 0.08,
+        revealEnd: 0.16,
+      },
+    ],
     symptoms: [
       "Kaca Belakang Retak / Pecah",
-      "Serpihan Kaca Mengelupas",
-      "Bodi Belakang Baret / Renggang"
+      "NFC / Apple Pay Tidak Terdeteksi",
+      "Wireless Charging Lambat / Tidak Mengisi"
     ],
     symptomsEn: [
       "Cracked / Shattered Rear Glass",
-      "Peeling Broken Glass Shards",
-      "Scratched / Loose Back Cover"
+      "NFC / Apple Pay Failure",
+      "Wireless Charging Slow / Intermittent"
     ],
-    fixmiSolution: "Penggantian Kaca Belakang Laser Presisi Tanpa Bongkar Mesin Bergaransi.",
-    fixmiSolutionEn: "Precision Laser Rear Glass Replacement without Disassembly.",
+    fixmiSolution: "Penggantian Kaca Belakang Laser Presisi & Modul Antena NFC / Koil MagSafe OEM Bergaransi.",
+    fixmiSolutionEn: "Precision Laser Rear Glass Replacement & OEM NFC / MagSafe Inductive Coil Repair.",
     estimatedTime: "40 - 60 Menit",
     estimatedTimeEn: "40 - 60 Minutes",
-    categoryLink: "/pricelist/iphone",
-  },
-  {
-    id: "nfc",
-    name: "NFC & MagSafe",
-    nameEn: "NFC & MagSafe",
-    code: "INDUCTION // NFC",
-    side: "left",
-    layerRange: "Layer 12 (NFC)",
-    minStep: 2,
-    revealStart: 0.00,
-    revealEnd: 0.12,
-    circleImage: "/images/services/NFC.webp",
-    icon: Nfc,
-    hotspot: { x: 50, y: 48 },
-    symptoms: ["NFC / Apple Pay Tidak Terdeteksi", "Wireless Charging Lambat / Terputus", "Koil MagSafe Rusak / Terkelupas"],
-    symptomsEn: ["NFC / Apple Pay Failure", "Wireless Charging Intermittent / Slow", "Damaged MagSafe Inductive Coil"],
-    fixmiSolution: "Penggantian Modul Koil Fleksibel NFC & Induksi Wireless Charging OEM Bergaransi.",
-    fixmiSolutionEn: "OEM Precision Replacement of NFC Antenna & MagSafe Inductive Coil.",
-    estimatedTime: "25 - 40 Menit",
-    estimatedTimeEn: "25 - 40 Minutes",
     categoryLink: "/pricelist/iphone",
   },
   {
@@ -696,7 +695,8 @@ export default function ExplodedPhoneSection() {
     callout: ServiceCallout,
     spot?: ServiceHotspot
   ) => {
-    if (callout.id === "backglass") return 1;
+    // Untuk Backglass hotspot (step 1), selalu 1 saat berada di step 1 ke atas
+    if (callout.id === "backglass" && spot?.step === 1) return 1;
 
     const minStep = spot?.step ?? callout.minStep;
     const start = spot?.revealStart ?? callout.revealStart;
@@ -864,7 +864,7 @@ export default function ExplodedPhoneSection() {
           </svg>
 
           {/* ── LEFT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
-          <div className="hidden lg:flex lg:col-span-3 flex-col gap-4 sm:gap-5 lg:gap-6 justify-around items-center min-h-[520px]">
+          <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
             {SERVICE_CALLOUTS.filter((p) => p.side === "left").map((callout) => {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
