@@ -437,7 +437,17 @@ export default function ExplodedPhoneSection() {
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isAssembled, setIsAssembled] = useState<boolean>(false);
   const [spatialMap, setSpatialMap] = useState<Record<string, NodeSpatialInfo>>({});
+  const [bootKey, setBootKey] = useState<number>(0);
+  const prevStepRef = useRef<number>(1);
   
+  // Pre-load Booting.gif so it displays instantaneously at Step 14 without any network lag
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const preloadImg = new window.Image();
+      preloadImg.src = "/images/services/Booting.gif";
+    }
+  }, []);
+
   // State modal popover detail saat lingkaran diklik
   const [modalCallout, setModalCallout] = useState<ServiceCallout | null>(null);
 
@@ -526,9 +536,13 @@ export default function ExplodedPhoneSection() {
 
       setScrollProgress(quantized);
 
-      const activeStep = Math.min(13, Math.max(1, Math.floor(quantized * 12.9) + 1));
+      const activeStep = Math.min(14, Math.max(1, Math.floor(quantized * 13.9) + 1));
+      if (activeStep === 14 && prevStepRef.current !== 14) {
+        setBootKey((k) => k + 1);
+      }
+      prevStepRef.current = activeStep;
       setCurrentStep(activeStep);
-      setIsAssembled(quantized > 0.92);
+      setIsAssembled(quantized > 0.88);
 
       const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
       if (currentLayerDef && currentLayerDef.calloutId) {
@@ -743,14 +757,14 @@ export default function ExplodedPhoneSection() {
     return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
   };
 
-  // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.88 -> 0.98) ──
+  // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.84 -> 0.93) ──
   // Menggunakan fungsi smoothstep (3x^2 - 2x^3) untuk transisi perlahan, mulus tanpa lonjakan
   const rawFade =
-    scrollProgress <= 0.88
+    scrollProgress <= 0.84
       ? 1
-      : scrollProgress >= 0.98
+      : scrollProgress >= 0.93
       ? 0
-      : (0.98 - scrollProgress) / (0.98 - 0.88);
+      : (0.93 - scrollProgress) / (0.93 - 0.84);
   const assemblyFade = Math.min(1, Math.max(0, rawFade * rawFade * (3 - 2 * rawFade)));
 
   return (
@@ -784,14 +798,22 @@ export default function ExplodedPhoneSection() {
           <div className="mt-3.5 sm:mt-4 inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200">
             <span
               className={`h-2 w-2 rounded-full ${
-                isAssembled ? "bg-emerald-400 shadow-[0_0_10px_#34d399]" : "bg-primary animate-ping"
+                currentStep === 14
+                  ? "bg-emerald-400 shadow-[0_0_12px_#34d399] animate-pulse"
+                  : isAssembled
+                  ? "bg-emerald-400 shadow-[0_0_10px_#34d399]"
+                  : "bg-primary animate-ping"
               }`}
             />
             <span className="text-white font-bold tracking-wide transition-colors duration-150">
-              {isAssembled
+              {currentStep === 14
                 ? isEn
-                  ? "iPhone Fully Assembled"
-                  : "iPhone Terakit Sempurna"
+                  ? "Step 14/14: System Booting & QC Passed"
+                  : "Langkah 14/14: Sistem Booting & Uji Fungsi Sukses"
+                : isAssembled
+                ? isEn
+                  ? "Step 13/14: iPhone Fully Assembled"
+                  : "Langkah 13/14: iPhone Terakit Sempurna"
                 : activeCallout?.name || "Layar & Glass"}
             </span>
           </div>
@@ -1026,6 +1048,26 @@ export default function ExplodedPhoneSection() {
                 );
               })}
 
+              {/* ── FINAL STEP 14: SCREEN BOOTING ANIMATION (Booting.gif) ── */}
+              <div
+                className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-opacity duration-300 ease-out"
+                style={{
+                  opacity: currentStep === 14 ? 1 : 0,
+                  transformStyle: "preserve-3d",
+                  zIndex: 25,
+                }}
+              >
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    key={bootKey}
+                    src={`/images/services/Booting.gif?v=${bootKey}`}
+                    alt="iPhone Booting & Quality Test"
+                    className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(255,107,0,0.3)] select-none pointer-events-none"
+                  />
+                </div>
+              </div>
+
               {/* Interactive Pulsing Hotspot Dots */}
               <div className="absolute inset-0 z-40 pointer-events-auto">
                 {SERVICE_CALLOUTS.map((callout) => {
@@ -1123,10 +1165,14 @@ export default function ExplodedPhoneSection() {
                 {/* Sleek Instruction Badge */}
                 <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-200 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30 whitespace-nowrap shadow-xl flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                  {isAssembled
+                  {currentStep === 14
                     ? isEn
-                      ? "Scroll to Disassemble"
-                      : "Scroll untuk Membongkar"
+                      ? "Scroll Up to Disassemble"
+                      : "Scroll ke Atas untuk Membongkar"
+                    : isAssembled
+                    ? isEn
+                      ? "Scroll to Power On (Booting)"
+                      : "Scroll untuk Menyalakan (Booting)"
                     : dict.teardown.scrollHint}
                 </span>
               </div>
@@ -1239,18 +1285,29 @@ export default function ExplodedPhoneSection() {
 
         {/* ── FOOTER DOTS BAR ── */}
         <div className="relative z-20 w-full max-w-md mx-auto text-center mt-6">
-          {/* Visual Step Dots Bar: Step 1 (13.webp) ke Step 13 (1.webp) */}
+          {/* Visual Step Dots Bar: Step 1 (13.webp) ke Step 14 (Booting) */}
           <div className="flex items-center justify-center gap-1.5">
-            {ALL_13_LAYERS.map((layer) => (
-              <span
-                key={layer.step}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  layer.step <= currentStep
-                    ? "w-4 bg-primary"
-                    : "w-1.5 bg-white/20"
-                }`}
-              />
-            ))}
+            {Array.from({ length: 14 }).map((_, idx) => {
+              const stepNum = idx + 1;
+              const isPastOrCurrent = stepNum <= currentStep;
+              const isCurrent = stepNum === currentStep;
+              const isBootStep = stepNum === 14;
+
+              return (
+                <span
+                  key={stepNum}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    isCurrent && isBootStep
+                      ? "w-5 bg-emerald-400 shadow-[0_0_10px_#34d399]"
+                      : isPastOrCurrent
+                      ? isBootStep
+                        ? "w-4 bg-emerald-400"
+                        : "w-4 bg-primary"
+                      : "w-1.5 bg-white/20"
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
