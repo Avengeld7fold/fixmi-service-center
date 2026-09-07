@@ -22,7 +22,8 @@ import {
   Cable,
   X,
   Clock,
-  Info
+  Info,
+  Activity
 } from "lucide-react";
 
 // ── Urutan 13 Layer dari angka tertinggi (13) ke angka terkecil (1) ──
@@ -464,6 +465,23 @@ export default function ExplodedPhoneSection() {
 
   // State modal popover detail saat lingkaran diklik
   const [modalCallout, setModalCallout] = useState<ServiceCallout | null>(null);
+
+  // Close modal on Escape key press and lock background scroll
+  useEffect(() => {
+    if (!modalCallout) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalCallout(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [modalCallout]);
 
   // Komponen / Part yang sedang aktif (sesuai lingkaran oranye yang aktif)
   const activeCallout = SERVICE_CALLOUTS.find((c) => c.id === activeCalloutId) || SERVICE_CALLOUTS[0];
@@ -1375,86 +1393,138 @@ export default function ExplodedPhoneSection() {
         </div>
       </div>
 
-      {/* ── INTERACTIVE DETAIL MODAL POPOVER (APPLE-GRADE SUB-300MS EASING) ── */}
+      {/* ── INTERACTIVE DETAIL MODAL POPOVER (APPLE/TEENAGE ENGINEERING BENCHMARK) ── */}
       {modalCallout && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl transition-opacity duration-200 ease-out animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md transition-opacity duration-200 ease-out animate-in fade-in"
           onClick={() => setModalCallout(null)}
         >
           <div
-            className="relative w-full max-w-lg rounded-3xl border border-primary/70 bg-[#121216]/95 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_0_60px_rgba(255,107,0,0.35)] transition-all duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] animate-in zoom-in-95 slide-in-from-bottom-4"
+            className="relative w-full max-w-[500px] rounded-2xl sm:rounded-3xl border border-white/[0.08] border-t-white/20 bg-[#0B0B0E]/95 backdrop-blur-2xl p-6 sm:p-7 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.85),0_0_50px_-20px_rgba(255,107,0,0.15)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] animate-in zoom-in-95 slide-in-from-bottom-3"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button — Tactile Active Press Feedback */}
+            {/* Top Specular Hairline Highlight */}
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+            {/* Close Button — Precision Tactile */}
             <button
               type="button"
               onClick={() => setModalCallout(null)}
-              className="absolute top-5 right-5 p-2.5 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/15 active:scale-90 transition-[transform,background-color,color] duration-150 ease-out"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-neutral-400 hover:text-white hover:bg-white/[0.08] hover:border-white/20 active:scale-90 transition-all duration-150 ease-out"
               aria-label={dict.common.close}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            {/* Header: Thumbnail + Title */}
-            <div className="flex items-center gap-4 mb-5">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-primary/60 bg-primary/10 p-1 shrink-0 overflow-hidden shadow-[0_0_24px_rgba(255,107,0,0.35)] ring-2 ring-primary/20">
+            {/* Header: Technical Inspection Viewport + Telemetry */}
+            <div className="flex items-start gap-4 mb-5 pr-8">
+              {/* Hardware Inspection Stage */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl border border-white/[0.08] bg-[#070709] shrink-0 overflow-hidden flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)]">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,107,0,0.12),transparent_70%)] pointer-events-none" />
+                {/* Precision Corner Brackets */}
+                <span className="absolute top-1.5 left-1.5 w-1.5 h-1.5 border-t border-l border-white/20 pointer-events-none" />
+                <span className="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 border-b border-r border-white/20 pointer-events-none" />
                 <Image
                   src={modalCallout.circleImage}
                   alt={isEn ? modalCallout.nameEn : modalCallout.name}
                   fill
                   sizes="(max-width: 640px) 64px, 80px"
-                  className="object-contain p-2 drop-shadow-lg scale-110"
+                  className="object-contain p-2 drop-shadow-[0_6px_12px_rgba(0,0,0,0.6)]"
                 />
               </div>
-              <div>
-                <span className="font-mono text-xs text-primary uppercase tracking-wider block font-semibold">
-                  {modalCallout.code}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#f5f5f5] leading-tight mt-0.5">
+
+              {/* Component Info */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/10 text-primary font-semibold">
+                    {modalCallout.code}
+                  </span>
+                  <span className="font-mono text-[10px] tracking-widest text-neutral-400 uppercase flex items-center gap-1">
+                    <Activity className="w-3 h-3 text-emerald-400" />
+                    DIAGNOSTIC
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mt-1.5">
                   {isEn ? modalCallout.nameEn : modalCallout.name}
                 </h3>
-                <span className="font-mono text-[11px] text-neutral-400 mt-1 inline-flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-primary" /> {dict.teardown.modalEstimate}: <strong className="text-white">{isEn ? modalCallout.estimatedTimeEn : modalCallout.estimatedTime}</strong>
-                </span>
+                <div className="flex items-center gap-1.5 mt-1 font-mono text-[11px] text-neutral-400">
+                  <Clock className="w-3.5 h-3.5 text-primary/80 shrink-0" />
+                  <span>{dict.teardown.modalEstimate}:</span>
+                  <span className="font-medium text-neutral-200">
+                    {isEn ? modalCallout.estimatedTimeEn : modalCallout.estimatedTime}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Symptoms / Gejala Kerusakan */}
+            {/* Diagnostic Fault Matrix (Gejala Kerusakan) */}
             <div className="mb-4">
-              <h4 className="font-mono text-xs uppercase tracking-wider text-neutral-400 mb-2">
-                {dict.teardown.modalSymptoms.toUpperCase()}:
-              </h4>
-              <div className="space-y-2">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400 font-semibold flex items-center gap-1.5">
+                  <span className="w-1 h-3 rounded-full bg-primary" />
+                  {dict.teardown.modalSymptoms}
+                </span>
+                <span className="font-mono text-[10px] text-neutral-400 tracking-wider">
+                  TELEMETRY
+                </span>
+              </div>
+              <div className="space-y-1.5">
                 {(isEn ? modalCallout.symptomsEn : modalCallout.symptoms).map((symptom, i) => (
-                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-sm text-neutral-200 hover:border-white/10 transition-colors">
-                    <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-pulse" />
-                    <span>{symptom}</span>
+                  <div
+                    key={i}
+                    className="group flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <span className="font-mono text-[11px] text-neutral-400 font-semibold shrink-0 group-hover:text-primary transition-colors">
+                        0{i + 1}
+                      </span>
+                      <span className="text-xs sm:text-[13px] text-neutral-300 group-hover:text-white transition-colors leading-snug">
+                        {symptom}
+                      </span>
+                    </div>
+                    <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-rose-500/10 text-rose-400/90 border border-rose-500/20 font-medium">
+                      FAULT
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* FIXMI Solution */}
-            <div className="mb-6 p-4 rounded-2xl bg-primary/[0.06] border border-primary/25">
-              <h4 className="font-mono text-xs uppercase tracking-wider text-primary mb-1 font-semibold flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> {dict.teardown.modalFixmiSolution.toUpperCase()}:
-              </h4>
-              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+            {/* FIXMI Solution (Certified Protocol) */}
+            <div className="mb-5 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/[0.08] relative overflow-hidden">
+              <div className="absolute top-0 left-0 bottom-0 w-[3px] bg-gradient-to-b from-primary via-primary/70 to-transparent" />
+              <div className="flex items-center justify-between mb-1.5 pl-1">
+                <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-neutral-200 font-semibold">
+                  <ShieldCheck className="w-4 h-4 text-primary" />
+                  <span>{dict.teardown.modalFixmiSolution}</span>
+                </div>
+                <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                  OEM SPEC
+                </span>
+              </div>
+              <p className="text-xs sm:text-[13px] text-neutral-300 leading-relaxed pl-1">
                 {isEn ? modalCallout.fixmiSolutionEn : modalCallout.fixmiSolution}
               </p>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <span className="font-mono text-xs text-emerald-400 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> {dict.common.officialWarranty}
-              </span>
+            {/* Actions Bar: Swiss Hallmark Warranty + Tactile CTA */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-white/[0.08]">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.06] w-fit">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <span className="font-mono text-[11px] text-neutral-300 tracking-wide font-medium">
+                  {dict.common.officialWarranty}
+                </span>
+              </div>
               <Link
                 href={getLocalizedPath(modalCallout.categoryLink)}
-                className="rounded-full bg-primary px-6 py-2.5 font-mono text-xs sm:text-sm font-semibold text-black hover:bg-primary/90 active:scale-[0.97] transition-[transform,background-color,box-shadow] duration-180 ease-out hover:scale-105 shadow-[0_0_24px_rgba(255,107,0,0.45)] inline-flex items-center gap-2"
+                className="group relative inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 rounded-xl font-mono text-xs sm:text-sm font-semibold text-neutral-950 bg-gradient-to-b from-[#FFA53B] to-[#FF6B00] shadow-[0_2px_8px_rgba(255,107,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.4)] hover:brightness-110 active:scale-[0.98] transition-all duration-150"
                 onClick={() => setModalCallout(null)}
               >
-                {dict.whyUs.checkPriceBtn} <ArrowRight className="w-4 h-4" />
+                <span>{dict.whyUs.checkPriceBtn}</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-150" />
               </Link>
             </div>
           </div>
