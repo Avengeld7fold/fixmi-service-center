@@ -23,7 +23,8 @@ import {
   X,
   Clock,
   Info,
-  Activity
+  Activity,
+  ArrowUpRight
 } from "lucide-react";
 
 // ── Urutan 13 Layer dari angka tertinggi (13) ke angka terkecil (1) ──
@@ -1403,11 +1404,11 @@ export default function ExplodedPhoneSection() {
             className="relative w-full max-w-lg md:max-w-3xl rounded-[24px] border border-[#262626] bg-[#1a1a1a] shadow-2xl overflow-hidden transition-all duration-200 ease-out animate-in zoom-in-95 slide-in-from-bottom-2 max-h-[92vh] flex flex-col md:flex-row select-none"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button — Instrument Grade */}
+            {/* Close Button — Precision Tactile */}
             <button
               type="button"
               onClick={() => setModalCallout(null)}
-              className="absolute top-4 right-4 z-30 p-2 rounded-[10px] bg-[#121212] border border-[#262626] text-[#a3a3a3] hover:text-[#f5f5f5] hover:border-[#303030] active:scale-95 transition-all duration-150"
+              className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-white/[0.06] border border-white/10 text-neutral-400 hover:text-white hover:bg-white/15 hover:border-white/25 active:scale-90 transition-all duration-150 ease-out"
               aria-label={dict.common.close}
             >
               <X className="w-4 h-4" />
@@ -1453,7 +1454,7 @@ export default function ExplodedPhoneSection() {
                 {/* Header with Bayon Display Font */}
                 <div className="pr-8">
                   <h3
-                    className="font-bayon text-2xl sm:text-3xl lg:text-4xl uppercase tracking-[0.02em] text-[#f5f5f5] leading-none"
+                    className="font-bayon text-2xl sm:text-3xl lg:text-4xl uppercase tracking-[-0.01em] text-[#f5f5f5] leading-[0.95]"
                     style={{ fontFamily: "var(--font-bayon), sans-serif" }}
                   >
                     {isEn ? modalCallout.nameEn : modalCallout.name}
@@ -1498,7 +1499,7 @@ export default function ExplodedPhoneSection() {
                 </div>
               </div>
 
-              {/* Action Dock with Official DESIGN.md Button Spec */}
+              {/* Action Dock with Signature FIXMI Primary Button */}
               <div className="pt-6 sm:pt-7 mt-4 sm:mt-6 border-t border-[#262626] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xs font-mono text-[#a3a3a3]">
                   <span className="relative flex h-2 w-2">
@@ -1513,10 +1514,13 @@ export default function ExplodedPhoneSection() {
                 <Link
                   href={getLocalizedPath(modalCallout.categoryLink)}
                   onClick={() => setModalCallout(null)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[10px] bg-primary text-white font-semibold text-xs sm:text-sm hover:bg-[#e05e00] active:scale-[0.98] active:-translate-y-[1px] transition-all duration-150"
+                  className="group relative inline-flex items-center justify-center gap-2 sm:gap-2.5 min-h-[44px] px-6 py-2.5 rounded-full bg-primary text-[#121212] font-semibold text-xs sm:text-sm tracking-[-0.01em] whitespace-nowrap transition-all duration-200 ease-out hover:bg-primary-light active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 overflow-hidden text-center"
+                  style={{ boxShadow: "0 6px 20px -4px rgba(255, 107, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.45)" }}
                 >
-                  <span>{dict.whyUs.checkPriceBtn}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="relative z-10">{dict.whyUs.checkPriceBtn}</span>
+                  <span className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-black/10 flex items-center justify-center transition-all duration-200 ease-out group-hover:bg-black/15 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0">
+                    <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#121212]" strokeWidth={2.5} />
+                  </span>
                 </Link>
               </div>
             </div>
