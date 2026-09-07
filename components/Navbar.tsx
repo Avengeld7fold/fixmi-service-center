@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLenis } from "lenis/react";
@@ -21,15 +22,6 @@ const NAV_FONT_STYLE = {
   fontSize: "0.9375rem",
   letterSpacing: "0.1em",
   textTransform: "uppercase",
-} as const;
-
-const LOGO_TEXT_STYLE = {
-  fontFamily: "var(--font-neue-montreal), sans-serif",
-  fontSize: "1.25rem",
-  fontWeight: 800,
-  letterSpacing: "0.02em",
-  color: "var(--fixmi-primary)",
-  lineHeight: 1,
 } as const;
 
 // ponytail: 2 corner fillet SVGs were near-identical — parameterized
@@ -118,23 +110,19 @@ export default function Navbar() {
         style={{ maxWidth: "90rem", marginLeft: "auto", marginRight: "auto", height: "4.5rem" }}
       >
         {/* Logo */}
-        <Link href={getLocalizedPath("/")} className="group flex items-center gap-2.5 no-underline shrink-0 active:scale-[0.97] transition-transform duration-150 ease-out">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-[1.625rem] h-[1.625rem] transition-transform duration-300 ease-out group-hover:rotate-12"
-            style={{ color: "var(--fixmi-primary)" }}
-          >
-            <path
-              d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span style={LOGO_TEXT_STYLE}>FIXMI</span>
+        <Link
+          href={getLocalizedPath("/")}
+          className="group flex items-center no-underline shrink-0 active:scale-[0.97] transition-transform duration-150 ease-out"
+          aria-label="FIXMI"
+        >
+          <Image
+            src="/images/logo.svg"
+            alt="FIXMI Service Center"
+            width={141}
+            height={36}
+            priority
+            className="h-8 sm:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
+          />
         </Link>
 
         {/* Desktop Menu */}
