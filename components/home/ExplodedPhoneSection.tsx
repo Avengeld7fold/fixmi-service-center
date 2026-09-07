@@ -453,11 +453,13 @@ export default function ExplodedPhoneSection() {
   const [bootKey, setBootKey] = useState<number>(0);
   const prevStepRef = useRef<number>(1);
   
-  // Pre-load Booting.gif so it displays instantaneously at Step 14 without any network lag
+  // Pre-load Booting animation (WebP ~457KB for instant low-latency loading, fallback to GIF)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const preloadImg = new window.Image();
-      preloadImg.src = "/images/services/Booting.gif";
+      const preloadWebP = new window.Image();
+      preloadWebP.src = "/images/services/Booting.webp";
+      const preloadGif = new window.Image();
+      preloadGif.src = "/images/services/Booting.gif";
     }
   }, []);
 
@@ -1093,7 +1095,7 @@ export default function ExplodedPhoneSection() {
                 );
               })}
 
-              {/* ── FINAL STEP 14: SCREEN BOOTING ANIMATION (Booting.gif) ── */}
+              {/* ── FINAL STEP 14: SCREEN BOOTING ANIMATION (Optimized WebP with GIF Fallback) ── */}
               <div
                 className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-opacity duration-300 ease-out"
                 style={{
@@ -1103,16 +1105,15 @@ export default function ExplodedPhoneSection() {
                 }}
               >
                 <div className="relative w-full h-full">
-                  <Image
-                    key={bootKey}
-                    src="/images/services/Booting.gif"
-                    alt="iPhone Booting & Quality Test"
-                    fill
-                    unoptimized
-                    priority
-                    sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                    className="object-contain drop-shadow-[0_0_35px_rgba(255,107,0,0.3)] select-none pointer-events-none"
-                  />
+                  <picture key={bootKey} className="absolute inset-0 w-full h-full block">
+                    <source srcSet="/images/services/Booting.webp" type="image/webp" />
+                    <img
+                      src="/images/services/Booting.gif"
+                      alt="iPhone Booting & Quality Test"
+                      className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(255,107,0,0.3)] select-none pointer-events-none"
+                      loading="eager"
+                    />
+                  </picture>
                 </div>
               </div>
 
