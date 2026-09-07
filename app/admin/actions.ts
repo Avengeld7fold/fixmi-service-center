@@ -109,7 +109,15 @@ export async function savePricelistAction(payloadJson: string): Promise<ActionRe
     await writePricelist(JSON.parse(payloadJson));
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Gagal menyimpan." };
+    const rawMsg = e instanceof Error ? e.message : "Gagal menyimpan.";
+    if (rawMsg.includes("EROFS") || rawMsg.includes("read-only")) {
+      return {
+        ok: false,
+        error:
+          "Penyimpanan Vercel bersifat Read-Only (Serverless). File di server Vercel tidak dapat dimodifikasi langsung lewat web. Silakan gunakan tombol 'Unduh JSON' di panel untuk mengunduh data Anda, lalu gantikan data/pricelist.json di repositori lokal dan git push.",
+      };
+    }
+    return { ok: false, error: rawMsg };
   }
 }
 
