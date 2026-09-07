@@ -431,6 +431,19 @@ export default function ExplodedPhoneSection() {
 
   const targetProgressRef = useRef<number>(0);
   const currentProgressRef = useRef<number>(0);
+  const startRafRef = useRef<(() => void) | null>(null);
+
+  // Helper untuk navigasi langsung ke step tertentu dengan animasi smooth lerp
+  const jumpToStep = (step: number) => {
+    let target = 0;
+    if (step >= 14) target = 1.0;
+    else if (step === 13) target = 0.88;
+    else if (step === 1) target = 0.0;
+    else target = ((step - 1) / 12) * 0.84;
+
+    targetProgressRef.current = target;
+    startRafRef.current?.();
+  };
 
   const [activeCalloutId, setActiveCalloutId] = useState<string>("backglass");
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -504,6 +517,12 @@ export default function ExplodedPhoneSection() {
         );
       }
 
+      // Alokasikan waktu jeda setelah layer 13 (LCD) terpasang sempurna untuk fase Booting (Langkah 14)
+      // Fisik ponsel terakit sempurna pada progres 0.85, menyisakan 15% progres akhir untuk booting
+      const physicalDuration = (layers.length - 2) * (stepDuration - overlap) + stepDuration;
+      const totalTimelineDuration = physicalDuration / 0.85;
+      tl.set({}, {}, totalTimelineDuration);
+
       timelineRef.current = tl;
     },
     { scope: containerRef }
@@ -536,13 +555,21 @@ export default function ExplodedPhoneSection() {
 
       setScrollProgress(quantized);
 
-      const activeStep = Math.min(14, Math.max(1, Math.floor(quantized * 13.9) + 1));
+      let activeStep = 1;
+      if (quantized >= 0.90) {
+        activeStep = 14;
+      } else if (quantized >= 0.85) {
+        activeStep = 13;
+      } else {
+        activeStep = Math.min(12, Math.max(1, Math.floor((quantized / 0.85) * 12) + 1));
+      }
+
       if (activeStep === 14 && prevStepRef.current !== 14) {
         setBootKey((k) => k + 1);
       }
       prevStepRef.current = activeStep;
       setCurrentStep(activeStep);
-      setIsAssembled(quantized > 0.88);
+      setIsAssembled(quantized >= 0.85);
 
       const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
       if (currentLayerDef && currentLayerDef.calloutId) {
@@ -568,6 +595,8 @@ export default function ExplodedPhoneSection() {
       };
       rafId = requestAnimationFrame(tick);
     };
+
+    startRafRef.current = startRaf;
 
     const handleMouseEnter = () => {
       isHovered = true;
@@ -757,14 +786,14 @@ export default function ExplodedPhoneSection() {
     return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
   };
 
-  // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.84 -> 0.93) ──
+  // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.78 -> 0.85) ──
   // Menggunakan fungsi smoothstep (3x^2 - 2x^3) untuk transisi perlahan, mulus tanpa lonjakan
   const rawFade =
-    scrollProgress <= 0.84
+    scrollProgress <= 0.78
       ? 1
-      : scrollProgress >= 0.93
+      : scrollProgress >= 0.85
       ? 0
-      : (0.93 - scrollProgress) / (0.93 - 0.84);
+      : (0.85 - scrollProgress) / (0.85 - 0.78);
   const assemblyFade = Math.min(1, Math.max(0, rawFade * rawFade * (3 - 2 * rawFade)));
 
   return (
@@ -795,7 +824,16 @@ export default function ExplodedPhoneSection() {
           </h2>
 
           {/* Active Sparepart / Service Component Pill Mengikuti Lingkaran & Garis Oranye yang Aktif */}
-          <div className="mt-3.5 sm:mt-4 inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200">
+          <div
+            onClick={() => {
+              if (isAssembled) {
+                jumpToStep(currentStep === 14 ? 13 : 14);
+              }
+            }}
+            className={`mt-3.5 sm:mt-4 inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200 select-none ${
+              isAssembled ? "cursor-pointer hover:border-emerald-400/80 hover:scale-105 active:scale-95" : ""
+            }`}
+          >
             <span
               className={`h-2 w-2 rounded-full ${
                 currentStep === 14
@@ -812,8 +850,8 @@ export default function ExplodedPhoneSection() {
                   : "Langkah 14/14: Sistem Booting & Uji Fungsi Sukses"
                 : isAssembled
                 ? isEn
-                  ? "Step 13/14: iPhone Fully Assembled"
-                  : "Langkah 13/14: iPhone Terakit Sempurna"
+                  ? "Step 13/14: iPhone Fully Assembled (Click to Boot)"
+                  : "Langkah 13/14: iPhone Terakit Sempurna (Klik untuk Booting)"
                 : activeCallout?.name || "Layar & Glass"}
             </span>
           </div>
@@ -987,7 +1025,14 @@ export default function ExplodedPhoneSection() {
             {/* Clean Transparent Phone Stage Container (Tanpa Kotak / Ring) */}
             <div
               ref={layersContainerRef}
-              className="relative w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] h-[520px] sm:h-[580px] md:h-[620px] lg:h-[660px] flex items-center justify-center"
+              onClick={() => {
+                if (isAssembled) {
+                  jumpToStep(currentStep === 14 ? 13 : 14);
+                }
+              }}
+              className={`relative w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] h-[520px] sm:h-[580px] md:h-[620px] lg:h-[660px] flex items-center justify-center ${
+                isAssembled ? "cursor-pointer active:scale-[0.99] transition-transform duration-150" : ""
+              }`}
               style={{
                 perspective: 1400,
                 transformStyle: "preserve-3d",
@@ -1057,13 +1102,16 @@ export default function ExplodedPhoneSection() {
                   zIndex: 25,
                 }}
               >
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                <div className="relative w-full h-full">
+                  <Image
                     key={bootKey}
-                    src={`/images/services/Booting.gif?v=${bootKey}`}
+                    src="/images/services/Booting.gif"
                     alt="iPhone Booting & Quality Test"
-                    className="w-full h-full object-contain drop-shadow-[0_0_35px_rgba(255,107,0,0.3)] select-none pointer-events-none"
+                    fill
+                    unoptimized
+                    priority
+                    sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
+                    className="object-contain drop-shadow-[0_0_35px_rgba(255,107,0,0.3)] select-none pointer-events-none"
                   />
                 </div>
               </div>
@@ -1152,7 +1200,15 @@ export default function ExplodedPhoneSection() {
 
               {/* Minimalist Apple-Style Scroll Cue (Hanya muncul sebelum perakitan dimulai atau saat terakit penuh sebagai petunjuk) */}
               <div
-                className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-none transition-[transform,opacity] duration-300 ease-out flex flex-col items-center gap-1.5 ${
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isAssembled) {
+                    jumpToStep(currentStep === 14 ? 13 : 14);
+                  }
+                }}
+                className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-40 transition-[transform,opacity] duration-300 ease-out flex flex-col items-center gap-1.5 select-none ${
+                  isAssembled ? "cursor-pointer pointer-events-auto active:scale-95" : "pointer-events-none"
+                } ${
                   scrollProgress < 0.05 || isAssembled
                     ? "opacity-100 translate-y-0 scale-100"
                     : "opacity-0 translate-y-3 scale-95"
@@ -1294,17 +1350,22 @@ export default function ExplodedPhoneSection() {
               const isBootStep = stepNum === 14;
 
               return (
-                <span
+                <button
                   key={stepNum}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  type="button"
+                  onClick={() => jumpToStep(stepNum)}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer focus:outline-none ${
                     isCurrent && isBootStep
-                      ? "w-5 bg-emerald-400 shadow-[0_0_10px_#34d399]"
+                      ? "w-6 bg-emerald-400 shadow-[0_0_12px_#34d399]"
+                      : isCurrent
+                      ? "w-5 bg-primary shadow-[0_0_10px_#FF6B00]"
                       : isPastOrCurrent
                       ? isBootStep
-                        ? "w-4 bg-emerald-400"
-                        : "w-4 bg-primary"
-                      : "w-1.5 bg-white/20"
+                        ? "w-3.5 bg-emerald-400/80"
+                        : "w-3 bg-primary/70"
+                      : "w-1.5 bg-white/20 hover:bg-white/50"
                   }`}
+                  aria-label={`Lompat ke Langkah ${stepNum}`}
                 />
               );
             })}
