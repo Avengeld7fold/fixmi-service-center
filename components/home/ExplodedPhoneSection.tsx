@@ -1,31 +1,12 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useI18n } from "@/lib/i18n/context";
-import { 
-  BatteryCharging, 
-  Camera, 
-  Cpu, 
-  Smartphone, 
-  ShieldCheck, 
-  ArrowRight, 
-  Sparkles, 
-  Layers, 
-  Wrench, 
-  Volume2, 
-  ScanFace,
-  Nfc,
-  Cable,
-  X,
-  Clock,
-  Info,
-  Activity,
-  ArrowUpRight
-} from "lucide-react";
+import { X, Clock, Info, ShieldCheck, ArrowUpRight } from "lucide-react";
 
 // ── Urutan 13 Layer dari angka tertinggi (13) ke angka terkecil (1) ──
 interface LayerDefinition {
@@ -35,15 +16,16 @@ interface LayerDefinition {
   name: string;
   subName: string;
   calloutId?: string;
+  isOffside?: boolean;
 }
 
 const ALL_13_LAYERS: LayerDefinition[] = [
   { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "backglass" },
-  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "backglass" },
+  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "backglass", isOffside: true },
   { step: 3,  fileNumber: 11, file: "/images/services/Housing.webp", name: "Titanium Housing Chassis", subName: "Rangka & Sasis Bodi" },
-  { step: 4,  fileNumber: 10, file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", subName: "Konektor Fleksibel Cas", calloutId: "flex-charger" },
+  { step: 4,  fileNumber: 10, file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", subName: "Konektor Fleksibel Cas", calloutId: "flex-charger", isOffside: true },
   { step: 5,  fileNumber: 9,  file: "/images/services/Loud-Speaker.webp", name: "Bottom Loudspeaker Module", subName: "Modul Speaker Bawah", calloutId: "speaker-housing" },
-  { step: 6,  fileNumber: 8,  file: "/images/services/Taptic-Engine.webp", name: "Taptic Engine Haptic Vibration", subName: "Motor Getar Presisi" },
+  { step: 6,  fileNumber: 8,  file: "/images/services/Taptic-Engine.webp", name: "Taptic Engine Haptic Vibration", subName: "Motor Getar Presisi", isOffside: true },
   { step: 7,  fileNumber: 7,  file: "/images/services/Flex-Power.webp", name: "Power Button & Volume Flex Cable", subName: "Fleksibel Tombol Power & Volume", calloutId: "motherboard" },
   { step: 8,  fileNumber: 6,  file: "/images/services/Logicboard.webp", name: "Logic Board Main PCB", subName: "Papan Sirkuit Utama & Chipset", calloutId: "motherboard" },
   { step: 9,  fileNumber: 5,  file: "/images/services/Back-Camera.webp", name: "Rear Triple Camera Module", subName: "Sistem Lensa Kamera Belakang", calloutId: "camera" },
@@ -53,15 +35,15 @@ const ALL_13_LAYERS: LayerDefinition[] = [
   { step: 13, fileNumber: 1,  file: "/images/services/LCD.webp", name: "Super Retina OLED Display & Glass", subName: "Layar Sentuh & Panel Depan", calloutId: "screen" },
 ];
 
-// ── 6 Layanan Callout Lingkaran dengan Rentang Scroll Perjalanan (revealStart -> revealEnd) ──
+// ── 6 Layanan Callout Lingkaran dengan Rentang Scroll Perjalanan ──
 interface ServiceHotspot {
   x: number;
   y: number;
-  label?: string;
-  labelEn?: string;
-  step?: number;
-  revealStart?: number;
-  revealEnd?: number;
+  label: string;
+  labelEn: string;
+  step: number;
+  revealStart: number;
+  revealEnd: number;
 }
 
 interface ServiceCallout {
@@ -75,9 +57,7 @@ interface ServiceCallout {
   revealStart: number;
   revealEnd: number;
   circleImage: string;
-  icon: typeof Smartphone;
-  hotspot: { x: number; y: number };
-  hotspots?: ServiceHotspot[];
+  hotspots: ServiceHotspot[];
   symptoms: string[];
   symptomsEn: string[];
   fixmiSolution: string;
@@ -99,8 +79,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     revealStart: 0.00,
     revealEnd: 0.16,
     circleImage: "/images/services/Backglass.webp",
-    icon: Smartphone,
-    hotspot: { x: 50, y: 72 },
     hotspots: [
       {
         x: 50,
@@ -148,8 +126,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     revealStart: 0.16,
     revealEnd: 0.28,
     circleImage: "/images/services/Flex-Charger.webp",
-    icon: Cable,
-    hotspot: { x: 50, y: 92 },
+    hotspots: [
+      {
+        x: 50,
+        y: 92,
+        label: "Flex Charger",
+        labelEn: "Flex Charger",
+        step: 4,
+        revealStart: 0.16,
+        revealEnd: 0.28,
+      },
+    ],
     symptoms: [
       "Tidak Bisa Cas / Cas Putus-Putus",
       "Konektor USB-C/Lightning Longgar / Goyang",
@@ -177,8 +164,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     revealStart: 0.30,
     revealEnd: 0.85,
     circleImage: "/images/services/Loud-Speaker.webp",
-    icon: Volume2,
-    hotspot: { x: 40, y: 88 },
     hotspots: [
       {
         x: 40,
@@ -226,8 +211,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     revealStart: 0.58,
     revealEnd: 0.74,
     circleImage: "/images/services/Back-Camera.webp",
-    icon: Camera,
-    hotspot: { x: 65, y: 17 },
     hotspots: [
       {
         x: 65,
@@ -275,8 +258,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     revealStart: 0.44,
     revealEnd: 0.60,
     circleImage: "/images/services/Logicboard.webp",
-    icon: Cpu,
-    hotspot: { x: 74, y: 32 },
+    hotspots: [
+      {
+        x: 74,
+        y: 32,
+        label: "Logic Board",
+        labelEn: "Logic Board",
+        step: 7,
+        revealStart: 0.44,
+        revealEnd: 0.60,
+      },
+    ],
     symptoms: ["Mati Total (Short Circuit)", "IC Power / Baseband No Service", "Restart Terus Menerus"],
     symptomsEn: ["Dead Unit / Short Circuit", "Power IC / Baseband Searching...", "Continuous Bootloop / Restart"],
     fixmiSolution: "Pengerjaan Mikrosolder Mikroskop Level 4, Reballing CPU Dual-Layer, & Pemulihan Jalur.",
@@ -296,8 +288,17 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     revealStart: 0.80,
     revealEnd: 0.94,
     circleImage: "/images/services/Battery.webp",
-    icon: BatteryCharging,
-    hotspot: { x: 40, y: 55 },
+    hotspots: [
+      {
+        x: 40,
+        y: 55,
+        label: "Baterai & BMS",
+        labelEn: "Battery & BMS",
+        step: 12,
+        revealStart: 0.80,
+        revealEnd: 0.94,
+      },
+    ],
     symptoms: ["Battery Health <80% / Service", "Baterai Kembung / Drop Cepat", "Sering Mati Mendadak"],
     symptomsEn: ["Battery Health <80% / Service Alert", "Swollen Battery / Fast Drain", "Random Power Shutdowns"],
     fixmiSolution: "Sel Baterai High-Capacity Grade A+ dengan pemindahan modul BMS (tanpa pesan error).",
@@ -308,14 +309,15 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
   },
 ];
 
+// Pre-computed static arrays — zero allocations during render cycles
+const LEFT_CALLOUTS = SERVICE_CALLOUTS.filter((p) => p.side === "left");
+const RIGHT_CALLOUTS = SERVICE_CALLOUTS.filter((p) => p.side === "right");
+const STEP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
+
 interface NodeSpatialInfo {
-  dotX: number;
-  dotY: number;
   finalCircleX: number;
   finalCircleY: number;
-  dx: number;
-  dy: number;
-  dots?: { dotX: number; dotY: number }[];
+  dots: { dotX: number; dotY: number }[];
 }
 
 // ── De Casteljau Subcurve: Menghitung Kurva Parsial yang Tumbuh Mulus dari Titik iPhone ke Lingkaran ──
@@ -361,8 +363,8 @@ function getCubicBezierSubcurve(
   };
 }
 
-// ── Komponen Lingkaran Callout Bersih & Minimalis (Emil Kowalski Tactile Motion) ──
-function InspectionCircleNode({
+// ── Komponen Lingkaran Callout Bersih & Minimalis (Emil Kowalski Tactile Motion, Memoized) ──
+const InspectionCircleNode = memo(function InspectionCircleNode({
   callout,
   isActive,
   isRevealed,
@@ -421,7 +423,7 @@ function InspectionCircleNode({
       </div>
     </div>
   );
-}
+});
 
 export default function ExplodedPhoneSection() {
   const { dict, locale, getLocalizedPath } = useI18n();
@@ -700,20 +702,13 @@ export default function ExplodedPhoneSection() {
 
         const nodeRect = circleNodeEl.getBoundingClientRect();
 
-        // Posisi anchor awal kurva persis pada tepi lingkaran yang menghadap ke ponsel
         const finalCircleX =
           callout.side === "left"
             ? nodeRect.right - gridRect.left + 3
             : nodeRect.left - gridRect.left - 3;
         const finalCircleY = nodeRect.top - gridRect.top + nodeRect.height / 2;
 
-        // Hitung koordinat dot: prioritaskan pengukuran presisi dari DOM rect elemen button
-        const spots =
-          callout.hotspots && callout.hotspots.length > 0
-            ? callout.hotspots
-            : [{ x: callout.hotspot.x, y: callout.hotspot.y }];
-
-        const dots = spots.map((spot, spotIdx) => {
+        const dots = callout.hotspots.map((spot, spotIdx) => {
           const btnEl = document.getElementById(`callout-hotspot-dot-${callout.id}-${spotIdx}`);
           if (btnEl) {
             const btnRect = btnEl.getBoundingClientRect();
@@ -729,12 +724,8 @@ export default function ExplodedPhoneSection() {
         });
 
         newMap[callout.id] = {
-          dotX: dots[0].dotX,
-          dotY: dots[0].dotY,
           finalCircleX,
           finalCircleY,
-          dx: 0,
-          dy: 0,
           dots,
         };
       });
@@ -752,24 +743,26 @@ export default function ExplodedPhoneSection() {
     };
 
     updateSpatialMap();
+
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(throttledUpdate) : null;
+    if (ro) {
+      if (stageGridRef.current) ro.observe(stageGridRef.current);
+      if (layersContainerRef.current) ro.observe(layersContainerRef.current);
+    }
+
     window.addEventListener("resize", throttledUpdate);
     window.addEventListener("scroll", throttledUpdate, { passive: true });
 
-    const t1 = setTimeout(updateSpatialMap, 50);
-    const t2 = setTimeout(updateSpatialMap, 150);
-    const t3 = setTimeout(updateSpatialMap, 400);
-    const t4 = setTimeout(updateSpatialMap, 800);
+    const t = setTimeout(updateSpatialMap, 300);
 
     return () => {
+      ro?.disconnect();
       window.removeEventListener("resize", throttledUpdate);
       window.removeEventListener("scroll", throttledUpdate);
       if (throttleTimer !== null) clearTimeout(throttleTimer);
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      clearTimeout(t);
     };
-  }, [activeCalloutId]);
+  }, []);
 
   // ── Hitung Progress Perjalanan Mulus (Travel Progress 0.0 -> 1.0) untuk Setiap Komponen ──
   const getCalloutTravelProgress = (callout: ServiceCallout) => {
@@ -777,37 +770,21 @@ export default function ExplodedPhoneSection() {
     if (scrollProgress < callout.revealStart) return 0;
     if (scrollProgress >= callout.revealEnd) return 1;
     const raw = (scrollProgress - callout.revealStart) / (callout.revealEnd - callout.revealStart);
-    // Smooth cubic ease out
     return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
   };
 
-  // ── Hitung Progress Perjalanan Mulus (Travel Progress 0.0 -> 1.0) untuk Titik Hotspot Individual (Sequential Per-Dot) ──
-  const getHotspotTravelProgress = (
-    callout: ServiceCallout,
-    spot?: ServiceHotspot
-  ) => {
-    // Untuk Backglass hotspot (step 1), selalu 1 saat berada di step 1 ke atas
-    if (callout.id === "backglass" && spot?.step === 1) return 1;
+  // ── Hitung Progress Perjalanan Mulus untuk Titik Hotspot Individual ──
+  const getHotspotTravelProgress = (callout: ServiceCallout, spot: ServiceHotspot) => {
+    if (callout.id === "backglass" && spot.step === 1) return 1;
+    if (currentStep < spot.step && scrollProgress < spot.revealStart) return 0;
+    if (scrollProgress < spot.revealStart) return 0;
+    if (scrollProgress >= spot.revealEnd) return 1;
 
-    const minStep = spot?.step ?? callout.minStep;
-    const start = spot?.revealStart ?? callout.revealStart;
-    const end = spot?.revealEnd ?? callout.revealEnd;
-
-    // Saat scroll membongkar/merakit, cegah kemunculan titik sebelum step fisiknya tiba di stage ponsel
-    // Misal: Step 9 (Back Camera) muncul terlebih dahulu dengan 1 garis, lalu Step 10 (Front Camera) menyusul di step 10
-    if (currentStep < minStep && scrollProgress < start) {
-      return 0;
-    }
-
-    if (scrollProgress < start) return 0;
-    if (scrollProgress >= end) return 1;
-
-    const raw = (scrollProgress - start) / (end - start);
+    const raw = (scrollProgress - spot.revealStart) / (spot.revealEnd - spot.revealStart);
     return Math.min(1, Math.max(0, 1 - Math.pow(1 - raw, 3)));
   };
 
   // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.78 -> 0.85) ──
-  // Menggunakan fungsi smoothstep (3x^2 - 2x^3) untuk transisi perlahan, mulus tanpa lonjakan
   const rawFade =
     scrollProgress <= 0.78
       ? 1
@@ -843,7 +820,7 @@ export default function ExplodedPhoneSection() {
             {dict.teardown.heading}
           </h2>
 
-          {/* Active Sparepart / Service Component Pill Mengikuti Lingkaran & Garis Oranye yang Aktif */}
+          {/* Active Sparepart / Service Component Pill */}
           <div
             onClick={() => {
               if (isAssembled) {
@@ -872,7 +849,9 @@ export default function ExplodedPhoneSection() {
                 ? isEn
                   ? "Step 13/14: iPhone Fully Assembled (Click to Boot)"
                   : "Langkah 13/14: iPhone Terakit Sempurna (Klik untuk Booting)"
-                : activeCallout?.name || "Layar & Glass"}
+                : isEn
+                ? (activeCallout?.nameEn || "Screen & Glass")
+                : (activeCallout?.name || "Layar & Glass")}
             </span>
           </div>
         </div>
@@ -902,18 +881,9 @@ export default function ExplodedPhoneSection() {
               const spatial = spatialMap[callout.id];
               if (!spatial) return null;
 
-              const originDots =
-                spatial.dots && spatial.dots.length > 0
-                  ? spatial.dots
-                  : [{ dotX: spatial.dotX, dotY: spatial.dotY }];
-
-              const spots =
-                callout.hotspots && callout.hotspots.length > 0
-                  ? callout.hotspots
-                  : [{ x: callout.hotspot.x, y: callout.hotspot.y }];
-
-              return originDots.map((dot, dotIdx) => {
-                const spot = spots[dotIdx];
+              return spatial.dots.map((dot, dotIdx) => {
+                const spot = callout.hotspots[dotIdx];
+                if (!spot) return null;
                 const t = getHotspotTravelProgress(callout, spot);
                 if (t <= 0.01) return null;
 
@@ -923,23 +893,13 @@ export default function ExplodedPhoneSection() {
                 // Titik Akhir (p3): Titik Hotspot pada Gambar Ponsel
                 const p3 = { x: dot.dotX, y: dot.dotY };
 
-                // Control Points Kurva Organik: Mengalir dari Lingkaran (p0) Mengarah ke Hotspot Ponsel (p3)
-                let p1: { x: number; y: number };
-                let p2: { x: number; y: number };
+                // Control Points Kurva Organik
+                const isLeft = callout.side === "left";
+                const dx = isLeft ? p3.x - p0.x : p0.x - p3.x;
+                const p1 = { x: isLeft ? p0.x + dx * 0.45 : p0.x - dx * 0.45, y: p0.y };
+                const p2 = { x: isLeft ? p3.x - dx * 0.35 : p3.x + dx * 0.35, y: p3.y };
 
-                if (callout.side === "left") {
-                  // Lingkaran di kiri (p0.x < p3.x): keluar ke kanan (+dx), masuk ke dot dari kiri (-dx)
-                  const dx = p3.x - p0.x;
-                  p1 = { x: p0.x + dx * 0.45, y: p0.y };
-                  p2 = { x: p3.x - dx * 0.35, y: p3.y };
-                } else {
-                  // Lingkaran di kanan (p0.x > p3.x): keluar ke kiri (-dx), masuk ke dot dari kanan (+dx)
-                  const dx = p0.x - p3.x;
-                  p1 = { x: p0.x - dx * 0.45, y: p0.y };
-                  p2 = { x: p3.x + dx * 0.35, y: p3.y };
-                }
-
-                // Hitung subkurva yang tumbuh dari Lingkaran (p0) mengarah dan mendarat tepat pada Dot Ponsel (p3)
+                // Hitung subkurva De Casteljau
                 const { pathD, tipX, tipY } = getCubicBezierSubcurve(p0, p1, p2, p3, t);
                 const lineOpacity = Math.min(1, t * 1.5) * assemblyFade;
                 if (lineOpacity <= 0.01) return null;
@@ -965,7 +925,7 @@ export default function ExplodedPhoneSection() {
                       className={`cursor-pointer ${assemblyFade > 0.1 ? "pointer-events-auto" : "pointer-events-none"}`}
                     />
 
-                    {/* Organic Wave / Curved Dashed Line (Tumbuh Mulai dari Dot iPhone ke Lingkaran) */}
+                    {/* Organic Wave / Curved Dashed Line */}
                     <path
                       d={pathD}
                       fill="none"
@@ -997,13 +957,12 @@ export default function ExplodedPhoneSection() {
 
           {/* ── LEFT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
-            {SERVICE_CALLOUTS.filter((p) => p.side === "left").map((callout) => {
+            {LEFT_CALLOUTS.map((callout) => {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
               const scale = 0.9 + t * 0.1;
               const isRevealed = (t > 0.35 || isActive) && assemblyFade > 0.1;
               const calloutOpacity = (isActive ? 1 : t) * assemblyFade;
-              const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
                 <div
@@ -1023,9 +982,7 @@ export default function ExplodedPhoneSection() {
                     isRevealed={isRevealed}
                     isEn={isEn}
                     onMouseEnter={() => {
-                      if (isRevealed) {
-                        setActiveCalloutId(callout.id);
-                      }
+                      if (isRevealed) setActiveCalloutId(callout.id);
                     }}
                     onClick={() => {
                       if (isRevealed) {
@@ -1039,10 +996,10 @@ export default function ExplodedPhoneSection() {
             })}
           </div>
 
-          {/* ── CENTER: SEQUENTIAL 13-LAYER IPHONE ASSEMBLY WITH DEPTH OF FIELD FOCUS (13.webp -> 1.webp) ── */}
+          {/* ── CENTER: SEQUENTIAL 13-LAYER IPHONE ASSEMBLY WITH DEPTH OF FIELD FOCUS ── */}
           <div className="col-span-1 lg:col-span-6 flex flex-col justify-center items-center py-2">
             
-            {/* Clean Transparent Phone Stage Container (Tanpa Kotak / Ring) */}
+            {/* Clean Transparent Phone Stage Container */}
             <div
               ref={layersContainerRef}
               onClick={() => {
@@ -1064,19 +1021,11 @@ export default function ExplodedPhoneSection() {
                 const isCurrentActiveLayer = currentStep === layerStep;
                 const isRevealedLayer = currentStep >= layerStep;
 
-                // Cinematic Depth of Field: Layer yang sedang aktif bersinar terang, layer lain sedikit lembut & redup
                 const dofFilter = isAssembled
                   ? "none"
                   : isCurrentActiveLayer
                   ? "brightness(1.18) contrast(1.08) drop-shadow(0 0 18px rgba(255,107,0,0.25))"
                   : "brightness(0.68) blur(0.6px)";
-
-                // Komponen internal dengan bagian offside (kabel fleksibel / konektor menonjol keluar sasis)
-                // Memudar halus saat LCD menutup sasis sehingga saat ponsel terakit sempurna siluetnya 100% rapi
-                const isOffsideLayer =
-                  layer.file.includes("NFC") ||
-                  layer.file.includes("Flex-Charger") ||
-                  layer.file.includes("Taptic-Engine");
 
                 return (
                   <div
@@ -1092,11 +1041,11 @@ export default function ExplodedPhoneSection() {
                       filter: isRevealedLayer ? dofFilter : "none",
                     }}
                   >
-                    {/* Layer PNG/WebP Graphic */}
+                    {/* Layer Graphic */}
                     <div
                       className="relative w-full h-full transition-opacity duration-200 ease-out"
                       style={{
-                        opacity: isOffsideLayer ? assemblyFade : 1,
+                        opacity: layer.isOffside ? assemblyFade : 1,
                       }}
                     >
                       <Image
@@ -1140,21 +1089,13 @@ export default function ExplodedPhoneSection() {
               <div className="absolute inset-0 z-40 pointer-events-auto">
                 {SERVICE_CALLOUTS.map((callout) => {
                   const isActive = activeCalloutId === callout.id;
-                  const displayName = isEn ? callout.nameEn : callout.name;
 
-                  const spots =
-                    callout.hotspots && callout.hotspots.length > 0
-                      ? callout.hotspots
-                      : [{ x: callout.hotspot.x, y: callout.hotspot.y, label: displayName, labelEn: displayName }];
-
-                  return spots.map((spot, spotIdx) => {
+                  return callout.hotspots.map((spot, spotIdx) => {
                     const t = getHotspotTravelProgress(callout, spot);
                     const dotOpacity = t * assemblyFade;
                     if (dotOpacity <= 0.01) return null;
 
-                    const spotLabel = isEn
-                      ? (spot.labelEn || displayName)
-                      : (spot.label || displayName);
+                    const spotLabel = isEn ? spot.labelEn : spot.label;
 
                     return (
                       <button
@@ -1169,7 +1110,6 @@ export default function ExplodedPhoneSection() {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (t > 0.3 && assemblyFade > 0.1) {
-                            // Klik pada dot mengaktifkan highlight lingkaran & garis tanpa membuka kartu modal
                             setActiveCalloutId(callout.id);
                           }
                         }}
@@ -1184,7 +1124,7 @@ export default function ExplodedPhoneSection() {
                         className="group absolute flex items-center justify-center focus:outline-none cursor-pointer active:scale-90 transition-transform duration-150 ease-out"
                         aria-label={`Select component ${spotLabel}`}
                       >
-                        {/* Outer Glowing Pulsing Ring (Animasi Pulsa Kedip-kedip Aktif) */}
+                        {/* Outer Glowing Pulsing Ring */}
                         <span
                           className={`absolute w-10 h-10 rounded-full transition-[transform,background-color] duration-200 ease-out ${
                             isActive
@@ -1218,7 +1158,7 @@ export default function ExplodedPhoneSection() {
                 })}
               </div>
 
-              {/* Minimalist Apple-Style Scroll Cue (Hanya muncul sebelum perakitan dimulai atau saat terakit penuh sebagai petunjuk) */}
+              {/* Minimalist Apple-Style Scroll Cue */}
               <div
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1257,13 +1197,12 @@ export default function ExplodedPhoneSection() {
 
           {/* ── RIGHT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
-            {SERVICE_CALLOUTS.filter((p) => p.side === "right").map((callout) => {
+            {RIGHT_CALLOUTS.map((callout) => {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
               const scale = 0.9 + t * 0.1;
               const isRevealed = (t > 0.35 || isActive) && assemblyFade > 0.1;
               const calloutOpacity = (isActive ? 1 : t) * assemblyFade;
-              const displayName = isEn ? callout.nameEn : callout.name;
 
               return (
                 <div
@@ -1283,9 +1222,7 @@ export default function ExplodedPhoneSection() {
                     isRevealed={isRevealed}
                     isEn={isEn}
                     onMouseEnter={() => {
-                      if (isRevealed) {
-                        setActiveCalloutId(callout.id);
-                      }
+                      if (isRevealed) setActiveCalloutId(callout.id);
                     }}
                     onClick={() => {
                       if (isRevealed) {
@@ -1362,10 +1299,8 @@ export default function ExplodedPhoneSection() {
 
         {/* ── FOOTER DOTS BAR ── */}
         <div className="relative z-20 w-full max-w-md mx-auto text-center mt-6">
-          {/* Visual Step Dots Bar: Step 1 (13.webp) ke Step 14 (Booting) */}
           <div className="flex items-center justify-center gap-1.5">
-            {Array.from({ length: 14 }).map((_, idx) => {
-              const stepNum = idx + 1;
+            {STEP_NUMBERS.map((stepNum) => {
               const isPastOrCurrent = stepNum <= currentStep;
               const isCurrent = stepNum === currentStep;
               const isBootStep = stepNum === 14;
