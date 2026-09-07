@@ -1,26 +1,71 @@
 "use client";
 
 import { useEffect } from "react";
-import { X, ShieldCheck, Check } from "lucide-react";
+import { X, ShieldCheck, ArrowRight } from "lucide-react";
 import { useLenis } from "lenis/react";
 import { useI18n } from "@/lib/i18n/context";
+import { whatsappUrl } from "@/lib/constants";
 
-const ID_TERMS = [
-  "Garansi service berlaku hingga 365 hari (1 tahun) sesuai jenis suku cadang yang diganti.",
-  "Garansi mencakup suku cadang yang diganti dan jasa teknisi terkait — bukan komponen lain di luar perbaikan.",
-  "Klaim garansi sangat mudah: cukup tunjukkan nota digital atau nomor WhatsApp terdaftar.",
-  "Garansi gugur bila segel garansi rusak/dilepas atau perangkat dibongkar pihak lain.",
-  "Kerusakan fisik akibat kelalaian pengguna (jatuh, retak, tertindih, atau terkena air) tidak termasuk garansi.",
-  "Data & privasi perangkat dijamin aman. Harap backup data bila memungkinkan sebelum perbaikan.",
+interface TermItem {
+  id: string;
+  title: string;
+  desc: string;
+}
+
+const ID_TERMS: TermItem[] = [
+  {
+    id: "01",
+    title: "Suku Cadang & Jasa Teknisi",
+    desc: "Mencakup 100% suku cadang yang diganti serta biaya pengerjaan teknisi terkait tanpa biaya tambahan.",
+  },
+  {
+    id: "02",
+    title: "Klaim Praktis Paperless",
+    desc: "Cukup tunjukkan invoice digital atau nomor WhatsApp yang terdaftar saat servis, tanpa perlu nota fisik.",
+  },
+  {
+    id: "03",
+    title: "Keamanan & Kerahasiaan Data",
+    desc: "Data pribadi aman dan terlindungi. Kami sarankan mencadangkan data sebelum perbaikan bila memungkinkan.",
+  },
+  {
+    id: "04",
+    title: "Integritas Segel Garansi",
+    desc: "Garansi gugur bila segel fisik FIXMI rusak, dilepas, atau unit dibongkar oleh pihak ketiga.",
+  },
+  {
+    id: "05",
+    title: "Pengecualian Kerusakan Fisik & Cairan",
+    desc: "Kerusakan akibat kelalaian (terjatuh, retak, tertindih, atau terkena air) berada di luar perlindungan garansi.",
+  },
 ];
 
-const EN_TERMS = [
-  "Service warranty valid up to 365 days (1 year) depending on the replacement part category.",
-  "Warranty covers replaced parts and associated labor — does not apply to unrelated hardware faults.",
-  "Seamless warranty claims: simply present your digital receipt or registered WhatsApp contact.",
-  "Warranty void if warranty tamper seals are damaged or if the unit is dismantled by external parties.",
-  "Physical accidental damage (drops, cracked glass, excessive pressure, or liquid ingress) is excluded.",
-  "Data privacy is strictly protected. Please back up your device when possible prior to service benching.",
+const EN_TERMS: TermItem[] = [
+  {
+    id: "01",
+    title: "Parts & Labor Coverage",
+    desc: "Covers 100% replacement parts and associated technician workbench labor with zero hidden fees.",
+  },
+  {
+    id: "02",
+    title: "Paperless Digital Claim",
+    desc: "Simply present your digital receipt or registered WhatsApp number — no paper receipts required.",
+  },
+  {
+    id: "03",
+    title: "Data & Privacy Security",
+    desc: "Your device data is strictly confidential. We advise backing up personal files prior to intake if possible.",
+  },
+  {
+    id: "04",
+    title: "Tamper Seal Integrity",
+    desc: "Warranty is void if the official FIXMI security seal is broken, removed, or dismantled by external parties.",
+  },
+  {
+    id: "05",
+    title: "Physical & Liquid Exclusions",
+    desc: "Accidental damage from user negligence (drops, cracked glass, pressure, or liquid ingress) is excluded.",
+  },
 ];
 
 export default function WarrantyModal({
@@ -64,59 +109,113 @@ export default function WarrantyModal({
         type="button"
         aria-label={dict.common.close}
         onClick={onClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 h-full w-full cursor-default bg-black/80 backdrop-blur-sm transition-opacity"
       />
 
-      {/* Panel */}
-      <div className="fade-rise relative z-10 flex max-h-[85vh] w-full max-w-[34rem] flex-col overflow-hidden rounded-[16px] border border-panel-border bg-panel shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
-        {/* Header */}
-        <div className="flex items-center gap-3 border-b border-panel-border px-5 py-4 lg:px-6">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-panel-raised">
-            <ShieldCheck className="h-5 w-5 text-primary" aria-hidden="true" />
-          </span>
-          <div className="flex-1">
-            <h2
-              id="warranty-title"
-              className="text-base font-semibold text-foreground lg:text-lg"
-            >
-              {dict.pricelist.warrantyModalTitle}
-            </h2>
-            <p className="font-mono text-[0.625rem] uppercase tracking-widest text-text-muted">
-              {dict.pricelist.warrantyModalSubtitle}
-            </p>
+      {/* Modal Surface */}
+      <div className="fade-rise relative z-10 flex max-h-[90vh] sm:max-h-[85vh] w-full max-w-[34rem] flex-col overflow-hidden rounded-[20px] border border-panel-border bg-panel shadow-[0_24px_60px_rgba(0,0,0,0.7)]">
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-primary">
+              <ShieldCheck className="h-4.5 w-4.5 stroke-[2]" aria-hidden="true" />
+            </span>
+            <div>
+              <h2
+                id="warranty-title"
+                className="text-base font-bold text-white tracking-[-0.01em]"
+              >
+                {dict.pricelist.warrantyModalTitle}
+              </h2>
+              <p className="font-mono text-[0.625rem] uppercase tracking-wider text-neutral-400">
+                {dict.pricelist.warrantyModalSubtitle}
+              </p>
+            </div>
           </div>
+
           <button
             type="button"
             onClick={onClose}
             aria-label={dict.common.close}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-panel-border text-text-muted transition-[border-color,color,transform] duration-150 ease-out hover:border-primary hover:text-primary active:scale-95"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-neutral-400 transition-colors duration-150 hover:border-white/[0.2] hover:text-white active:scale-95"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Daftar ketentuan */}
-        <ul
+        {/* ── Scrollable Body ── */}
+        <div
           data-lenis-prevent
-          className="flex-1 space-y-3 overflow-y-auto [overscroll-behavior:contain] px-5 py-5 lg:px-6"
+          className="flex-1 space-y-5 overflow-y-auto [overscroll-behavior:contain] p-5 sm:p-6"
         >
-          {terms.map((t, i) => (
-            <li key={i} className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                <Check className="h-3 w-3 text-primary" aria-hidden="true" />
+          {/* Quick Metrics Strip */}
+          <div className="grid grid-cols-3 divide-x divide-white/[0.06] rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 text-center">
+            <div className="px-1">
+              <span className="block font-mono text-[0.625rem] uppercase tracking-wider text-neutral-400">
+                {isEn ? "Period" : "Masa Garansi"}
               </span>
-              <span className="text-sm leading-relaxed text-text-secondary">{t}</span>
-            </li>
-          ))}
-        </ul>
+              <span className="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                {isEn ? "Up to 365 Days" : "Hingga 365 Hari"}
+              </span>
+            </div>
+            <div className="px-1">
+              <span className="block font-mono text-[0.625rem] uppercase tracking-wider text-neutral-400">
+                {isEn ? "Scope" : "Cakupan"}
+              </span>
+              <span className="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                {isEn ? "Parts & Labor" : "Part & Jasa"}
+              </span>
+            </div>
+            <div className="px-1">
+              <span className="block font-mono text-[0.625rem] uppercase tracking-wider text-neutral-400">
+                {isEn ? "Claim" : "Syarat Klaim"}
+              </span>
+              <span className="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                {isEn ? "Digital Invoice" : "Nota Digital / WA"}
+              </span>
+            </div>
+          </div>
 
-        {/* Footer */}
-        <div className="border-t border-panel-border px-5 py-4 lg:px-6">
-          <p className="text-xs leading-relaxed text-text-muted">
+          {/* Editorial Terms List */}
+          <div className="divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-white/[0.015] px-4 sm:px-5">
+            {terms.map((item) => (
+              <div key={item.id} className="flex items-start gap-3.5 py-3.5 first:pt-4 last:pb-4">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] font-mono text-[0.625rem] text-neutral-400">
+                  {item.id}
+                </span>
+                <div className="flex-1 space-y-0.5">
+                  <h3 className="text-xs sm:text-sm font-medium text-white tracking-[-0.01em]">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed text-neutral-400">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Footer Bar ── */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/[0.08] bg-white/[0.02] px-5 py-3.5 sm:px-6">
+          <p className="text-xs text-neutral-400 text-center sm:text-left">
             {isEn
-              ? "Have questions regarding warranty coverage? Contact FIXMI team — we will gladly explain before workbench intake."
-              : "Ada pertanyaan soal garansi? Hubungi tim FIXMI — kami bantu jelaskan sebelum service dimulai."}
+              ? "Need more details about warranty coverage?"
+              : "Ada pertanyaan seputar ketentuan garansi?"}
           </p>
+          <a
+            href={whatsappUrl(
+              isEn
+                ? "Hello FIXMI Service Center, I would like to ask about warranty terms and claims."
+                : "Halo FIXMI Service Center, saya ingin bertanya tentang ketentuan dan klaim garansi servis."
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors duration-150 hover:text-primary-light"
+          >
+            <span>{isEn ? "Ask via WhatsApp" : "Tanya via WhatsApp"}</span>
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
         </div>
       </div>
     </div>

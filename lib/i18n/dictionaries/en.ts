@@ -90,7 +90,7 @@ export const enDictionary: Dictionary = {
   },
   journey: {
     badge: "TRANSPARENT PROCESS",
-    heading: "TRANSPARENT REPAIR JOURNEY, ZERO WORRIES.",
+    heading: "OUR SERVICE WORKFLOW STANDARDS",
     step1Tag: "01. PROCESS",
     step1Title: "OPEN-BENCH DIAGNOSTICS",
     step1Desc:
@@ -125,8 +125,8 @@ export const enDictionary: Dictionary = {
   },
   faq: {
     badge: "FREQUENTLY ASKED QUESTIONS",
-    heading1: "EVERYTHING YOU NEED TO KNOW",
-    heading2: "BEFORE REPAIRING AT FIXMI",
+    heading1: "FREQUENTLY ASKED",
+    heading2: "QUESTIONS",
     subheading: "Total clarity is our commitment. Here are direct answers to our most common inquiries.",
     cardBadge: "FAST RESPONSE",
     cardTitle: "Have Another Question?",

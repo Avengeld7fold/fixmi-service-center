@@ -6,10 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import dynamic from "next/dynamic";
 
-// Code-splitting: semua section di bawah fold dipecah ke chunk JS terpisah.
-// SSR tetap aktif (default) sehingga HTML awal identik — tidak ada perubahan
-// visual, layout shift, ataupun dampak SEO. Hanya beban parse JS awal yang
-// berkurang signifikan untuk perangkat lawas.
+// ponytail: code-split below-fold sections — SSR stays on, only JS parse cost reduced
 const WhyChooseFixmiSection = dynamic(() => import("./WhyChooseFixmiSection"));
 const ExplodedPhoneSection = dynamic(() => import("./ExplodedPhoneSection"));
 const RepairJourneySection = dynamic(() => import("./RepairJourneySection"));
@@ -20,14 +17,15 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-/**
- * WaveDividerSection — Solusi bg-transparent definitif
- *
- * Kunci: body background = #121212 (sama dengan Hero section).
- * Dengan section menggunakan bg-transparent, area di atas wave curve
- * akan menampilkan body background (#121212) — identik dengan Hero.
- * Tidak ada lagi seam karena tidak ada dua CSS background yang berbeda.
- */
+// ponytail: 5 identical wrapper <div>s → one array
+const SECTIONS = [
+  WhyChooseFixmiSection,
+  ExplodedPhoneSection,
+  RepairJourneySection,
+  CustomerReviewsSection,
+  FaqSection,
+] as const;
+
 export default function WaveDividerSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const frontWaveRef = useRef<SVGSVGElement>(null);
@@ -56,16 +54,8 @@ export default function WaveDividerSection() {
   );
 
   return (
-    /*
-      bg-transparent: body (#121212) tembus ke area di atas wave curve.
-      Ini membuat area atas wave identik dengan Hero background — no seam!
-    */
-    <section
-      ref={sectionRef}
-      className="relative w-full"
-      style={{ background: "transparent" }}
-    >
-      {/* Wave wrapper: transparan di atas, menyatu rapat tanpa celah/belang */}
+    <section ref={sectionRef} className="relative w-full" style={{ background: "transparent" }}>
+      {/* Wave curve with tapered orange crest glow */}
       <div className="relative w-full pointer-events-none select-none z-10 -mb-px">
         <svg
           ref={frontWaveRef}
@@ -92,15 +82,13 @@ export default function WaveDividerSection() {
             </filter>
           </defs>
 
-          {/*
-            Wave Body = #121212 Murni, identik dengan Hero dan seluruh kanvas halaman
-          */}
+          {/* Wave body — #121212 matches page background */}
           <path
             d="M0,35 C260,120 500,145 760,70 C1020,5 1260,90 1440,35 L1440,160 L0,160 Z"
             fill="#121212"
           />
 
-          {/* Garis puncak oranye tapered yang bersinar tajam dan elegan */}
+          {/* Tapered orange crest stroke */}
           <path
             d="M0,35 C260,120 500,145 760,70 C1020,5 1260,90 1440,35"
             stroke="url(#taperedCrestGlow)"
@@ -111,30 +99,12 @@ export default function WaveDividerSection() {
         </svg>
       </div>
 
-      {/* ── Section 1: MENGAPA MEMILIH FIXMI (Apple Dark Bento Trust Grid) ── */}
-      <div className="relative w-full bg-[#121212] cursor-default">
-        <WhyChooseFixmiSection />
-      </div>
-
-      {/* ── Section 2: APA YANG KAMI PERBAIKI (Exploded Assembly + Callout) ── */}
-      <div className="relative w-full bg-[#121212] cursor-default">
-        <ExplodedPhoneSection />
-      </div>
-
-      {/* ── Section 3: ALUR SERVIS TRANSPARAN (4-Step Repair Journey) ── */}
-      <div className="relative w-full bg-[#121212] cursor-default">
-        <RepairJourneySection />
-      </div>
-
-      {/* ── Section 4: CUSTOMER REVIEWS (Live Google Maps Rating & Reviews) ── */}
-      <div className="relative w-full bg-[#121212] cursor-default">
-        <CustomerReviewsSection />
-      </div>
-
-      {/* ── Section 5: FAQ (Ask Away - 3D Perspective Photo + Minimalist Accordion) ── */}
-      <div className="relative w-full bg-[#121212] cursor-default">
-        <FaqSection />
-      </div>
+      {/* Content sections */}
+      {SECTIONS.map((Section, idx) => (
+        <div key={idx} className="relative w-full bg-[#121212] cursor-default">
+          <Section />
+        </div>
+      ))}
     </section>
   );
 }

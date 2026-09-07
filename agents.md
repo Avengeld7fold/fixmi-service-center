@@ -37,6 +37,16 @@ Gunakan struktur ini sebagai acuan saat diminta membuat komponen:
 * `public/models/`: Lokasi model 3D.
 * `public/sequence/`: Lokasi *frame* gambar statis untuk *scroll animation*.
 
+### E. Prinsip Wajib Ponytail (Senior Clean Code & Zero Bloat - Wajib Setiap Saat)
+* **Kewajiban Mutlak:** Wajib selalu mengaktifkan mindset dan perilaku skills `/ponytail` (Senior Clean Code Developer) pada SETIAP penulisan kode, penambahan fitur, bugfix, maupun refactoring ke depannya tanpa terkecuali.
+* **Minimal & Ringkas (YAGNI):** Jangan membuat abstraksi spekulatif, scaffolding berlebihan, atau kode yang tidak diminta. Terapkan prinsip: kode terbaik adalah kode yang tidak perlu ditulis (*the best code is no code*).
+* **Bebas Dead Code & Zero Duplikasi:** Selalu bersihkan import, interface, variabel, dan properti yang tidak digunakan. Deduplikasi blok kode berulang menjadi fungsi murni atau mapping data yang rapi dan mudah dirawat.
+* **Feature Integrity (Aturan Kritis):**
+  - Kode yang ringkas dan bersih TIDAK BOLEH merusak tampilan visual, micro-motion, gesture, atau fungsionalitas apapun.
+  - Jangan memindahkan class Tailwind arbitrer (`[...]`) ke variabel JavaScript agar tidak terlewat oleh AOT scanner Tailwind CSS v4.
+  - Selalu pertahankan variabel CSS animasi (seperti `--row`) dan custom properties yang terhubung ke `globals.css`.
+  - Selalu verifikasi setiap perubahan dengan `npx tsc --noEmit` dan `npm run build` sebelum menyelesaikannya.
+
 ## 4. Pola Komunikasi Agent
 * **Jangan berasumsi:** Jika *prompt* dari *user* kurang jelas, bertanyalah. Jika diminta menyelesaikan Fase 1, jangan melompat menulis kode untuk Fase 2 hingga diinstruksikan.
 * **Fokus pada Output:** Berikan blok kode lengkap jika memungkinkan, hindari memotong kode di tengah jalan kecuali panjang karakter dibatasi.

@@ -90,7 +90,7 @@ export const idDictionary: Dictionary = {
   },
   journey: {
     badge: "TRANSPARANSI PROSES",
-    heading: "PROSES YANG DIRANCANG UNTUK MEMBERIKAN KEPASTIAN DI SETIAP TAHAP.",
+    heading: "STANDAR ALUR SERVIS KAMI",
     step1Tag: "01. PROCESS",
     step1Title: "DIAGNOSA TERBUKA DI MEJA DEPAN",
     step1Desc:
@@ -125,8 +125,8 @@ export const idDictionary: Dictionary = {
   },
   faq: {
     badge: "PERTANYAAN UMUM",
-    heading1: "INFORMASI YANG PERLU ANDA MILIKI",
-    heading2: "SEBELUM MEMPERCAYAKAN PERANGKAT ANDA",
+    heading1: "YANG PALING SERING",
+    heading2: "DITANYAKAN",
     subheading: "Informasi yang jelas adalah bagian dari standar layanan kami.",
     cardBadge: "RESPON CEPAT",
     cardTitle: "Punya Pertanyaan Lain?",
