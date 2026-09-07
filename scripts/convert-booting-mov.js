@@ -9,6 +9,10 @@ const LCD_IMAGE = path.join(__dirname, '../public/images/services/LCD.webp');
 const OUTPUT_GIF = path.join(__dirname, '../public/images/services/Booting.gif');
 const OUTPUT_ROOT_GIF = path.join(__dirname, '../public/booting.gif');
 
+// Exact dimensions matching LCD.webp
+const TARGET_WIDTH = 441;
+const TARGET_HEIGHT = 735;
+
 const RAW_DIR = '/tmp/fixmi_raw_frames';
 const MASKED_DIR = '/tmp/fixmi_masked_frames';
 
@@ -77,6 +81,7 @@ async function generateSilhouetteMask(width, height) {
 }
 
 async function main() {
+  console.log(`Target Dimensions: ${TARGET_WIDTH} x ${TARGET_HEIGHT} (matching LCD.webp)`);
   console.log('1. Preparing directories...');
   fs.rmSync(RAW_DIR, { recursive: true, force: true });
   fs.rmSync(MASKED_DIR, { recursive: true, force: true });
@@ -89,10 +94,10 @@ async function main() {
   const rawFrames = fs.readdirSync(RAW_DIR).filter(f => f.endsWith('.png')).sort();
   console.log(`Extracted ${rawFrames.length} frames.`);
 
-  console.log('3. Generating pixel-perfect iPhone silhouette mask...');
-  const maskBuffer = await generateSilhouetteMask(440, 736);
+  console.log(`3. Generating pixel-perfect iPhone silhouette mask (${TARGET_WIDTH}x${TARGET_HEIGHT})...`);
+  const maskBuffer = await generateSilhouetteMask(TARGET_WIDTH, TARGET_HEIGHT);
 
-  console.log('4. Masking frames to preserve transparent background...');
+  console.log('4. Masking and resizing frames to 441x735 with transparent background...');
   const batchSize = 10;
   for (let i = 0; i < rawFrames.length; i += batchSize) {
     const batch = rawFrames.slice(i, i + batchSize);
@@ -100,6 +105,7 @@ async function main() {
       const inputPath = path.join(RAW_DIR, file);
       const outputPath = path.join(MASKED_DIR, file);
       await sharp(inputPath)
+        .resize(TARGET_WIDTH, TARGET_HEIGHT, { fit: 'fill' })
         .ensureAlpha()
         .composite([{ input: maskBuffer, blend: 'dest-in' }])
         .png({ compressionLevel: 6 })
@@ -107,7 +113,7 @@ async function main() {
     }));
     process.stdout.write(`Processed ${Math.min(i + batchSize, rawFrames.length)}/${rawFrames.length} frames...\r`);
   }
-  console.log('\nAll frames masked successfully!');
+  console.log('\nAll frames masked and resized to 441x735 successfully!');
 
   console.log('5. Generating color palette preserving transparency...');
   const palettePath = '/tmp/fixmi_palette.png';
