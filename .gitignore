@@ -41,7 +41,8 @@ next-env.d.ts
 .vercel
 
 # Backup runtime pricelist (dibuat admin panel)
-/data/backups/
+/data/backups/*.json
+!/data/backups/.gitkeep
 
 # Claude Code local settings
 .claude/settings.local.json

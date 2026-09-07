@@ -156,12 +156,11 @@ function timestamp(): string {
  * Mengembalikan daftar nama file yang dihapus.
  */
 export async function cleanExpiredBackups(): Promise<string[]> {
-  await mkdir(BACKUP_DIR, { recursive: true });
-  const now = Date.now();
   const deleted: string[] = [];
 
   try {
     const files = (await readdir(BACKUP_DIR)).filter((f) => /^pricelist-.*\.json$/.test(f));
+    const now = Date.now();
     for (const filename of files) {
       const filepath = join(BACKUP_DIR, filename);
       try {
@@ -177,7 +176,7 @@ export async function cleanExpiredBackups(): Promise<string[]> {
       }
     }
   } catch {
-    // Folder belum ada
+    // Folder belum ada atau read-only
   }
 
   return deleted;
@@ -187,26 +186,28 @@ export async function cleanExpiredBackups(): Promise<string[]> {
  * Membuat snapshot cadangan manual dari data pricelist saat ini.
  */
 export async function createManualBackup(): Promise<string> {
-  await mkdir(BACKUP_DIR, { recursive: true });
-  const filename = `pricelist-${timestamp()}--cadangan-manual.json`;
-  await copyFile(PRICELIST_PATH, join(BACKUP_DIR, filename));
-  await cleanExpiredBackups();
-  return filename;
+  try {
+    await mkdir(BACKUP_DIR, { recursive: true });
+    const filename = `pricelist-${timestamp()}--cadangan-manual.json`;
+    await copyFile(PRICELIST_PATH, join(BACKUP_DIR, filename));
+    await cleanExpiredBackups();
+    return filename;
+  } catch {
+    fail("Gagal membuat snapshot cadangan (penyimpanan server read-only atau folder tidak dapat diakses).");
+  }
 }
 
 async function backupCurrent(reason?: string): Promise<string> {
-  await mkdir(BACKUP_DIR, { recursive: true });
-  const safeReason = reason ? `--${reason.replace(/[^a-zA-Z0-9-]/g, "-")}` : "";
-  const filename = `pricelist-${timestamp()}${safeReason}.json`;
   try {
+    await mkdir(BACKUP_DIR, { recursive: true });
+    const safeReason = reason ? `--${reason.replace(/[^a-zA-Z0-9-]/g, "-")}` : "";
+    const filename = `pricelist-${timestamp()}${safeReason}.json`;
     await copyFile(PRICELIST_PATH, join(BACKUP_DIR, filename));
+    await cleanExpiredBackups();
+    return filename;
   } catch {
-    return ""; // file utama belum ada — tidak ada yang di-backup
+    return ""; // file utama belum ada atau penyimpanan server read-only
   }
-
-  // Bersihkan backup yang sudah lebih tua dari 30 hari
-  await cleanExpiredBackups();
-  return filename;
 }
 
 interface DeletionCheckResult {
@@ -360,39 +361,43 @@ function parseBackupTitle(filename: string): { title: string; badge?: string } {
  * Backup yang sudah melewati 30 hari akan otomatis dihapus dan tidak ditampilkan.
  */
 export async function listBackups(): Promise<BackupInfo[]> {
-  await mkdir(BACKUP_DIR, { recursive: true });
-  // Bersihkan file kedaluwarsa terlebih dahulu
-  await cleanExpiredBackups();
+  try {
+    // Bersihkan file kedaluwarsa terlebih dahulu jika ada
+    await cleanExpiredBackups();
 
-  const now = Date.now();
-  const files = (await readdir(BACKUP_DIR)).filter((f) => /^pricelist-.*\.json$/.test(f));
-  const infos: BackupInfo[] = [];
+    const now = Date.now();
+    const files = (await readdir(BACKUP_DIR)).filter((f) => /^pricelist-.*\.json$/.test(f));
+    const infos: BackupInfo[] = [];
 
-  for (const name of files) {
-    try {
-      const s = await stat(join(BACKUP_DIR, name));
-      const ageMs = now - s.mtime.getTime();
+    for (const name of files) {
+      try {
+        const s = await stat(join(BACKUP_DIR, name));
+        const ageMs = now - s.mtime.getTime();
 
-      // Hanya masukkan yang <= 30 hari
-      if (ageMs <= BACKUP_RETENTION_MS) {
-        const daysOld = Math.floor(ageMs / (24 * 60 * 60 * 1000));
-        const daysRemaining = Math.max(1, BACKUP_RETENTION_DAYS - daysOld);
-        const parsed = parseBackupTitle(name);
-        infos.push({
-          name,
-          title: parsed.title,
-          badge: parsed.badge,
-          modifiedAt: s.mtime.toISOString(),
-          sizeBytes: s.size,
-          daysRemaining,
-        });
+        // Hanya masukkan yang <= 30 hari
+        if (ageMs <= BACKUP_RETENTION_MS) {
+          const daysOld = Math.floor(ageMs / (24 * 60 * 60 * 1000));
+          const daysRemaining = Math.max(1, BACKUP_RETENTION_DAYS - daysOld);
+          const parsed = parseBackupTitle(name);
+          infos.push({
+            name,
+            title: parsed.title,
+            badge: parsed.badge,
+            modifiedAt: s.mtime.toISOString(),
+            sizeBytes: s.size,
+            daysRemaining,
+          });
+        }
+      } catch {
+        // Abaikan bila file error saat dibaca
       }
-    } catch {
-      // Abaikan bila file error saat dibaca
     }
-  }
 
-  return infos.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt)); // terbaru dulu berdasarkan waktu
+    return infos.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt)); // terbaru dulu berdasarkan waktu
+  } catch {
+    // Folder belum ada atau filesystem read-only (misal Vercel)
+    return [];
+  }
 }
 
 /**
@@ -446,16 +451,19 @@ export async function deleteBackup(name: string): Promise<void> {
  * Mengosongkan seluruh file backup secara permanen dari server.
  */
 export async function clearAllBackups(): Promise<number> {
-  await mkdir(BACKUP_DIR, { recursive: true });
-  const files = (await readdir(BACKUP_DIR)).filter((f) => /^pricelist-.*\.json$/.test(f));
   let count = 0;
-  for (const filename of files) {
-    try {
-      await unlink(join(BACKUP_DIR, filename));
-      count++;
-    } catch {
-      // Abaikan jika sudah terhapus
+  try {
+    const files = (await readdir(BACKUP_DIR)).filter((f) => /^pricelist-.*\.json$/.test(f));
+    for (const filename of files) {
+      try {
+        await unlink(join(BACKUP_DIR, filename));
+        count++;
+      } catch {
+        // Abaikan jika sudah terhapus
+      }
     }
+  } catch {
+    // Folder belum ada atau read-only
   }
   return count;
 }

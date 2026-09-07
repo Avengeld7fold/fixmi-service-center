@@ -127,8 +127,12 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/fixmi-logo.png",
+    icon: [
+      { url: "/favinco.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favinco.svg",
+    apple: "/favinco.svg",
   },
 };
 

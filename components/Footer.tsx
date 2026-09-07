@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { CSSProperties } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
 import { SOCIAL_LINKS } from "@/lib/constants";
@@ -47,7 +49,7 @@ const SOCIALS = [
 
 export default function Footer() {
   const pathname = usePathname();
-  const { dict, locale } = useI18n();
+  const { dict, locale, getLocalizedPath } = useI18n();
   const [active, setActive] = useState<StoreKey>("head");
 
   if (pathname.startsWith("/admin") || pathname === "/contact" || pathname === "/en/contact") return null;
@@ -132,22 +134,20 @@ export default function Footer() {
     <footer className="border-t border-white/[0.08] bg-[#121212] text-neutral-300">
       <div className="mx-auto w-full px-3 sm:px-4 md:px-12 lg:px-16" style={{ maxWidth: "90rem" }}>
         {/* ── Brand Header ── */}
-        <div className="flex flex-col gap-2 border-b border-white/[0.08] py-12 lg:py-14">
-          <div className="flex items-center gap-2.5">
-            <span className="text-3xl font-bold italic tracking-[-0.03em] text-[#f5f5f5]">
-              fixmi
-            </span>
-            <svg width="16" height="27" viewBox="0 0 24 40" fill="var(--fixmi-primary)" aria-hidden="true" className="shrink-0 drop-shadow-[0_0_8px_rgba(255,107,0,0.35)]">
-              <path d="M14 0 3 23h7l-2 17 13-25h-8l3-15z" />
-            </svg>
-            <span className="text-lg font-bold tracking-wide">
-              <span className="text-primary">SERVICE</span>{" "}
-              <span className="text-[#f5f5f5]">CENTER</span>
-            </span>
-          </div>
-          <p className="text-sm text-neutral-400">
-            {dict.footer.tagline}
-          </p>
+        <div className="border-b border-white/[0.08] py-10 lg:py-12">
+          <Link
+            href={getLocalizedPath("/")}
+            className="inline-block no-underline group active:scale-[0.98] transition-transform duration-150 ease-out"
+            aria-label="FIXMI Service Center"
+          >
+            <Image
+              src="/images/logo.svg"
+              alt="FIXMI Service Center · Phone Service · Sparepart · Tech Academy"
+              width={212}
+              height={54}
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90 drop-shadow-sm"
+            />
+          </Link>
         </div>
 
         {/* ── Store locator ── */}
