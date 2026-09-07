@@ -398,6 +398,7 @@ function InspectionCircleNode({
             src={callout.circleImage}
             alt={displayName}
             fill
+            sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, (max-width: 1024px) 80px, 88px"
             className="object-contain p-2.5 group-hover:scale-115 transition-transform duration-250 ease-out drop-shadow-md"
           />
           {/* Dark overlay with inspection icon on hover */}
@@ -1326,6 +1327,7 @@ export default function ExplodedPhoneSection() {
                         src={callout.circleImage}
                         alt={displayName}
                         fill
+                        sizes="56px"
                         className="object-contain p-1"
                       />
                     </div>
@@ -1400,6 +1402,7 @@ export default function ExplodedPhoneSection() {
                   src={modalCallout.circleImage}
                   alt={isEn ? modalCallout.nameEn : modalCallout.name}
                   fill
+                  sizes="(max-width: 640px) 64px, 80px"
                   className="object-contain p-2 drop-shadow-lg scale-110"
                 />
               </div>
