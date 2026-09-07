@@ -1393,118 +1393,117 @@ export default function ExplodedPhoneSection() {
         </div>
       </div>
 
-      {/* ── INTERACTIVE DETAIL MODAL (APPLE PRO HARDWARE ATELIER / VITRINE) ── */}
+      {/* ── INTERACTIVE DETAIL MODAL (FIXMI CLINICAL DIAGNOSTIC INSTRUMENT) ── */}
       {modalCallout && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-6 bg-black/80 backdrop-blur-xl transition-opacity duration-200 ease-out animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-6 bg-black/80 backdrop-blur-md transition-opacity duration-200 ease-out animate-in fade-in"
           onClick={() => setModalCallout(null)}
         >
           <div
-            className="relative w-full max-w-lg md:max-w-3xl rounded-3xl border border-white/[0.1] bg-[#121216]/95 backdrop-blur-3xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9),0_0_60px_-15px_rgba(255,107,0,0.12)] overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] animate-in zoom-in-95 slide-in-from-bottom-3 max-h-[92vh] flex flex-col md:flex-row"
+            className="relative w-full max-w-lg md:max-w-3xl rounded-[24px] border border-[#262626] bg-[#1a1a1a] shadow-2xl overflow-hidden transition-all duration-200 ease-out animate-in zoom-in-95 slide-in-from-bottom-2 max-h-[92vh] flex flex-col md:flex-row select-none"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top Specular Hairline Highlight */}
-            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent z-20" />
-
-            {/* Close Button — Apple Tactile Circle */}
+            {/* Close Button — Instrument Grade */}
             <button
               type="button"
               onClick={() => setModalCallout(null)}
-              className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-white/[0.06] border border-white/10 text-neutral-400 hover:text-white hover:bg-white/15 hover:border-white/25 active:scale-90 transition-all duration-150 ease-out"
+              className="absolute top-4 right-4 z-30 p-2 rounded-[10px] bg-[#121212] border border-[#262626] text-[#a3a3a3] hover:text-[#f5f5f5] hover:border-[#303030] active:scale-95 transition-all duration-150"
               aria-label={dict.common.close}
             >
               <X className="w-4 h-4" />
             </button>
 
-            {/* ── LEFT COLUMN: HARDWARE VITRINE SHOWCASE ── */}
-            <div className="relative md:w-[280px] shrink-0 bg-gradient-to-b from-[#18181E] to-[#0D0D11] p-6 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-white/[0.08] min-h-[220px] md:min-h-[460px] overflow-hidden">
-              {/* Warm Ambient Spotlight */}
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,107,0,0.22),transparent_70%)]" />
-              <div className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 w-44 h-24 bg-primary/20 rounded-full blur-2xl" />
+            {/* ── LEFT COLUMN: HARDWARE SPECIMEN VITRINE (Tonal Dark Slate #121212) ── */}
+            <div className="relative md:w-[280px] shrink-0 bg-[#121212] p-6 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-[#262626] min-h-[220px] md:min-h-[440px] overflow-hidden">
+              {/* Subtle Diagnostic Spotlight */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,107,0,0.14),transparent_65%)]" />
 
-              {/* Code Pill Badge */}
+              {/* Component Code Monospace Spec */}
               <div className="relative z-10 w-full flex items-center justify-between">
-                <span className="font-mono text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/10 text-neutral-300 font-medium">
+                <span className="font-mono text-xs uppercase tracking-wider px-2.5 py-1 rounded-[6px] bg-[#1a1a1a] border border-[#262626] text-[#a3a3a3] font-medium tabular-nums">
                   {modalCallout.code}
                 </span>
               </div>
 
-              {/* Floating Hardware Specimen */}
-              <div className="relative z-10 my-auto py-2 w-full h-[150px] sm:h-[180px] md:h-[260px] flex items-center justify-center">
+              {/* Floating Hardware Specimen (Heroic Scale) */}
+              <div className="relative z-10 my-auto py-2 w-full h-[150px] sm:h-[180px] md:h-[240px] flex items-center justify-center">
                 <Image
                   src={modalCallout.circleImage}
                   alt={isEn ? modalCallout.nameEn : modalCallout.name}
                   fill
                   sizes="(max-width: 768px) 200px, 280px"
-                  className="object-contain drop-shadow-[0_16px_36px_rgba(0,0,0,0.9)] transition-transform duration-300 hover:scale-105"
+                  className="object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.85)] transition-transform duration-300 hover:scale-105"
                   priority
                 />
               </div>
 
-              {/* Time Estimate Pill */}
-              <div className="relative z-10 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/[0.08] text-xs text-neutral-300 backdrop-blur-sm">
+              {/* Time Estimate Badge (Monospace Tabular) */}
+              <div className="relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#1a1a1a] border border-[#262626] text-xs font-mono tabular-nums text-[#a3a3a3]">
                 <Clock className="w-3.5 h-3.5 text-primary" />
                 <span>{dict.teardown.modalEstimate}:</span>
-                <strong className="text-white font-semibold">
+                <strong className="text-[#f5f5f5] font-semibold">
                   {isEn ? modalCallout.estimatedTimeEn : modalCallout.estimatedTime}
                 </strong>
               </div>
             </div>
 
-            {/* ── RIGHT COLUMN: EDITORIAL DIAGNOSTICS & ACTION ── */}
-            <div className="flex-1 p-6 sm:p-7 md:p-8 flex flex-col justify-between overflow-y-auto">
+            {/* ── RIGHT COLUMN: CLINICAL DIAGNOSTIC INFO & ACTION (#1a1a1a Surface) ── */}
+            <div className="flex-1 p-6 sm:p-7 md:p-8 flex flex-col justify-between overflow-y-auto bg-[#1a1a1a]">
               <div>
-                {/* Header */}
+                {/* Header with Bayon Display Font */}
                 <div className="pr-8">
-                  <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+                  <h3
+                    className="font-bayon text-2xl sm:text-3xl lg:text-4xl uppercase tracking-[0.02em] text-[#f5f5f5] leading-none"
+                    style={{ fontFamily: "var(--font-bayon), sans-serif" }}
+                  >
                     {isEn ? modalCallout.nameEn : modalCallout.name}
                   </h3>
-                  <p className="text-xs text-neutral-400 mt-1 font-medium">
+                  <p className="font-mono text-xs text-[#737373] mt-2 tabular-nums">
                     {modalCallout.layerRange}
                   </p>
                 </div>
 
-                {/* Hairline Divider */}
-                <div className="w-full h-px bg-white/[0.08] my-4 sm:my-5" />
+                {/* 1px Panel Divider */}
+                <div className="w-full h-px bg-[#262626] my-4 sm:my-5" />
 
-                {/* Common Symptoms (Zero Nested Boxes) */}
+                {/* Diagnostic Symptoms */}
                 <div className="mb-4 sm:mb-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-3">
+                  <h4 className="font-mono text-xs uppercase tracking-wider text-[#a3a3a3] mb-3">
                     {dict.teardown.modalSymptoms}
                   </h4>
                   <ul className="space-y-2.5">
                     {(isEn ? modalCallout.symptomsEn : modalCallout.symptoms).map((symptom, i) => (
-                      <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-neutral-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 shadow-[0_0_6px_rgba(255,107,0,0.8)]" />
-                        <span className="leading-relaxed">{symptom}</span>
+                      <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-[#d4d4d8] leading-relaxed">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 shadow-[0_0_6px_rgba(255,107,0,0.6)]" />
+                        <span>{symptom}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                {/* Hairline Divider */}
-                <div className="w-full h-px bg-white/[0.08] my-4 sm:my-5" />
+                {/* 1px Panel Divider */}
+                <div className="w-full h-px bg-[#262626] my-4 sm:my-5" />
 
-                {/* FIXMI Certified Solution */}
+                {/* FIXMI Diagnostic Solution Protocol */}
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
                     <ShieldCheck className="w-4 h-4 text-primary" />
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-white">
+                    <h4 className="font-mono text-xs uppercase tracking-wider text-[#f5f5f5] font-medium">
                       {dict.teardown.modalFixmiSolution}
                     </h4>
                   </div>
-                  <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed pl-6">
+                  <p className="text-xs sm:text-sm text-[#a3a3a3] leading-relaxed pl-6 max-w-[65ch]">
                     {isEn ? modalCallout.fixmiSolutionEn : modalCallout.fixmiSolution}
                   </p>
                 </div>
               </div>
 
-              {/* Action Bar */}
-              <div className="pt-6 sm:pt-7 mt-4 sm:mt-6 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs text-neutral-300">
+              {/* Action Dock with Official DESIGN.md Button Spec */}
+              <div className="pt-6 sm:pt-7 mt-4 sm:mt-6 border-t border-[#262626] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs font-mono text-[#a3a3a3]">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22C55E] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22C55E]" />
                   </span>
                   <span className="font-medium tracking-wide">
                     {dict.common.officialWarranty}
@@ -1514,7 +1513,7 @@ export default function ExplodedPhoneSection() {
                 <Link
                   href={getLocalizedPath(modalCallout.categoryLink)}
                   onClick={() => setModalCallout(null)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-primary text-black font-semibold text-xs sm:text-sm hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_4px_20px_rgba(255,107,0,0.3)]"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[10px] bg-primary text-white font-semibold text-xs sm:text-sm hover:bg-[#e05e00] active:scale-[0.98] active:-translate-y-[1px] transition-all duration-150"
                 >
                   <span>{dict.whyUs.checkPriceBtn}</span>
                   <ArrowRight className="w-4 h-4" />
