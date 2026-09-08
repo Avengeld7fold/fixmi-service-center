@@ -4,28 +4,740 @@
     "Slug": "iphone",
     "description": "Layanan perbaikan display OLED, penggantian baterai, kalibrasi Face ID, dan restorasi logic board iPhone secara presisi.",
     "Image": "/images/iphone.webp",
-    "service_types": []
+    "service_types": [
+      {
+        "Name": "LCD",
+        "Slug": "lcd",
+        "variants": [
+          {
+            "Key": "original-apple",
+            "Label": "ORIGINAL APPLE",
+            "Note": ""
+          },
+          {
+            "Key": "oem",
+            "Label": "OEM",
+            "Note": ""
+          },
+          {
+            "Key": "grade-a",
+            "Label": "GRADE A",
+            "Note": ""
+          },
+          {
+            "Key": "oled-premium",
+            "Label": "OLED PREMIUM",
+            "Note": ""
+          },
+          {
+            "Key": "pindah-chip-lcd",
+            "Label": "PINDAH CHIP LCD",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPhone 6",
+            "prices": {
+              "original-apple": 600000,
+              "oem": 475000,
+              "grade-a": 375000,
+              "oled-premium": null,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S",
+            "prices": {
+              "original-apple": 600000,
+              "oem": 500000,
+              "grade-a": 375000,
+              "oled-premium": null,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S Plus",
+            "prices": {
+              "original-apple": 650000,
+              "oem": 530000,
+              "grade-a": 375000,
+              "oled-premium": null,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7",
+            "prices": {
+              "original-apple": 950000,
+              "oem": 550000,
+              "grade-a": 450000,
+              "oled-premium": null,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7 Plus",
+            "prices": {
+              "original-apple": 900000,
+              "oem": 690000,
+              "grade-a": 475000,
+              "oled-premium": null,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8",
+            "prices": {
+              "original-apple": 950000,
+              "oem": 570000,
+              "grade-a": 480000,
+              "oled-premium": 700000,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8 Plus",
+            "prices": {
+              "original-apple": 1100000,
+              "oem": 650000,
+              "grade-a": 490000,
+              "oled-premium": 800000,
+              "pindah-chip-lcd": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone X",
+            "prices": {
+              "original-apple": 1200000,
+              "oem": 729000,
+              "grade-a": 550000,
+              "oled-premium": 950000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XR",
+            "prices": {
+              "original-apple": 1350000,
+              "oem": 700000,
+              "grade-a": 550000,
+              "oled-premium": 980000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS",
+            "prices": {
+              "original-apple": 1600000,
+              "oem": 680000,
+              "grade-a": 550000,
+              "oled-premium": 975000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS Max",
+            "prices": {
+              "original-apple": 2000000,
+              "oem": 800000,
+              "grade-a": 650000,
+              "oled-premium": 1000000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11",
+            "prices": {
+              "original-apple": 1500000,
+              "oem": 800000,
+              "grade-a": 650000,
+              "oled-premium": 1000000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro",
+            "prices": {
+              "original-apple": 1800000,
+              "oem": 890000,
+              "grade-a": 700000,
+              "oled-premium": 1200000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro Max",
+            "prices": {
+              "original-apple": 2200000,
+              "oem": 1050000,
+              "grade-a": 750000,
+              "oled-premium": 1590000,
+              "pindah-chip-lcd": 300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12",
+            "prices": {
+              "original-apple": 2300000,
+              "oem": 1000000,
+              "grade-a": 780000,
+              "oled-premium": 1700000,
+              "pindah-chip-lcd": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Mini",
+            "prices": {
+              "original-apple": 2350000,
+              "oem": 1050000,
+              "grade-a": 820000,
+              "oled-premium": 1750000,
+              "pindah-chip-lcd": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro",
+            "prices": {
+              "original-apple": 2200000,
+              "oem": 1000000,
+              "grade-a": 780000,
+              "oled-premium": 1700000,
+              "pindah-chip-lcd": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro Max",
+            "prices": {
+              "original-apple": 3500000,
+              "oem": 1750000,
+              "grade-a": 850000,
+              "oled-premium": 2100000,
+              "pindah-chip-lcd": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13",
+            "prices": {
+              "original-apple": 2400000,
+              "oem": 1200000,
+              "grade-a": 900000,
+              "oled-premium": 1600000,
+              "pindah-chip-lcd": 400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Mini",
+            "prices": {
+              "original-apple": 2850000,
+              "oem": 1200000,
+              "grade-a": 950000,
+              "oled-premium": 1950000,
+              "pindah-chip-lcd": 400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro",
+            "prices": {
+              "original-apple": 3300000,
+              "oem": 1400000,
+              "grade-a": 1050000,
+              "oled-premium": 2400000,
+              "pindah-chip-lcd": 400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro Max",
+            "prices": {
+              "original-apple": 5749000,
+              "oem": 1450000,
+              "grade-a": 2800000,
+              "oled-premium": 2300000,
+              "pindah-chip-lcd": 400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14",
+            "prices": {
+              "original-apple": 2850000,
+              "oem": 1450000,
+              "grade-a": 1100000,
+              "oled-premium": 1800000,
+              "pindah-chip-lcd": 450000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Plus",
+            "prices": {
+              "original-apple": 3200000,
+              "oem": 1600000,
+              "grade-a": 1150000,
+              "oled-premium": 2200000,
+              "pindah-chip-lcd": 450000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro",
+            "prices": {
+              "original-apple": 5700000,
+              "oem": 1750000,
+              "grade-a": 1100000,
+              "oled-premium": 2750000,
+              "pindah-chip-lcd": 450000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro Max",
+            "prices": {
+              "original-apple": 6700000,
+              "oem": 1800000,
+              "grade-a": 1350000,
+              "oled-premium": 2950000,
+              "pindah-chip-lcd": 450000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15",
+            "prices": {
+              "original-apple": 4650000,
+              "oem": 1600000,
+              "grade-a": 1050000,
+              "oled-premium": 2700000,
+              "pindah-chip-lcd": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Plus",
+            "prices": {
+              "original-apple": 4700000,
+              "oem": 1750000,
+              "grade-a": 1200000,
+              "oled-premium": 2750000,
+              "pindah-chip-lcd": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro",
+            "prices": {
+              "original-apple": 5800000,
+              "oem": 2500000,
+              "grade-a": 1600000,
+              "oled-premium": 4000000,
+              "pindah-chip-lcd": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro Max",
+            "prices": {
+              "original-apple": 6875000,
+              "oem": 2600000,
+              "grade-a": 1800000,
+              "oled-premium": 4100000,
+              "pindah-chip-lcd": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16",
+            "prices": {
+              "original-apple": 6450000,
+              "oem": 2800000,
+              "grade-a": 1900000,
+              "oled-premium": 4200000,
+              "pindah-chip-lcd": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Plus",
+            "prices": {
+              "original-apple": 7550000,
+              "oem": 3200000,
+              "grade-a": 2300000,
+              "oled-premium": 4500000,
+              "pindah-chip-lcd": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro",
+            "prices": {
+              "original-apple": 8100000,
+              "oem": 3500000,
+              "grade-a": 2600000,
+              "oled-premium": 5500000,
+              "pindah-chip-lcd": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro Max",
+            "prices": {
+              "original-apple": 8500000,
+              "oem": 4100000,
+              "grade-a": 2950000,
+              "oled-premium": 5700000,
+              "pindah-chip-lcd": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17",
+            "prices": {
+              "original-apple": 7800000,
+              "oem": 3800000,
+              "grade-a": 2800000,
+              "oled-premium": 4400000,
+              "pindah-chip-lcd": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Pro",
+            "prices": {
+              "original-apple": 10200000,
+              "oem": 3200000,
+              "grade-a": 2400000,
+              "oled-premium": 5250000,
+              "pindah-chip-lcd": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Pro Max",
+            "prices": {
+              "original-apple": 12500000,
+              "oem": 3700000,
+              "grade-a": 2600000,
+              "oled-premium": 5655000,
+              "pindah-chip-lcd": 700000
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     "Name": "iPad",
     "Slug": "ipad",
     "description": "Restorasi digitizer presisi tinggi, penggantian baterai iPad, dan reparasi port pengisian daya.",
     "Image": "/images/ipad.webp",
-    "service_types": []
+    "service_types": [
+      {
+        "Name": "Battery",
+        "Slug": "battery",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPad Pro 13\" (M4)",
+            "prices": {
+              "harga": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPad Pro 11\" (M4)",
+            "prices": {
+              "harga": 850000
+            }
+          },
+          {
+            "DeviceModel": "iPad Air 13\" (M2)",
+            "prices": {
+              "harga": 700000
+            }
+          },
+          {
+            "DeviceModel": "iPad Air 11\" (M2)",
+            "prices": {
+              "harga": 650000
+            }
+          },
+          {
+            "DeviceModel": "iPad Pro 12.9\" (Gen 6)",
+            "prices": {
+              "harga": 800000
+            }
+          },
+          {
+            "DeviceModel": "iPad Pro 11\" (Gen 4)",
+            "prices": {
+              "harga": 750000
+            }
+          },
+          {
+            "DeviceModel": "iPad 10th Gen",
+            "prices": {
+              "harga": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPad 9th Gen",
+            "prices": {
+              "harga": 450000
+            }
+          },
+          {
+            "DeviceModel": "iPad Mini 6",
+            "prices": {
+              "harga": 550000
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     "Name": "Macbook",
     "Slug": "macbook",
     "description": "Perbaikan hardware logic board, penggantian layar retina, dan pembersihan komponen termal interior Macbook.",
     "Image": "/images/macbook.webp",
-    "service_types": []
+    "service_types": [
+      {
+        "Name": "LCD / Display",
+        "Slug": "lcd-display",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "MacBook Pro 16\" (M3 Max)",
+            "prices": {
+              "harga": 6500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M3 Pro)",
+            "prices": {
+              "harga": 5500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 15\" (M3)",
+            "prices": {
+              "harga": 4500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M3)",
+            "prices": {
+              "harga": 4000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 16\" (M2 Max)",
+            "prices": {
+              "harga": 6000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M2 Pro)",
+            "prices": {
+              "harga": 5000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M2)",
+            "prices": {
+              "harga": 3800000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 13\" (M2)",
+            "prices": {
+              "harga": 4500000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M1)",
+            "prices": {
+              "harga": 3500000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Battery",
+        "Slug": "battery",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "MacBook Pro 16\" (M3 Max)",
+            "prices": {
+              "harga": 1200000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M3 Pro)",
+            "prices": {
+              "harga": 1000000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 15\" (M3)",
+            "prices": {
+              "harga": 900000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M3)",
+            "prices": {
+              "harga": 850000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 16\" (M2 Max)",
+            "prices": {
+              "harga": 1100000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Pro 14\" (M2 Pro)",
+            "prices": {
+              "harga": 950000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M2)",
+            "prices": {
+              "harga": 800000
+            }
+          },
+          {
+            "DeviceModel": "MacBook Air 13\" (M1)",
+            "prices": {
+              "harga": 750000
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     "Name": "iWatch",
     "Slug": "iwatch",
     "description": "Penggantian kaca pecah, layar sentuh OLED, dan penggantian baterai jam pintar Apple Watch.",
     "Image": "/images/iwatch.webp",
-    "service_types": []
+    "service_types": [
+      {
+        "Name": "LCD / Display",
+        "Slug": "lcd-display",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "Apple Watch Ultra 2",
+            "prices": {
+              "harga": 3000000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Ultra",
+            "prices": {
+              "harga": 2800000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 9",
+            "prices": {
+              "harga": 1800000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 8",
+            "prices": {
+              "harga": 1600000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 7",
+            "prices": {
+              "harga": 1400000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE (Gen 2)",
+            "prices": {
+              "harga": 1000000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE",
+            "prices": {
+              "harga": 900000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Battery",
+        "Slug": "battery",
+        "variants": [
+          {
+            "Key": "harga",
+            "Label": "HARGA",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "Apple Watch Ultra 2",
+            "prices": {
+              "harga": 500000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Ultra",
+            "prices": {
+              "harga": 500000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 9",
+            "prices": {
+              "harga": 350000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 8",
+            "prices": {
+              "harga": 350000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch Series 7",
+            "prices": {
+              "harga": 350000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE (Gen 2)",
+            "prices": {
+              "harga": 300000
+            }
+          },
+          {
+            "DeviceModel": "Apple Watch SE",
+            "prices": {
+              "harga": 300000
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     "Name": "Android",
