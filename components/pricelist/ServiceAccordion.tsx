@@ -7,6 +7,8 @@ import { ChevronDown } from "lucide-react";
 import ServiceIcon from "./ServiceIcon";
 import PriceTable from "./PriceTable";
 import type { ServiceType } from "@/lib/data";
+import { useI18n } from "@/lib/i18n/context";
+import { getLocalizedServiceName } from "@/lib/i18n/service-translation";
 
 interface ServiceAccordionProps {
   services: ServiceType[];
@@ -16,6 +18,7 @@ interface ServiceAccordionProps {
 }
 
 export default function ServiceAccordion({ services, categoryName, sub = false }: ServiceAccordionProps) {
+  const { locale } = useI18n();
   // Single-open. State lokal di sini; parent me-remount lewat key={activeSlug}
   // saat kategori berganti → akordeon otomatis tertutup tanpa effect (§3.1.3).
   const [openSlug, setOpenSlug] = useState<string | null>(null);
@@ -85,7 +88,7 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
                 <ServiceIcon name={service.icon} className="h-[1.125rem] w-[1.125rem] lg:h-5 lg:w-5 text-primary" />
               </span>
               <span className="flex-1 text-sm lg:text-base font-medium text-foreground">
-                {service.title}
+                {getLocalizedServiceName(service, locale)}
               </span>
               {/* Chevron rotates 180° when open — universal expand/collapse affordance */}
               <ChevronDown

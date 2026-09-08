@@ -440,7 +440,7 @@ export async function parseImportFile(
       DeviceModel: dp.DeviceModel,
       prices: Object.fromEntries(b.variants.map((v) => [v.Key, dp.prices[v.Key] ?? null])),
     })),
-    title: "",
+    title: b.Name,
     icon: "",
   });
 

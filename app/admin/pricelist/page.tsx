@@ -22,10 +22,13 @@ export default async function AdminPricelistPage() {
         exportCategories={categories.map((c) => ({
           Name: c.Name,
           Slug: c.Slug,
-          services: c.service_types.map((s) => ({
-            Slug: s.Slug,
-            title: s.Brand ? `${s.Brand} · ${s.Series ? `${s.Series} · ` : ""}${s.title}` : s.title,
-          })),
+          services: c.service_types.map((s) => {
+            const t = s.title || s.Name;
+            return {
+              Slug: s.Slug,
+              title: s.Brand ? `${s.Brand} · ${s.Series ? `${s.Series} · ` : ""}${t}` : t,
+            };
+          }),
         }))}
       />
 
@@ -75,10 +78,13 @@ export default async function AdminPricelistPage() {
           Slug: c.Slug,
           // Service bertingkat diberi konteks merk/series di label — tanpa ini
           // dropdown tujuan import berisi 5 "Harga LCD" yang tak terbedakan.
-          services: c.service_types.map((s) => ({
-            Slug: s.Slug,
-            title: s.Brand ? `${s.Brand} · ${s.Series} · ${s.title}` : s.title,
-          })),
+          services: c.service_types.map((s) => {
+            const t = s.title || s.Name;
+            return {
+              Slug: s.Slug,
+              title: s.Brand ? `${s.Brand} · ${s.Series ? `${s.Series} · ` : ""}${t}` : t,
+            };
+          }),
         }))}
       />
       <PricelistEditor key={version} categories={categories} />

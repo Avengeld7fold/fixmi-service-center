@@ -9,6 +9,7 @@ import galleryData from "@/data/gallery.json";
 export interface Variant {
   Key: string; // kunci stabil untuk lookup harga, mis. "original-apple"
   Label: string; // teks kolom, mis. "ORIGINAL APPLE"
+  Label_en?: string; // teks kolom bahasa Inggris, mis. "PRICE" atau "ORIGINAL APPLE"
   Note: string; // keterangan garansi di bawah label, boleh kosong
 }
 
@@ -18,7 +19,8 @@ export interface DevicePrice {
 }
 
 export interface ServiceType {
-  Name: string; // "LCD / Display"
+  Name: string; // "LCD / Display" atau "Ganti LCD" (teks asli apa adanya)
+  Name_en?: string; // teks terjemahan bahasa Inggris kustom, mis. "Screen Replacement"
   Slug: string; // "lcd-display" — atau "samsung-galaxy-s-series--lcd-display" bila bertingkat
   // Hirarki opsional (pola fixmibali.com untuk Android): service ber-Brand
   // dirender bertingkat Merk → Series → jenis service, bukan daftar datar.
@@ -26,8 +28,7 @@ export interface ServiceType {
   Series?: string; // "Galaxy S Series"
   variants: Variant[];
   device_prices: DevicePrice[];
-  // Field hasil resolusi di kode (tidak disimpan di JSON) — §4.3:
-  title: string; // judul akordeon, mis. "Harga LCD iPhone"
+  title?: string; // judul akordeon (opsional, fallback ke Name)
   icon: string; // nama ikon lucide-react, mis. "smartphone"
 }
 

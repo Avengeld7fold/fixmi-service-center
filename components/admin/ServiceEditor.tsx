@@ -139,8 +139,13 @@ export default function ServiceEditor({
             <ServiceIcon name={service.icon} className="h-5 w-5 text-primary group-hover/icon:scale-110 transition-transform" />
           </span>
           <span className="flex-1">
-            <span className="block text-base font-semibold text-foreground">
-              {service.title || service.Name}
+            <span className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <span>{service.Name}</span>
+              {service.Name_en && (
+                <span className="rounded-md border border-primary/20 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-normal text-primary">
+                  EN: {service.Name_en}
+                </span>
+              )}
             </span>
             <span className="block text-xs text-text-muted">
               {service.Brand ? `${service.Brand} · ${service.Series} · ` : ""}
@@ -185,10 +190,18 @@ export default function ServiceEditor({
 
                 <input
                   value={service.Name}
-                  onChange={(e) => onChange({ ...service, Name: e.target.value, title: "" })}
-                  placeholder="Nama layanan, mis. Service LCD / Baterai"
-                  aria-label="Nama layanan"
-                  className="flex-1 min-w-[160px] sm:min-w-[200px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                  onChange={(e) => onChange({ ...service, Name: e.target.value, title: e.target.value })}
+                  placeholder="Nama layanan (ID), mis. Ganti LCD"
+                  aria-label="Nama layanan (ID)"
+                  className="flex-1 min-w-[150px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                />
+
+                <input
+                  value={service.Name_en || ""}
+                  onChange={(e) => onChange({ ...service, Name_en: e.target.value || undefined })}
+                  placeholder="English Name (opsional), mis. Screen Replacement"
+                  aria-label="Nama layanan (EN)"
+                  className="flex-1 min-w-[150px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
                 />
 
                 {/* Kolom Merk & Series hanya muncul di kategori Android atau layanan ber-Brand */}
@@ -302,7 +315,7 @@ export default function ServiceEditor({
         isOpen={openIconPicker}
         currentIcon={service.icon}
         categorySlug={categorySlug || (categoryName.toLowerCase().includes("android") ? "android" : undefined)}
-        serviceTitle={service.title || service.Name}
+        serviceTitle={service.Name}
         onSelect={(iconId) => onChange({ ...service, icon: iconId })}
         onClose={() => setOpenIconPicker(false)}
       />

@@ -4,6 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MoveLeft, MoveRight, Search, X } from "lucide-react";
 import { formatThousands, type ServiceType } from "@/lib/data";
 import { useI18n } from "@/lib/i18n/context";
+import {
+  getLocalizedServiceName,
+  getLocalizedVariantLabel,
+  getLocalizedVariantNote,
+} from "@/lib/i18n/service-translation";
 
 interface PriceTableProps {
   service: ServiceType;
@@ -139,10 +144,10 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
               {/* Sel pojok: sticky dua arah (top + left), z tertinggi */}
               <th className="sticky left-0 top-0 z-30 min-w-[8.5rem] lg:min-w-[11rem] border-b border-r border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 align-bottom [transform:translateZ(0)] [will-change:transform]">
                 <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground">
-                  {service.Name}
+                  {getLocalizedServiceName(service, locale)}
                 </span>
                 <span className="mt-0.5 block text-[0.625rem] font-normal tracking-wide text-text-muted">
-                  {categoryName} {isEn ? "Models" : "Models"}
+                  {categoryName} {isEn ? "Models" : "Model"}
                 </span>
               </th>
               {variants.map((v) => (
@@ -151,11 +156,11 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                   className="sticky top-0 z-20 min-w-[7.5rem] lg:min-w-[8.5rem] border-b border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 align-bottom text-right [transform:translateZ(0)] [will-change:transform]"
                 >
                   <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground">
-                    {v.Label}
+                    {getLocalizedVariantLabel(v, locale)}
                   </span>
                   {v.Note && (
                     <span className="mt-0.5 block text-[0.625rem] font-normal normal-case tracking-wide text-text-muted">
-                      {v.Note}
+                      {getLocalizedVariantNote(v.Note, locale)}
                     </span>
                   )}
                 </th>

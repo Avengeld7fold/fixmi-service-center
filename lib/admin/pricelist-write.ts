@@ -17,6 +17,7 @@ export const BACKUP_RETENTION_MS = BACKUP_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 interface StoredServiceType {
   Name: string;
+  Name_en?: string;
   Slug: string;
   Brand?: string;
   Series?: string;
@@ -81,7 +82,12 @@ export function validateAndStrip(input: unknown): StoredCategory[] {
           fail(`Service "${s.Name}" (${c.Name}): varian "${v.Key}" tanpa Label.`);
         if (keys.has(v.Key)) fail(`Service "${s.Name}" (${c.Name}): Key varian duplikat "${v.Key}".`);
         keys.add(v.Key);
-        return { Key: v.Key, Label: v.Label.trim(), Note: typeof v.Note === "string" ? v.Note.trim() : "" };
+        return {
+          Key: v.Key,
+          Label: v.Label.trim(),
+          ...(typeof v.Label_en === "string" && v.Label_en.trim() ? { Label_en: v.Label_en.trim() } : {}),
+          Note: typeof v.Note === "string" ? v.Note.trim() : "",
+        };
       });
 
       if (!Array.isArray(s.device_prices)) fail(`Service "${s.Name}" (${c.Name}): device_prices bukan array.`);
@@ -113,6 +119,7 @@ export function validateAndStrip(input: unknown): StoredCategory[] {
 
       return {
         Name: s.Name.trim(),
+        ...(typeof s.Name_en === "string" && s.Name_en.trim() ? { Name_en: s.Name_en.trim() } : {}),
         Slug: s.Slug,
         // Passthrough hirarki merk/series & icon kustom
         ...(typeof s.Brand === "string" && s.Brand.trim() ? { Brand: s.Brand.trim() } : {}),

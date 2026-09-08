@@ -78,6 +78,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
 
   // Form tambah layanan service baru
   const [newName, setNewName] = useState("");
+  const [newNameEn, setNewNameEn] = useState("");
   const [newBrand, setNewBrand] = useState("");
   const [newSeries, setNewSeries] = useState("");
   const [newIcon, setNewIcon] = useState("smartphone");
@@ -217,6 +218,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
 
   const addService = () => {
     const name = newName.trim();
+    const nameEn = newNameEn.trim();
     const brand = brandedMode ? newBrand.trim() : "";
     const series = brandedMode ? newSeries.trim() : "";
     if (brandedMode && !brand)
@@ -233,13 +235,14 @@ export default function PricelistEditor({ categories }: { categories: Category[]
 
     const svc: ServiceType = {
       Name: name,
+      ...(nameEn ? { Name_en: nameEn } : {}),
       Slug: slug,
       ...(brand ? { Brand: brand } : {}),
       ...(series ? { Series: series } : {}),
       icon: newIcon,
-      variants: [{ Key: "harga", Label: "HARGA", Note: "" }],
+      variants: [{ Key: "harga", Label: "HARGA", Label_en: "PRICE", Note: "" }],
       device_prices: [],
-      title: "",
+      title: name,
     };
 
     setMessage(null);
@@ -256,6 +259,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
     setOpenBrand(brand || null);
     setOpenSeries(brand ? `${brand}::${series || "Semua Model"}` : null);
     setNewName("");
+    setNewNameEn("");
     setNewBrand("");
     setNewSeries("");
     setNewIcon("smartphone");
@@ -410,11 +414,18 @@ export default function PricelistEditor({ categories }: { categories: Category[]
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder={
                   brandedMode
-                    ? "Jenis perbaikan, mis. Service LCD / Baterai"
-                    : "Nama layanan, mis. Ganti Baterai / Speaker"
+                    ? "Nama perbaikan (ID), mis. Service LCD"
+                    : "Nama layanan (ID), mis. Ganti LCD / Baterai"
                 }
-                aria-label="Jenis perbaikan layanan baru"
-                className="flex-1 min-w-[160px] sm:min-w-[200px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                aria-label="Nama perbaikan layanan baru (Bahasa Indonesia)"
+                className="flex-1 min-w-[150px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+              />
+              <input
+                value={newNameEn}
+                onChange={(e) => setNewNameEn(e.target.value)}
+                placeholder="English Name (opsional), mis. Screen Replacement"
+                aria-label="Nama perbaikan layanan baru (English - opsional)"
+                className="flex-1 min-w-[150px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
               />
               <button
                 type="button"

@@ -29,11 +29,9 @@ export function resolveServiceMeta(
     ? serviceSlug.split("--").pop()!
     : serviceSlug;
   const meta = SERVICE_META[baseSlug];
-  const shortName = meta?.title ?? serviceName;
   return {
-    // Bertingkat: konteks merk/series sudah ada di header induk — nama
-    // kategori jadi redundan ("Harga LCD", bukan "Harga LCD Android").
-    title: branded ? `Harga ${shortName}` : `Harga ${shortName} ${categoryName}`,
+    // Teks murni persis sesuai nama layanan (tanpa pemaksaan kata "Harga" / nama kategori)
+    title: serviceName,
     icon: meta?.icon ?? "wrench",
   };
 }
@@ -117,16 +115,23 @@ export async function getPricelist(): Promise<Category[]> {
 
         const brand = typeof s.Brand === "string" && s.Brand.trim() ? s.Brand.trim() : undefined;
         const series = typeof s.Series === "string" && s.Series.trim() ? s.Series.trim() : undefined;
+        const nameEn = typeof s.Name_en === "string" && s.Name_en.trim() ? s.Name_en.trim() : undefined;
         const { title, icon: fallbackIcon } = resolveServiceMeta(s.Slug, s.Name, c.Name as string, !!brand);
         const icon = typeof s.icon === "string" && s.icon.trim() ? s.icon.trim() : fallbackIcon;
         return {
           Name: s.Name,
+          ...(nameEn ? { Name_en: nameEn } : {}),
           Slug: s.Slug,
           ...(brand ? { Brand: brand } : {}),
           ...(series ? { Series: series } : {}),
-          variants: s.variants as Variant[],
+          variants: (s.variants as Variant[]).map((v) => ({
+            Key: v.Key,
+            Label: v.Label,
+            ...(v.Label_en ? { Label_en: v.Label_en } : {}),
+            Note: v.Note || "",
+          })),
           device_prices: s.device_prices as DevicePrice[],
-          title,
+          title: (typeof s.title === "string" && s.title.trim()) ? s.title.trim() : s.Name,
           icon,
         };
       });
