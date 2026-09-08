@@ -33,7 +33,7 @@ export interface ImportError {
 }
 
 export interface ImportPreview {
-  categories: { name: string; services: number; models: number; prices: number }[];
+  categories: { name: string; slug: string; services: number; models: number; prices: number }[];
   untouched: string[];
   errors: ImportError[];
   warnings: string[];
@@ -444,9 +444,10 @@ export async function parseImportFile(
     icon: "",
   });
 
-  const countPreview = (name: string, services: ReturnType<typeof buildServiceTypes>[]) => {
+  const countPreview = (name: string, slug: string, services: ReturnType<typeof buildServiceTypes>[]) => {
     preview.categories.push({
       name,
+      slug,
       services: services.length,
       models: services.reduce((n, s) => n + s.device_prices.length, 0),
       prices: services.reduce(
@@ -466,7 +467,7 @@ export async function parseImportFile(
 
     if (target) {
       const built = buildServiceTypes(services.get(targetServiceSlug)!);
-      countPreview(cat.Name, [built]);
+      countPreview(cat.Name, cat.Slug, [built]);
       preview.targetNote = `Semua baris masuk ke "${targetServiceName}" (${cat.Name}) — service lain di kategori ini tidak berubah.`;
       return {
         ...cat,
@@ -485,7 +486,7 @@ export async function parseImportFile(
     }
 
     const service_types = [...services.values()].map(buildServiceTypes);
-    countPreview(cat.Name, service_types);
+    countPreview(cat.Name, cat.Slug, service_types);
     return { ...cat, service_types };
   });
 

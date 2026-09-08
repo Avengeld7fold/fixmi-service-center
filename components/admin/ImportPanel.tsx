@@ -42,9 +42,41 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
   const [applying, setApplying] = useState(false);
   const [appliedMessage, setAppliedMessage] = useState<string>("");
   const [applyError, setApplyError] = useState<string>("");
+  const [selectedCategorySlugs, setSelectedCategorySlugs] = useState<Set<string>>(new Set());
 
   const activeCat = categories.find((c) => c.Slug === targetCat);
   const targetIncomplete = targetCat !== "" && targetSvc === "";
+
+  // Set seluruh kategori terdeteksi terpilih secara default saat preview baru tersedia
+  useEffect(() => {
+    if (state.preview && state.preview.categories.length > 0) {
+      setSelectedCategorySlugs(new Set(state.preview.categories.map((c) => c.slug)));
+    } else {
+      setSelectedCategorySlugs(new Set());
+    }
+  }, [state.preview]);
+
+  const toggleCategory = (slug: string) => {
+    setSelectedCategorySlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) {
+        next.delete(slug);
+      } else {
+        next.add(slug);
+      }
+      return next;
+    });
+  };
+
+  const selectAllCats = () => {
+    if (state.preview) {
+      setSelectedCategorySlugs(new Set(state.preview.categories.map((c) => c.slug)));
+    }
+  };
+
+  const deselectAllCats = () => {
+    setSelectedCategorySlugs(new Set());
+  };
 
   // Auto-dismiss pesan sukses impor setelah 4 detik
   useEffect(() => {
@@ -58,6 +90,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
   const handleFileChange = (file: File | null) => {
     setSelectedFile(file);
     setState(initialState);
+    setSelectedCategorySlugs(new Set());
     setApplyError("");
   };
 
@@ -102,17 +135,23 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
 
   const apply = async () => {
     if (!state.payload) return;
+    if (selectedCategorySlugs.size === 0) {
+      setApplyError("Pilih minimal 1 kategori perangkat untuk diimpor.");
+      return;
+    }
+
     setApplying(true);
     setApplyError("");
-    const result = await importApplyAction(state.payload);
+    const result = await importApplyAction(state.payload, Array.from(selectedCategorySlugs));
     setApplying(false);
 
     if (result.ok) {
       // 1. Catat pesan sukses
-      setAppliedMessage("Data berhasil diimpor — seluruh daftar harga di website telah diperbarui.");
+      setAppliedMessage("Data berhasil diimpor — kategori yang Anda pilih telah diperbarui di website.");
       // 2. Bersihkan file yang diupload dan staged preview
       setSelectedFile(null);
       setState(initialState);
+      setSelectedCategorySlugs(new Set());
       if (fileRef.current) fileRef.current.value = "";
       // 3. Otomatis tutup drawer agar tampilan bersih
       setIsOpen(false);
@@ -125,7 +164,11 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
 
   const preview = state.preview;
   const hasErrors = (preview?.errors.length ?? 0) > 0;
-  const isReadyToImport = !hasErrors && Boolean(state.payload) && Boolean(preview);
+  const isReadyToImport =
+    !hasErrors &&
+    Boolean(state.payload) &&
+    Boolean(preview) &&
+    selectedCategorySlugs.size > 0;
 
   const selectClass =
     "rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2 text-xs sm:text-sm text-white outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20";
@@ -391,33 +434,114 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
               {/* Preview Hasil Periksa File */}
               {preview && (
                 <div className="mt-4 space-y-3">
-                  {/* Ringkasan */}
-                  {preview.categories.length > 0 && (
-                    <div className="rounded-xl border border-white/[0.10] bg-white/[0.03] p-4">
-                      <p className="mb-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-400">
-                        {preview.targetNote ? "Tujuan Layanan" : "Kategori Perangkat yang Akan Diperbarui"}
-                      </p>
-                      {preview.targetNote && (
-                        <p className="mb-2 text-sm text-white font-medium">{preview.targetNote}</p>
-                      )}
-                      <ul className="space-y-1.5 text-xs sm:text-sm text-neutral-200">
-                        {preview.categories.map((c) => (
-                          <li key={c.name} className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-emerald-400 shrink-0" />
-                            <span className="font-semibold text-white">{c.name}</span>
-                            <span className="text-neutral-400">
-                              — {c.services} jenis layanan, {c.models} model perangkat, {c.prices} harga terisi
+                  {/* Ringkasan & Seleksi Kategori Interaktif */}
+                  {preview.categories.length > 0 && (() => {
+                    const unselectedNames = preview.categories
+                      .filter((c) => !selectedCategorySlugs.has(c.slug))
+                      .map((c) => c.name);
+                    const untouchedList = [
+                      ...preview.untouched,
+                      ...unselectedNames,
+                    ];
+
+                    return (
+                      <div className="rounded-xl border border-white/[0.10] bg-white/[0.03] p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5 pb-2.5 border-b border-white/[0.08]">
+                          <div>
+                            <p className="font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-300">
+                              {preview.targetNote ? "Tujuan Layanan" : "Kategori yang Ditemukan di File Excel"}
+                            </p>
+                            <p className="text-xs text-neutral-400 mt-0.5">
+                              {preview.targetNote
+                                ? preview.targetNote
+                                : "Centang kategori yang ingin diimpor. Kategori yang tidak dicentang akan dilewati dan data aslinya tetap aman."}
+                            </p>
+                          </div>
+                          {!preview.targetNote && preview.categories.length > 1 && (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={selectAllCats}
+                                className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+                              >
+                                Pilih Semua
+                              </button>
+                              <span className="text-neutral-600">•</span>
+                              <button
+                                type="button"
+                                onClick={deselectAllCats}
+                                className="text-xs font-medium text-neutral-400 hover:text-white hover:underline cursor-pointer"
+                              >
+                                Batal Semua
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {preview.targetNote && (
+                          <p className="mb-3 text-sm text-white font-medium">{preview.targetNote}</p>
+                        )}
+
+                        {/* Interactive Category Checkbox Cards */}
+                        <div className="space-y-2">
+                          {preview.categories.map((c) => {
+                            const isChecked = selectedCategorySlugs.has(c.slug);
+                            return (
+                              <label
+                                key={c.slug}
+                                className={`flex items-start sm:items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                                  isChecked
+                                    ? "border-emerald-500/40 bg-emerald-500/[0.07] text-white ring-1 ring-emerald-500/25"
+                                    : "border-white/[0.08] bg-white/[0.01] text-neutral-400 opacity-60 hover:opacity-100 hover:bg-white/[0.03]"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => toggleCategory(c.slug)}
+                                  className="accent-emerald-500 h-4 w-4 mt-0.5 sm:mt-0 rounded cursor-pointer shrink-0"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-xs sm:text-sm text-white">
+                                      {c.name}
+                                    </span>
+                                    <span
+                                      className={`text-[0.625rem] font-mono px-2 py-0.5 rounded-full font-medium ${
+                                        isChecked
+                                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                          : "bg-white/[0.05] text-neutral-400 border border-white/[0.08]"
+                                      }`}
+                                    >
+                                      {isChecked ? "Akan Diimpor" : "Dilewati (Tidak Berubah)"}
+                                    </span>
+                                  </div>
+                                  <div className="text-[0.6875rem] sm:text-xs text-neutral-400 mt-1">
+                                    {c.services} jenis layanan • {c.models} model perangkat • {c.prices} harga terisi
+                                  </div>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+
+                        {/* Summary Untouched Note */}
+                        <div className="mt-3 pt-2.5 border-t border-white/[0.06] text-xs text-neutral-400 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                          <span className="font-mono text-[0.6875rem] text-neutral-300">
+                            {selectedCategorySlugs.size} dari {preview.categories.length} kategori dipilih untuk diimpor
+                          </span>
+                          {untouchedList.length > 0 && (
+                            <span className="text-[0.6875rem] text-neutral-400">
+                              Data tetap aman (tidak berubah):{" "}
+                              <span className="text-neutral-300 font-medium">
+                                {untouchedList.join(", ")}
+                              </span>
                             </span>
-                          </li>
-                        ))}
-                      </ul>
-                      {preview.untouched.length > 0 && (
-                        <p className="mt-2 text-xs text-neutral-500">
-                          Tidak ada perubahan pada: {preview.untouched.join(", ")}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Peringatan */}
                   {preview.warnings.length > 0 && (

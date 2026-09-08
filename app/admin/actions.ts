@@ -20,6 +20,7 @@ import { revalidatePath } from "next/cache";
 import { clearAllBackups, createManualBackup, deleteBackup, listBackups, restoreBackup, writePricelist } from "@/lib/admin/pricelist-write";
 import { parseImportFile, type ImportPreview } from "@/lib/admin/import-parse";
 import { getPricelist } from "@/lib/pricelist-server";
+import type { Category } from "@/lib/data";
 import { addPromoItem, deletePromoItem, type PromoImageItem } from "@/lib/promo-server";
 import { addGalleryImage, deleteGalleryImage, type GalleryImage } from "@/lib/gallery-server";
 
@@ -165,10 +166,36 @@ export async function importPreviewAction(formData: FormData): Promise<ImportPre
   }
 }
 
-export async function importApplyAction(payloadJson: string): Promise<ActionResult> {
+export async function importApplyAction(
+  payloadJson: string,
+  selectedCategorySlugs?: string[]
+): Promise<ActionResult> {
   if (!(await requireSession())) return { ok: false, error: "Sesi berakhir — silakan login ulang." };
   try {
-    await writePricelist(JSON.parse(payloadJson));
+    const parsedPayload = JSON.parse(payloadJson) as Category[];
+    let finalCategories = parsedPayload;
+
+    if (selectedCategorySlugs && selectedCategorySlugs.length > 0) {
+      const existing = await getPricelist();
+      const selectedSet = new Set(selectedCategorySlugs);
+
+      finalCategories = existing.map((curCat) => {
+        if (selectedSet.has(curCat.Slug)) {
+          const importedCat = parsedPayload.find((p) => p.Slug === curCat.Slug);
+          return importedCat || curCat;
+        }
+        return curCat;
+      });
+
+      const importedNew = parsedPayload.filter(
+        (p) => selectedSet.has(p.Slug) && !existing.some((e) => e.Slug === p.Slug)
+      );
+      if (importedNew.length > 0) {
+        finalCategories.push(...importedNew);
+      }
+    }
+
+    await writePricelist(finalCategories);
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Gagal menerapkan import." };
