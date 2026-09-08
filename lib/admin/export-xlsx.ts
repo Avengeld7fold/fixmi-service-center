@@ -1,12 +1,22 @@
 import ExcelJS from "exceljs";
 import type { Category } from "@/lib/data";
 
+export interface ExportFilter {
+  categorySlug?: string;
+  serviceSlug?: string;
+}
+
 /**
  * Export pricelist → workbook long-format (kontrak PRD §4.3), satu sheet.
  * File ini sekaligus menjadi TEMPLATE: client mengedit hasil export lalu
  * mengimpornya kembali, sehingga format tidak pernah dikarang manual.
+ *
+ * Mendukung filter opsional per-kategori dan per-layanan spesifik.
  */
-export async function buildPricelistXlsx(categories: Category[]): Promise<Buffer> {
+export async function buildPricelistXlsx(
+  categories: Category[],
+  filter?: ExportFilter
+): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Pricelist");
 
@@ -20,8 +30,16 @@ export async function buildPricelistXlsx(categories: Category[]): Promise<Buffer
   ];
   sheet.getRow(1).font = { bold: true };
 
-  for (const cat of categories) {
-    for (const svc of cat.service_types) {
+  const targetCategories = filter?.categorySlug
+    ? categories.filter((c) => c.Slug === filter.categorySlug)
+    : categories;
+
+  for (const cat of targetCategories) {
+    const targetServices = filter?.serviceSlug
+      ? cat.service_types.filter((s) => s.Slug === filter.serviceSlug)
+      : cat.service_types;
+
+    for (const svc of targetServices) {
       for (const dp of svc.device_prices) {
         for (const v of svc.variants) {
           const price = dp.prices[v.Key];
@@ -45,3 +63,4 @@ export async function buildPricelistXlsx(categories: Category[]): Promise<Buffer
 
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
+

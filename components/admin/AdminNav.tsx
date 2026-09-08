@@ -1,16 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Receipt, Sparkles, Image as ImageIcon, ExternalLink, LogOut, Download } from "lucide-react";
 import { logoutAction } from "@/app/admin/actions";
+import ExportModal, { type ExportCategoryOption } from "./ExportModal";
 
 interface AdminNavProps {
   showExport?: boolean;
+  exportCategories?: ExportCategoryOption[];
 }
 
-export default function AdminNav({ showExport = false }: AdminNavProps) {
+export default function AdminNav({ showExport = false, exportCategories = [] }: AdminNavProps) {
   const pathname = usePathname();
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const NAV_ITEMS = [
     {
@@ -81,15 +85,16 @@ export default function AdminNav({ showExport = false }: AdminNavProps) {
 
           {/* Export Excel only if showExport is true */}
           {showExport && (
-            <a
-              href="/api/admin/export"
+            <button
+              type="button"
+              onClick={() => setExportModalOpen(true)}
               title="Unduh data harga dalam format Excel"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-white transition-all duration-150 hover:bg-white/[0.08] hover:border-primary/50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-white transition-all duration-150 hover:bg-white/[0.08] hover:border-primary/50 cursor-pointer"
             >
               <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" aria-hidden="true" />
               <span className="hidden sm:inline">Export Excel</span>
               <span className="sm:hidden">Excel</span>
-            </a>
+            </button>
           )}
 
           {/* Logout Button */}
@@ -105,6 +110,15 @@ export default function AdminNav({ showExport = false }: AdminNavProps) {
           </form>
         </div>
       </div>
+
+      {/* Export Options Modal */}
+      {showExport && (
+        <ExportModal
+          isOpen={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          categories={exportCategories}
+        />
+      )}
     </nav>
   );
 }

@@ -17,7 +17,17 @@ export default async function AdminPricelistPage() {
   return (
     <div className="mx-auto w-full max-w-[75rem] px-3.5 sm:px-6 md:px-10 py-6 sm:py-10 lg:py-14">
       {/* ── Shared Admin Navigation Switcher ── */}
-      <AdminNav showExport />
+      <AdminNav
+        showExport
+        exportCategories={categories.map((c) => ({
+          Name: c.Name,
+          Slug: c.Slug,
+          services: c.service_types.map((s) => ({
+            Slug: s.Slug,
+            title: s.Brand ? `${s.Brand} · ${s.Series ? `${s.Series} · ` : ""}${s.title}` : s.title,
+          })),
+        }))}
+      />
 
       {/* Header — Mengikuti tipografi dan ukuran halaman /pricelist */}
       <header className="mb-10 lg:mb-14">
