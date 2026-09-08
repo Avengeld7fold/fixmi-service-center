@@ -72,11 +72,7 @@ export default function PricelistExplorer({
 
   const activeCategory = categories.find((c) => c.Slug === activeSlug) ?? categories[0];
   const hasPricingData = Boolean(
-    activeCategory &&
-      activeCategory.service_types.length > 0 &&
-      activeCategory.service_types.some(
-        (s) => Array.isArray(s.device_prices) && s.device_prices.length > 0
-      )
+    activeCategory && activeCategory.service_types.length > 0
   );
 
   const selectCategory = (slug: string) => {
@@ -247,9 +243,7 @@ export default function PricelistExplorer({
           <>
             {activeCategory.service_types.some((s) => s.Brand) && (
               <BrandExplorer
-                services={activeCategory.service_types.filter(
-                  (s) => s.Brand && Array.isArray(s.device_prices) && s.device_prices.length > 0
-                )}
+                services={activeCategory.service_types.filter((s) => Boolean(s.Brand))}
                 categoryName={activeCategory.Name}
                 brandIcons={activeCategory.brand_icons}
               />
@@ -257,9 +251,7 @@ export default function PricelistExplorer({
             {activeCategory.service_types.some((s) => !s.Brand) && (
               <div className={activeCategory.service_types.some((s) => s.Brand) ? "mt-2.5 lg:mt-4" : ""}>
                 <ServiceAccordion
-                  services={activeCategory.service_types.filter(
-                    (s) => !s.Brand && Array.isArray(s.device_prices) && s.device_prices.length > 0
-                  )}
+                  services={activeCategory.service_types.filter((s) => !s.Brand)}
                   categoryName={activeCategory.Name}
                 />
               </div>

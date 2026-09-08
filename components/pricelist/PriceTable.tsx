@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MoveLeft, MoveRight, Search, X } from "lucide-react";
+import { MoveLeft, MoveRight, Search, X, MessageCircle } from "lucide-react";
 import { formatThousands, type ServiceType } from "@/lib/data";
+import { whatsappUrl } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
 import {
   getLocalizedServiceName,
@@ -172,11 +173,34 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
               <tr>
                 <td
                   colSpan={variants.length + 1}
-                  className="px-4 py-10 text-center text-sm text-text-muted"
+                  className="px-4 py-8 text-center"
                 >
-                  {query
-                    ? (isEn ? `No models matching “${query}”.` : `Tidak ada model yang cocok dengan “${query}”.`)
-                    : (isEn ? "No model pricing available for this service." : "Belum ada data model untuk service ini.")}
+                  {query ? (
+                    <p className="text-sm text-text-muted">
+                      {isEn ? `No models matching “${query}”.` : `Tidak ada model yang cocok dengan “${query}”.`}
+                    </p>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-3 py-2">
+                      <p className="text-sm text-text-muted">
+                        {isEn
+                          ? "Device model pricing for this service is currently being updated."
+                          : "Daftar harga model perangkat untuk layanan ini sedang diperbarui."}
+                      </p>
+                      <a
+                        href={whatsappUrl(
+                          isEn
+                            ? `Hello FIXMI, I would like to ask for an estimated repair quote for ${getLocalizedServiceName(service, "en")} (${categoryName}).`
+                            : `Halo FIXMI, saya ingin konsultasi estimasi biaya ${getLocalizedServiceName(service, "id")} (${categoryName}).`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-4 py-2 text-xs font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white active:scale-95"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        <span>{isEn ? "Ask Price Quote via WhatsApp" : "Tanya Estimasi Biaya via WhatsApp"}</span>
+                      </a>
+                    </div>
+                  )}
                 </td>
               </tr>
             ) : (
