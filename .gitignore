@@ -40,6 +40,9 @@ next-env.d.ts
 # Vercel
 .vercel
 
+# Runtime pricelist database (dikelola admin panel, jangan dilacak git)
+/data/pricelist.json
+
 # Backup runtime pricelist (dibuat admin panel)
 /data/backups/*.json
 !/data/backups/.gitkeep

@@ -1,4 +1,4 @@
-import { readFile, stat } from "node:fs/promises";
+import { copyFile, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { Category, ServiceType, Variant, DevicePrice } from "./data";
 import { SKELETON_PRICELIST } from "./pricelist-skeleton";
@@ -39,9 +39,29 @@ export function resolveServiceMeta(
 // ============================================================
 // Pricelist — dibaca via fs setiap request (JANGAN import statis,
 // agar perubahan admin tampil tanpa rebuild — §7.2). SERVER-ONLY.
+// data/pricelist.json bertindak sebagai runtime database (diabaikan git).
+// Bila belum ada, otomatis di-seed dari data/pricelist.template.json.
 // ============================================================
 
 const PRICELIST_PATH = join(process.cwd(), "data", "pricelist.json");
+const TEMPLATE_PATH = join(process.cwd(), "data", "pricelist.template.json");
+
+/**
+ * Pastikan file data/pricelist.json tersedia.
+ * Jika belum ada (fresh install / clone baru), otomatis salin dari template.
+ */
+async function ensurePricelistFile(): Promise<string> {
+  try {
+    return await readFile(PRICELIST_PATH, "utf8");
+  } catch {
+    try {
+      await copyFile(TEMPLATE_PATH, PRICELIST_PATH);
+      return await readFile(PRICELIST_PATH, "utf8");
+    } catch {
+      return "";
+    }
+  }
+}
 
 const MONTH_NAMES_ID = [
   "Januari",
@@ -68,7 +88,13 @@ function assert(condition: unknown, message: string): asserts condition {
  */
 export async function getPricelistLastUpdated(): Promise<string> {
   try {
-    const s = await stat(PRICELIST_PATH);
+    let s;
+    try {
+      s = await stat(PRICELIST_PATH);
+    } catch {
+      await ensurePricelistFile();
+      s = await stat(PRICELIST_PATH);
+    }
     const date = s.mtime;
     const month = MONTH_NAMES_ID[date.getMonth()] ?? "Januari";
     const year = date.getFullYear();
@@ -87,12 +113,12 @@ export async function getPricelistLastUpdated(): Promise<string> {
  * Sistem mengembalikan SKELETON_PRICELIST (kartu kategori & gambar tetap tampil,
  * tetapi TANPA akordeon/tabel hardcoded).
  *
- * JIKA file data/pricelist.json DITEMUKAN:
+ * JIKA file data/pricelist.json DITEMUKAN (atau berhasil di-seed dari template):
  * Akordeon dan tabel harga dirender murni dari isi service_types yang terdaftar di file.
  */
 export async function getPricelist(): Promise<Category[]> {
   try {
-    const raw = await readFile(PRICELIST_PATH, "utf8");
+    const raw = await ensurePricelistFile();
     if (!raw.trim()) {
       return SKELETON_PRICELIST;
     }
