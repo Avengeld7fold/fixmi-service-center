@@ -30,6 +30,8 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
   const [canLeft, setCanLeft] = useState(false);
   const rafId = useRef<number | null>(null);
 
+  const isSyncing = useRef(false);
+
   const updateHint = () => {
     if (rafId.current !== null) return;
     rafId.current = requestAnimationFrame(() => {
@@ -41,10 +43,26 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
     });
   };
 
-  /** Sync header horizontal position + update directional hint. */
-  const handleScroll = () => {
-    if (headerRef.current && scrollRef.current) {
+  /** Sync header horizontal position from body + update hint. */
+  const handleBodyScroll = () => {
+    if (!isSyncing.current && headerRef.current && scrollRef.current) {
+      isSyncing.current = true;
       headerRef.current.scrollLeft = scrollRef.current.scrollLeft;
+      requestAnimationFrame(() => {
+        isSyncing.current = false;
+      });
+    }
+    updateHint();
+  };
+
+  /** Sync body horizontal position from header + update hint. */
+  const handleHeaderScroll = () => {
+    if (!isSyncing.current && headerRef.current && scrollRef.current) {
+      isSyncing.current = true;
+      scrollRef.current.scrollLeft = headerRef.current.scrollLeft;
+      requestAnimationFrame(() => {
+        isSyncing.current = false;
+      });
     }
     updateHint();
   };
@@ -78,6 +96,10 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
   }, [query, service.device_prices, service.variants]);
 
   const variants = service.variants;
+
+  const tableMinWidth = useMemo(() => {
+    return `max(100%, calc(9.5rem + ${variants.length} * 7.5rem))`;
+  }, [variants.length]);
 
   return (
     <div className="pt-4">
@@ -136,16 +158,30 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
            scrolls away. This bypasses the WebKit bug where nested
            overflow-hidden ancestors (accordion) break position:sticky;top:0.
 
-           headerRef  → overflow-hidden, scrollLeft synced from body via JS
-           scrollRef  → overflow-auto,   the only vertical+horizontal scroller
-           Both tables share identical min-w values for column alignment. */}
+           headerRef  → overflow-x-auto, scrollLeft synced bidirectionally
+           scrollRef  → overflow-auto,   the primary vertical+horizontal scroller
+           Both tables share table-fixed, identical <colgroup>, and identical minWidth
+           so columns align with mathematical precision down to the sub-pixel. */}
       <div className="relative -mx-2 lg:mx-0">
         {/* Header — never scrolls vertically */}
-        <div ref={headerRef} className="overflow-hidden">
-          <table className="w-full border-separate border-spacing-0 text-left">
+        <div
+          ref={headerRef}
+          onScroll={handleHeaderScroll}
+          className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x"
+        >
+          <table
+            className="w-full table-fixed border-separate border-spacing-0 text-left"
+            style={{ minWidth: tableMinWidth }}
+          >
+            <colgroup>
+              <col className="w-[9.5rem] lg:w-[13.5rem]" />
+              {variants.map((v) => (
+                <col key={v.Key} />
+              ))}
+            </colgroup>
             <thead>
               <tr>
-                <th className="sticky left-0 z-30 min-w-[8.5rem] lg:min-w-[11rem] border-b border-r border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 text-center align-middle">
+                <th className="sticky left-0 z-30 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 text-center align-middle">
                   <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                     {getLocalizedServiceName(service, locale)}
                   </span>
@@ -156,7 +192,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                 {variants.map((v) => (
                   <th
                     key={v.Key}
-                    className="min-w-[7.5rem] lg:min-w-[8.5rem] border-b border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 text-center align-middle"
+                    className="border-b border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 text-center align-middle"
                   >
                     <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                       {getLocalizedVariantLabel(v, locale)}
@@ -176,11 +212,20 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
         {/* Body — scrolls vertically & horizontally */}
         <div
           ref={scrollRef}
-          onScroll={handleScroll}
+          onScroll={handleBodyScroll}
           data-lenis-prevent
-          className="max-h-[30rem] overflow-auto [overscroll-behavior:contain] touch-pan-x touch-pan-y"
+          className="max-h-[30rem] overflow-auto [overscroll-behavior:contain] touch-pan-x touch-pan-y [scrollbar-width:thin]"
         >
-          <table className="w-full border-separate border-spacing-0 text-left">
+          <table
+            className="w-full table-fixed border-separate border-spacing-0 text-left"
+            style={{ minWidth: tableMinWidth }}
+          >
+            <colgroup>
+              <col className="w-[9.5rem] lg:w-[13.5rem]" />
+              {variants.map((v) => (
+                <col key={v.Key} />
+              ))}
+            </colgroup>
             <tbody>
               {rows.length === 0 ? (
                 <tr>
@@ -222,7 +267,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                     key={row.DeviceModel}
                     className="group transition-colors hover:bg-panel-raised"
                   >
-                    <td className="sticky left-0 z-10 min-w-[8.5rem] lg:min-w-[11rem] border-b border-panel-border/60 border-r border-r-panel-border border-l-2 border-l-transparent bg-panel px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:bg-panel-raised group-hover:border-l-primary">
+                    <td className="sticky left-0 z-10 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-panel-border/60 border-r border-panel-border border-l-2 border-l-transparent bg-panel px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:bg-panel-raised group-hover:border-l-primary">
                       {row.DeviceModel}
                     </td>
                     {variants.map((v) => {
@@ -231,7 +276,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                       return (
                         <td
                           key={v.Key}
-                          className="min-w-[7.5rem] lg:min-w-[8.5rem] border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap"
+                          className="border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap"
                         >
                           {price == null || price === 0 ? (
                             <span className="text-text-muted select-none">–</span>
