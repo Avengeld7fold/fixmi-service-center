@@ -129,12 +129,12 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
           data-lenis-prevent WAJIB: tanpa ini Lenis menyedot event wheel ke
           scroll halaman sehingga kotak ini tidak pernah bisa digulir di desktop.
           [overscroll-behavior:contain] mencegah loncatan scroll ke Lenis saat mentok. */}
-      <div className="relative -mx-2 lg:mx-0">
+      <div className="relative -mx-2 lg:mx-0 overflow-hidden">
         <div
           ref={scrollRef}
           onScroll={updateHint}
           data-lenis-prevent
-          className="relative max-h-[30rem] overflow-auto [overscroll-behavior:contain] touch-pan-x touch-pan-y"
+          className="max-h-[30rem] overflow-auto [overscroll-behavior:contain] touch-pan-x touch-pan-y bg-panel"
         >
         {/* border-separate WAJIB (bukan border-collapse): sticky pada sel tabel
             rusak di iOS Safari saat border-collapse. Konsekuensi: border baris
