@@ -134,16 +134,16 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
           ref={scrollRef}
           onScroll={updateHint}
           data-lenis-prevent
-          className="max-h-[30rem] overflow-auto [overscroll-behavior:contain] [transform:translateZ(0)] [-webkit-overflow-scrolling:touch] touch-pan-x touch-pan-y"
+          className="max-h-[30rem] overflow-auto [overscroll-behavior:contain] touch-pan-x touch-pan-y"
         >
         {/* border-separate WAJIB (bukan border-collapse): sticky pada sel tabel
             rusak di iOS Safari saat border-collapse. Konsekuensi: border baris
             harus di sel (border pada <tr> tidak dirender saat separate). */}
         <table className="w-full border-separate border-spacing-0 text-left">
-          <thead>
-            <tr>
+          <thead className="sticky top-0 z-20 bg-panel">
+            <tr className="bg-panel">
               {/* Sel pojok: sticky dua arah (top + left), z tertinggi */}
-              <th className="sticky left-0 top-0 z-30 min-w-[8.5rem] lg:min-w-[11rem] border-b border-r border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 align-bottom text-center [transform:translateZ(0)] [will-change:transform]">
+              <th className="sticky left-0 top-0 z-30 min-w-[8.5rem] lg:min-w-[11rem] border-b border-r border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 align-bottom text-center">
                 <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                   {getLocalizedServiceName(service, locale)}
                 </span>
@@ -154,7 +154,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
               {variants.map((v) => (
                 <th
                   key={v.Key}
-                  className="sticky top-0 z-20 min-w-[7.5rem] lg:min-w-[8.5rem] border-b border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 align-bottom text-center [transform:translateZ(0)] [will-change:transform]"
+                  className="sticky top-0 z-20 min-w-[7.5rem] lg:min-w-[8.5rem] border-b border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 align-bottom text-center"
                 >
                   <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                     {getLocalizedVariantLabel(v, locale)}
@@ -209,7 +209,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                   key={row.DeviceModel}
                   className="group transition-colors hover:bg-panel-raised"
                 >
-                  <td className="sticky left-0 z-10 border-b border-panel-border/60 border-r border-r-panel-border border-l-2 border-l-transparent bg-panel px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:bg-panel-raised group-hover:border-l-primary [transform:translateZ(0)] [will-change:transform]">
+                  <td className="sticky left-0 z-10 border-b border-panel-border/60 border-r border-r-panel-border border-l-2 border-l-transparent bg-panel px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:bg-panel-raised group-hover:border-l-primary">
                     {row.DeviceModel}
                   </td>
                   {variants.map((v) => {
