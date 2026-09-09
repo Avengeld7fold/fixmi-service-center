@@ -6,34 +6,33 @@
     "Image": "/images/iphone.webp",
     "service_types": [
       {
-        "Name": "Harga LCD iPhone",
-        "Slug": "lcd",
-        "icon": "wrench",
+        "Name": "Biaya Pergantian LCD iPhone",
+        "Slug": "biaya-pergantian-lcd-iphone",
         "variants": [
           {
             "Key": "original-apple",
             "Label": "ORIGINAL APPLE",
-            "Note": ""
+            "Note": "Garansi 3 Bulan + Move Chip"
           },
           {
             "Key": "oem",
             "Label": "OEM",
-            "Note": ""
+            "Note": "Garansi 1 Bulan"
           },
           {
             "Key": "grade-a",
             "Label": "GRADE A",
-            "Note": ""
+            "Note": "Garansi 1 Bulan"
           },
           {
             "Key": "oled-premium",
             "Label": "OLED PREMIUM",
-            "Note": ""
+            "Note": "Garansi 3 Bulan"
           },
           {
-            "Key": "pindah-chip-lcd",
-            "Label": "PINDAH CHIP LCD",
-            "Note": ""
+            "Key": "chip-move-no-notif-fixed",
+            "Label": "CHIP MOVE / NO NOTIF FIXED",
+            "Note": "Biaya Pindah Chip LCD"
           }
         ],
         "device_prices": [
@@ -44,7 +43,7 @@
               "oem": 475000,
               "grade-a": 375000,
               "oled-premium": null,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -54,7 +53,7 @@
               "oem": 500000,
               "grade-a": 375000,
               "oled-premium": null,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -64,7 +63,7 @@
               "oem": 530000,
               "grade-a": 375000,
               "oled-premium": null,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -74,7 +73,7 @@
               "oem": 550000,
               "grade-a": 450000,
               "oled-premium": null,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -84,7 +83,7 @@
               "oem": 690000,
               "grade-a": 475000,
               "oled-premium": null,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -94,7 +93,7 @@
               "oem": 570000,
               "grade-a": 480000,
               "oled-premium": 700000,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -104,7 +103,7 @@
               "oem": 650000,
               "grade-a": 490000,
               "oled-premium": 800000,
-              "pindah-chip-lcd": null
+              "chip-move-no-notif-fixed": null
             }
           },
           {
@@ -114,7 +113,7 @@
               "oem": 729000,
               "grade-a": 550000,
               "oled-premium": 950000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -124,7 +123,7 @@
               "oem": 700000,
               "grade-a": 550000,
               "oled-premium": 980000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -134,7 +133,7 @@
               "oem": 680000,
               "grade-a": 550000,
               "oled-premium": 975000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -144,7 +143,7 @@
               "oem": 800000,
               "grade-a": 650000,
               "oled-premium": 1000000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -154,7 +153,7 @@
               "oem": 800000,
               "grade-a": 650000,
               "oled-premium": 1000000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -164,7 +163,7 @@
               "oem": 890000,
               "grade-a": 700000,
               "oled-premium": 1200000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -174,7 +173,7 @@
               "oem": 1050000,
               "grade-a": 750000,
               "oled-premium": 1590000,
-              "pindah-chip-lcd": 300000
+              "chip-move-no-notif-fixed": 300000
             }
           },
           {
@@ -184,7 +183,7 @@
               "oem": 1000000,
               "grade-a": 780000,
               "oled-premium": 1700000,
-              "pindah-chip-lcd": 350000
+              "chip-move-no-notif-fixed": 350000
             }
           },
           {
@@ -194,7 +193,7 @@
               "oem": 1050000,
               "grade-a": 820000,
               "oled-premium": 1750000,
-              "pindah-chip-lcd": 350000
+              "chip-move-no-notif-fixed": 350000
             }
           },
           {
@@ -204,7 +203,7 @@
               "oem": 1000000,
               "grade-a": 780000,
               "oled-premium": 1700000,
-              "pindah-chip-lcd": 350000
+              "chip-move-no-notif-fixed": 350000
             }
           },
           {
@@ -214,7 +213,7 @@
               "oem": 1750000,
               "grade-a": 850000,
               "oled-premium": 2100000,
-              "pindah-chip-lcd": 350000
+              "chip-move-no-notif-fixed": 350000
             }
           },
           {
@@ -224,7 +223,7 @@
               "oem": 1200000,
               "grade-a": 900000,
               "oled-premium": 1600000,
-              "pindah-chip-lcd": 400000
+              "chip-move-no-notif-fixed": 400000
             }
           },
           {
@@ -234,7 +233,7 @@
               "oem": 1200000,
               "grade-a": 950000,
               "oled-premium": 1950000,
-              "pindah-chip-lcd": 400000
+              "chip-move-no-notif-fixed": 400000
             }
           },
           {
@@ -244,7 +243,7 @@
               "oem": 1400000,
               "grade-a": 1050000,
               "oled-premium": 2400000,
-              "pindah-chip-lcd": 400000
+              "chip-move-no-notif-fixed": 400000
             }
           },
           {
@@ -254,7 +253,7 @@
               "oem": 1450000,
               "grade-a": 2800000,
               "oled-premium": 2300000,
-              "pindah-chip-lcd": 400000
+              "chip-move-no-notif-fixed": 400000
             }
           },
           {
@@ -264,7 +263,7 @@
               "oem": 1450000,
               "grade-a": 1100000,
               "oled-premium": 1800000,
-              "pindah-chip-lcd": 450000
+              "chip-move-no-notif-fixed": 450000
             }
           },
           {
@@ -274,7 +273,7 @@
               "oem": 1600000,
               "grade-a": 1150000,
               "oled-premium": 2200000,
-              "pindah-chip-lcd": 450000
+              "chip-move-no-notif-fixed": 450000
             }
           },
           {
@@ -284,7 +283,7 @@
               "oem": 1750000,
               "grade-a": 1100000,
               "oled-premium": 2750000,
-              "pindah-chip-lcd": 450000
+              "chip-move-no-notif-fixed": 450000
             }
           },
           {
@@ -294,7 +293,7 @@
               "oem": 1800000,
               "grade-a": 1350000,
               "oled-premium": 2950000,
-              "pindah-chip-lcd": 450000
+              "chip-move-no-notif-fixed": 450000
             }
           },
           {
@@ -304,7 +303,7 @@
               "oem": 1600000,
               "grade-a": 1050000,
               "oled-premium": 2700000,
-              "pindah-chip-lcd": 500000
+              "chip-move-no-notif-fixed": 500000
             }
           },
           {
@@ -314,7 +313,7 @@
               "oem": 1750000,
               "grade-a": 1200000,
               "oled-premium": 2750000,
-              "pindah-chip-lcd": 500000
+              "chip-move-no-notif-fixed": 500000
             }
           },
           {
@@ -324,7 +323,7 @@
               "oem": 2500000,
               "grade-a": 1600000,
               "oled-premium": 4000000,
-              "pindah-chip-lcd": 500000
+              "chip-move-no-notif-fixed": 500000
             }
           },
           {
@@ -334,7 +333,7 @@
               "oem": 2600000,
               "grade-a": 1800000,
               "oled-premium": 4100000,
-              "pindah-chip-lcd": 500000
+              "chip-move-no-notif-fixed": 500000
             }
           },
           {
@@ -344,7 +343,7 @@
               "oem": 2800000,
               "grade-a": 1900000,
               "oled-premium": 4200000,
-              "pindah-chip-lcd": 600000
+              "chip-move-no-notif-fixed": 600000
             }
           },
           {
@@ -354,7 +353,7 @@
               "oem": 3200000,
               "grade-a": 2300000,
               "oled-premium": 4500000,
-              "pindah-chip-lcd": 600000
+              "chip-move-no-notif-fixed": 600000
             }
           },
           {
@@ -364,7 +363,7 @@
               "oem": 3500000,
               "grade-a": 2600000,
               "oled-premium": 5500000,
-              "pindah-chip-lcd": 600000
+              "chip-move-no-notif-fixed": 600000
             }
           },
           {
@@ -374,7 +373,7 @@
               "oem": 4100000,
               "grade-a": 2950000,
               "oled-premium": 5700000,
-              "pindah-chip-lcd": 600000
+              "chip-move-no-notif-fixed": 600000
             }
           },
           {
@@ -384,7 +383,7 @@
               "oem": 3800000,
               "grade-a": 2800000,
               "oled-premium": 4400000,
-              "pindah-chip-lcd": 600000
+              "chip-move-no-notif-fixed": 600000
             }
           },
           {
@@ -394,7 +393,7 @@
               "oem": 3200000,
               "grade-a": 2400000,
               "oled-premium": 5250000,
-              "pindah-chip-lcd": 600000
+              "chip-move-no-notif-fixed": 600000
             }
           },
           {
@@ -404,7 +403,1357 @@
               "oem": 3700000,
               "grade-a": 2600000,
               "oled-premium": 5655000,
-              "pindah-chip-lcd": 700000
+              "chip-move-no-notif-fixed": 700000
+            }
+          },
+          {
+            "DeviceModel": "IP 18 PROOOO",
+            "prices": {
+              "original-apple": 434343,
+              "oem": 3434343,
+              "grade-a": null,
+              "oled-premium": 43434,
+              "chip-move-no-notif-fixed": null
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Biaya Pergantian Battery iPhone",
+        "Slug": "biaya-pergantian-battery-iphone",
+        "variants": [
+          {
+            "Key": "standart-battery",
+            "Label": "STANDART BATTERY",
+            "Note": "Garansi 1 Bulan, S&K berlaku"
+          },
+          {
+            "Key": "premium-battery",
+            "Label": "PREMIUM BATTERY",
+            "Note": "Garansi 3 Bulan, S&K berlaku"
+          },
+          {
+            "Key": "swap-chip-battery-bh-100",
+            "Label": "SWAP CHIP BATTERY BH 100%",
+            "Note": "Syarat battery wajib original"
+          },
+          {
+            "Key": "genuine-apple-quality",
+            "Label": "GENUINE APPLE QUALITY",
+            "Note": "Garansi 12 Bulan, S&K berlaku"
+          },
+          {
+            "Key": "original-chip-used",
+            "Label": "ORIGINAL CHIP \"USED\"",
+            "Note": "Garansi 6 Bulan, S&K berlaku"
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPhone 6",
+            "prices": {
+              "standart-battery": 270000,
+              "premium-battery": 350000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S",
+            "prices": {
+              "standart-battery": 291000,
+              "premium-battery": 375000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S Plus",
+            "prices": {
+              "standart-battery": 297000,
+              "premium-battery": 385000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7",
+            "prices": {
+              "standart-battery": 298000,
+              "premium-battery": 390000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7 Plus",
+            "prices": {
+              "standart-battery": 338000,
+              "premium-battery": 480000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8",
+            "prices": {
+              "standart-battery": 350000,
+              "premium-battery": 450000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8 Plus",
+            "prices": {
+              "standart-battery": 300000,
+              "premium-battery": 440000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iphone SE 2020",
+            "prices": {
+              "standart-battery": 389000,
+              "premium-battery": 489000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone SE 2022",
+            "prices": {
+              "standart-battery": 394000,
+              "premium-battery": 494000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone X",
+            "prices": {
+              "standart-battery": 380000,
+              "premium-battery": 510000,
+              "swap-chip-battery-bh-100": 269000,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone XR",
+            "prices": {
+              "standart-battery": 460000,
+              "premium-battery": 650000,
+              "swap-chip-battery-bh-100": 299000,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS",
+            "prices": {
+              "standart-battery": 460000,
+              "premium-battery": 650000,
+              "swap-chip-battery-bh-100": 299000,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS Max",
+            "prices": {
+              "standart-battery": 480000,
+              "premium-battery": 680000,
+              "swap-chip-battery-bh-100": 349000,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11",
+            "prices": {
+              "standart-battery": 498000,
+              "premium-battery": 675000,
+              "swap-chip-battery-bh-100": 369000,
+              "genuine-apple-quality": 890000,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro",
+            "prices": {
+              "standart-battery": 520000,
+              "premium-battery": 680000,
+              "swap-chip-battery-bh-100": 349000,
+              "genuine-apple-quality": 990000,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro Max",
+            "prices": {
+              "standart-battery": 600000,
+              "premium-battery": 820000,
+              "swap-chip-battery-bh-100": 369000,
+              "genuine-apple-quality": 1100000,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12",
+            "prices": {
+              "standart-battery": 498000,
+              "premium-battery": 648000,
+              "swap-chip-battery-bh-100": 399000,
+              "genuine-apple-quality": 1175000,
+              "original-chip-used": 845000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Mini",
+            "prices": {
+              "standart-battery": 465000,
+              "premium-battery": 615000,
+              "swap-chip-battery-bh-100": 429000,
+              "genuine-apple-quality": 1320000,
+              "original-chip-used": 775000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro",
+            "prices": {
+              "standart-battery": 498000,
+              "premium-battery": 648000,
+              "swap-chip-battery-bh-100": 429000,
+              "genuine-apple-quality": 1175000,
+              "original-chip-used": 845000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro Max",
+            "prices": {
+              "standart-battery": 700000,
+              "premium-battery": 852000,
+              "swap-chip-battery-bh-100": 429000,
+              "genuine-apple-quality": 1530000,
+              "original-chip-used": 1068000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13",
+            "prices": {
+              "standart-battery": 535000,
+              "premium-battery": 685000,
+              "swap-chip-battery-bh-100": 499000,
+              "genuine-apple-quality": 1350000,
+              "original-chip-used": 795000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Mini",
+            "prices": {
+              "standart-battery": 498000,
+              "premium-battery": 650000,
+              "swap-chip-battery-bh-100": 499000,
+              "genuine-apple-quality": 1275000,
+              "original-chip-used": 756000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro",
+            "prices": {
+              "standart-battery": 675000,
+              "premium-battery": 825000,
+              "swap-chip-battery-bh-100": 549000,
+              "genuine-apple-quality": 1470000,
+              "original-chip-used": 970000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro Max",
+            "prices": {
+              "standart-battery": 795000,
+              "premium-battery": 945000,
+              "swap-chip-battery-bh-100": 549000,
+              "genuine-apple-quality": 1530000,
+              "original-chip-used": 1080000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14",
+            "prices": {
+              "standart-battery": 585000,
+              "premium-battery": 710000,
+              "swap-chip-battery-bh-100": 549000,
+              "genuine-apple-quality": 1200000,
+              "original-chip-used": 798000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Plus",
+            "prices": {
+              "standart-battery": 640000,
+              "premium-battery": 760000,
+              "swap-chip-battery-bh-100": 599000,
+              "genuine-apple-quality": 1410000,
+              "original-chip-used": 879000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro",
+            "prices": {
+              "standart-battery": 798000,
+              "premium-battery": 950000,
+              "swap-chip-battery-bh-100": 599000,
+              "genuine-apple-quality": 1470000,
+              "original-chip-used": 1149000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro Max",
+            "prices": {
+              "standart-battery": 875000,
+              "premium-battery": 1023000,
+              "swap-chip-battery-bh-100": 599000,
+              "genuine-apple-quality": 1570000,
+              "original-chip-used": 1149000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15",
+            "prices": {
+              "standart-battery": 600000,
+              "premium-battery": 750000,
+              "swap-chip-battery-bh-100": 600000,
+              "genuine-apple-quality": 1365000,
+              "original-chip-used": 980000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Plus",
+            "prices": {
+              "standart-battery": 675000,
+              "premium-battery": 780000,
+              "swap-chip-battery-bh-100": 600000,
+              "genuine-apple-quality": 1450000,
+              "original-chip-used": 999000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro",
+            "prices": {
+              "standart-battery": 688000,
+              "premium-battery": 855000,
+              "swap-chip-battery-bh-100": 600000,
+              "genuine-apple-quality": 1550000,
+              "original-chip-used": 1122000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro Max",
+            "prices": {
+              "standart-battery": 745000,
+              "premium-battery": 995000,
+              "swap-chip-battery-bh-100": 600000,
+              "genuine-apple-quality": 1650000,
+              "original-chip-used": 1100000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16",
+            "prices": {
+              "standart-battery": 1455000,
+              "premium-battery": 1605000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Plus",
+            "prices": {
+              "standart-battery": null,
+              "premium-battery": 1350000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro",
+            "prices": {
+              "standart-battery": null,
+              "premium-battery": 1600000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro Max",
+            "prices": {
+              "standart-battery": null,
+              "premium-battery": 1725000,
+              "swap-chip-battery-bh-100": null,
+              "genuine-apple-quality": null,
+              "original-chip-used": null
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Biaya Pergantian Flexibel Charger iPhone",
+        "Slug": "biaya-pergantian-flexibel-charger-iphone",
+        "variants": [
+          {
+            "Key": "flexibel-charger-original-new",
+            "Label": "FLEXIBEL CHARGER ORIGINAL NEW",
+            "Note": "Garansi Service 2 Bulan"
+          },
+          {
+            "Key": "flexibel-charger-original-apple",
+            "Label": "FLEXIBEL CHARGER ORIGINAL APPLE",
+            "Note": "Garansi Service 3 Bulan"
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPhone 6",
+            "prices": {
+              "flexibel-charger-original-new": 250000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S",
+            "prices": {
+              "flexibel-charger-original-new": 250000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S Plus",
+            "prices": {
+              "flexibel-charger-original-new": 250000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7",
+            "prices": {
+              "flexibel-charger-original-new": 350000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7 Plus",
+            "prices": {
+              "flexibel-charger-original-new": 380000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8",
+            "prices": {
+              "flexibel-charger-original-new": 350000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8 Plus",
+            "prices": {
+              "flexibel-charger-original-new": 400000,
+              "flexibel-charger-original-apple": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone X",
+            "prices": {
+              "flexibel-charger-original-new": 425000,
+              "flexibel-charger-original-apple": 550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XR",
+            "prices": {
+              "flexibel-charger-original-new": 425000,
+              "flexibel-charger-original-apple": 550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS",
+            "prices": {
+              "flexibel-charger-original-new": 425000,
+              "flexibel-charger-original-apple": 550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS Max",
+            "prices": {
+              "flexibel-charger-original-new": 475000,
+              "flexibel-charger-original-apple": 580000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11",
+            "prices": {
+              "flexibel-charger-original-new": 400000,
+              "flexibel-charger-original-apple": 550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 650000,
+              "flexibel-charger-original-apple": 950000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 980000,
+              "flexibel-charger-original-apple": 1300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12",
+            "prices": {
+              "flexibel-charger-original-new": 625000,
+              "flexibel-charger-original-apple": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Mini",
+            "prices": {
+              "flexibel-charger-original-new": 598000,
+              "flexibel-charger-original-apple": 980000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 675000,
+              "flexibel-charger-original-apple": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 685000,
+              "flexibel-charger-original-apple": 1150000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13",
+            "prices": {
+              "flexibel-charger-original-new": 690000,
+              "flexibel-charger-original-apple": 950000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Mini",
+            "prices": {
+              "flexibel-charger-original-new": 775000,
+              "flexibel-charger-original-apple": 975000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 785000,
+              "flexibel-charger-original-apple": 1100000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 825000,
+              "flexibel-charger-original-apple": 1250000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14",
+            "prices": {
+              "flexibel-charger-original-new": 850000,
+              "flexibel-charger-original-apple": 1325000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Plus",
+            "prices": {
+              "flexibel-charger-original-new": 849000,
+              "flexibel-charger-original-apple": 1105000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 885000,
+              "flexibel-charger-original-apple": 1350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 900000,
+              "flexibel-charger-original-apple": 1500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15",
+            "prices": {
+              "flexibel-charger-original-new": 1200000,
+              "flexibel-charger-original-apple": 1550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Plus",
+            "prices": {
+              "flexibel-charger-original-new": 1270000,
+              "flexibel-charger-original-apple": 1575000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 1370000,
+              "flexibel-charger-original-apple": 1550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 1300000,
+              "flexibel-charger-original-apple": 1600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16",
+            "prices": {
+              "flexibel-charger-original-new": 1350000,
+              "flexibel-charger-original-apple": 1750000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Plus",
+            "prices": {
+              "flexibel-charger-original-new": 1475000,
+              "flexibel-charger-original-apple": 1675000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 1550000,
+              "flexibel-charger-original-apple": 1775000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 1575000,
+              "flexibel-charger-original-apple": 1857000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17",
+            "prices": {
+              "flexibel-charger-original-new": 1400000,
+              "flexibel-charger-original-apple": 1800000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Pro",
+            "prices": {
+              "flexibel-charger-original-new": 1500000,
+              "flexibel-charger-original-apple": 1850000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Pro Max",
+            "prices": {
+              "flexibel-charger-original-new": 1750000,
+              "flexibel-charger-original-apple": 2200000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Biaya Pergantian Kamera iPhone",
+        "Slug": "biaya-pergantian-kamera-iphone",
+        "variants": [
+          {
+            "Key": "original-kamera-depan",
+            "Label": "ORIGINAL KAMERA DEPAN",
+            "Note": "Garansi 1 Bulan, sudah termasuk service"
+          },
+          {
+            "Key": "original-kamera-belakang",
+            "Label": "ORIGINAL KAMERA BELAKANG",
+            "Note": "Garansi 1 Bulan, sudah termasuk service"
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPhone 6",
+            "prices": {
+              "original-kamera-depan": 480000,
+              "original-kamera-belakang": 800000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6 Plus",
+            "prices": {
+              "original-kamera-depan": 700000,
+              "original-kamera-belakang": 672000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S",
+            "prices": {
+              "original-kamera-depan": 700000,
+              "original-kamera-belakang": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S Plus",
+            "prices": {
+              "original-kamera-depan": 700000,
+              "original-kamera-belakang": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7",
+            "prices": {
+              "original-kamera-depan": 740000,
+              "original-kamera-belakang": 820000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7 Plus",
+            "prices": {
+              "original-kamera-depan": 760000,
+              "original-kamera-belakang": 960000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8",
+            "prices": {
+              "original-kamera-depan": 780000,
+              "original-kamera-belakang": 980000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8 Plus",
+            "prices": {
+              "original-kamera-depan": 800000,
+              "original-kamera-belakang": 980000
+            }
+          },
+          {
+            "DeviceModel": "iPhone X",
+            "prices": {
+              "original-kamera-depan": 840000,
+              "original-kamera-belakang": 1020000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XR",
+            "prices": {
+              "original-kamera-depan": 920000,
+              "original-kamera-belakang": 1300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS",
+            "prices": {
+              "original-kamera-depan": 920000,
+              "original-kamera-belakang": 1300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS Max",
+            "prices": {
+              "original-kamera-depan": 960000,
+              "original-kamera-belakang": 1360000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11",
+            "prices": {
+              "original-kamera-depan": 1080000,
+              "original-kamera-belakang": 2000000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro",
+            "prices": {
+              "original-kamera-depan": 1120000,
+              "original-kamera-belakang": 2100000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro Max",
+            "prices": {
+              "original-kamera-depan": 1200000,
+              "original-kamera-belakang": 2400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12",
+            "prices": {
+              "original-kamera-depan": 1260000,
+              "original-kamera-belakang": 2000000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Mini",
+            "prices": {
+              "original-kamera-depan": 1260000,
+              "original-kamera-belakang": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro",
+            "prices": {
+              "original-kamera-depan": 1260000,
+              "original-kamera-belakang": 2300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro Max",
+            "prices": {
+              "original-kamera-depan": 1400000,
+              "original-kamera-belakang": 2400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13",
+            "prices": {
+              "original-kamera-depan": 1500000,
+              "original-kamera-belakang": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Mini",
+            "prices": {
+              "original-kamera-depan": 1500000,
+              "original-kamera-belakang": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro",
+            "prices": {
+              "original-kamera-depan": 1560000,
+              "original-kamera-belakang": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro Max",
+            "prices": {
+              "original-kamera-depan": 1660000,
+              "original-kamera-belakang": 2700000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14",
+            "prices": {
+              "original-kamera-depan": 1700000,
+              "original-kamera-belakang": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Plus",
+            "prices": {
+              "original-kamera-depan": 1720000,
+              "original-kamera-belakang": 2400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro",
+            "prices": {
+              "original-kamera-depan": 1720000,
+              "original-kamera-belakang": 2900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro Max",
+            "prices": {
+              "original-kamera-depan": 1780000,
+              "original-kamera-belakang": 3000000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15",
+            "prices": {
+              "original-kamera-depan": 1780000,
+              "original-kamera-belakang": 2400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Plus",
+            "prices": {
+              "original-kamera-depan": 1800000,
+              "original-kamera-belakang": 2600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro",
+            "prices": {
+              "original-kamera-depan": 1800000,
+              "original-kamera-belakang": 2900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro Max",
+            "prices": {
+              "original-kamera-depan": 2100000,
+              "original-kamera-belakang": 3300000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Biaya Perbaikan Face ID iPhone",
+        "Slug": "biaya-perbaikan-face-id-iphone",
+        "variants": [
+          {
+            "Key": "biaya-perbaikan-face-id",
+            "Label": "BIAYA PERBAIKAN FACE ID",
+            "Note": "Garansi 1 Bulan, sudah termasuk service"
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPhone X",
+            "prices": {
+              "biaya-perbaikan-face-id": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XR",
+            "prices": {
+              "biaya-perbaikan-face-id": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS",
+            "prices": {
+              "biaya-perbaikan-face-id": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS Max",
+            "prices": {
+              "biaya-perbaikan-face-id": 750000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11",
+            "prices": {
+              "biaya-perbaikan-face-id": 800000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro",
+            "prices": {
+              "biaya-perbaikan-face-id": 850000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro Max",
+            "prices": {
+              "biaya-perbaikan-face-id": 1000000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12",
+            "prices": {
+              "biaya-perbaikan-face-id": 975000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Mini",
+            "prices": {
+              "biaya-perbaikan-face-id": 975000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro",
+            "prices": {
+              "biaya-perbaikan-face-id": 975000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro Max",
+            "prices": {
+              "biaya-perbaikan-face-id": 950000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13",
+            "prices": {
+              "biaya-perbaikan-face-id": 950000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Mini",
+            "prices": {
+              "biaya-perbaikan-face-id": 1100000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro",
+            "prices": {
+              "biaya-perbaikan-face-id": 1150000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro Max",
+            "prices": {
+              "biaya-perbaikan-face-id": 1200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14",
+            "prices": {
+              "biaya-perbaikan-face-id": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Plus",
+            "prices": {
+              "biaya-perbaikan-face-id": 2200000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro",
+            "prices": {
+              "biaya-perbaikan-face-id": 2300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro Max",
+            "prices": {
+              "biaya-perbaikan-face-id": 2300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15",
+            "prices": {
+              "biaya-perbaikan-face-id": 2300000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Plus",
+            "prices": {
+              "biaya-perbaikan-face-id": 2350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro",
+            "prices": {
+              "biaya-perbaikan-face-id": 2350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro Max",
+            "prices": {
+              "biaya-perbaikan-face-id": 2500000
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Biaya Pergantian Backglass / Housing iPhone",
+        "Slug": "biaya-pergantian-backglass-housing-iphone",
+        "variants": [
+          {
+            "Key": "housing-set-sudah-termasuk-backglass",
+            "Label": "HOUSING SET SUDAH TERMASUK BACKGLASS",
+            "Note": ""
+          },
+          {
+            "Key": "backglass-only-hanya-backglass",
+            "Label": "BACKGLASS ONLY HANYA BACKGLASS",
+            "Note": ""
+          }
+        ],
+        "device_prices": [
+          {
+            "DeviceModel": "iPhone 6",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 275000,
+              "backglass-only-hanya-backglass": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 300000,
+              "backglass-only-hanya-backglass": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 6S Plus",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 300000,
+              "backglass-only-hanya-backglass": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 350000,
+              "backglass-only-hanya-backglass": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 7 Plus",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 450000,
+              "backglass-only-hanya-backglass": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 400000,
+              "backglass-only-hanya-backglass": 250000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 8 Plus",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 400000,
+              "backglass-only-hanya-backglass": 250000
+            }
+          },
+          {
+            "DeviceModel": "iPhone X",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 580000,
+              "backglass-only-hanya-backglass": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XR",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 580000,
+              "backglass-only-hanya-backglass": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 580000,
+              "backglass-only-hanya-backglass": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone XS Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 600000,
+              "backglass-only-hanya-backglass": 400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 500000,
+              "backglass-only-hanya-backglass": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 550000,
+              "backglass-only-hanya-backglass": 350000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 11 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 680000,
+              "backglass-only-hanya-backglass": 400000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 750000,
+              "backglass-only-hanya-backglass": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Mini",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 600000,
+              "backglass-only-hanya-backglass": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 650000,
+              "backglass-only-hanya-backglass": 500000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 12 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 750000,
+              "backglass-only-hanya-backglass": 550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 700000,
+              "backglass-only-hanya-backglass": 600000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Mini",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 700000,
+              "backglass-only-hanya-backglass": 550000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 800000,
+              "backglass-only-hanya-backglass": 700000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 13 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 850000,
+              "backglass-only-hanya-backglass": 750000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 850000,
+              "backglass-only-hanya-backglass": 750000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Plus",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 900000,
+              "backglass-only-hanya-backglass": 780000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1350000,
+              "backglass-only-hanya-backglass": 780000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 14 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1490000,
+              "backglass-only-hanya-backglass": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1150000,
+              "backglass-only-hanya-backglass": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Plus",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1500000,
+              "backglass-only-hanya-backglass": 930000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1750000,
+              "backglass-only-hanya-backglass": 950000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 15 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1750000,
+              "backglass-only-hanya-backglass": 1100000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1350000,
+              "backglass-only-hanya-backglass": 800000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Plus",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1375000,
+              "backglass-only-hanya-backglass": 825000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1250000,
+              "backglass-only-hanya-backglass": 940000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 16 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1800000,
+              "backglass-only-hanya-backglass": 1100000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1900000,
+              "backglass-only-hanya-backglass": 900000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Air",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 2600000,
+              "backglass-only-hanya-backglass": null
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Pro",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1995000,
+              "backglass-only-hanya-backglass": 950000
+            }
+          },
+          {
+            "DeviceModel": "iPhone 17 Pro Max",
+            "prices": {
+              "housing-set-sudah-termasuk-backglass": 1995000,
+              "backglass-only-hanya-backglass": 950000
             }
           }
         ]
