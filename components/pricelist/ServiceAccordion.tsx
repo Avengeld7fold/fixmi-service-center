@@ -107,10 +107,9 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
               className="grid transition-[grid-template-rows] duration-300 ease-out"
               style={{
                 gridTemplateRows: open ? "1fr" : "0fr",
-                contentVisibility: open ? "visible" : "auto",
               }}
             >
-              <div className="overflow-hidden">
+              <div className={open ? "overflow-visible" : "overflow-hidden"}>
                 {hasBeenOpened && (
                   <div className="border-t border-panel-border px-2 pb-2.5 lg:px-5 lg:pb-5">
                     <PriceTable service={service} categoryName={categoryName} />
