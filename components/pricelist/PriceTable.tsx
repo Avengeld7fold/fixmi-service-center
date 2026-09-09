@@ -218,7 +218,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                     return (
                       <td
                         key={v.Key}
-                        className="border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-right font-mono text-sm tabular-nums whitespace-nowrap"
+                        className="border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap"
                       >
                         {price == null || price === 0 ? (
                           <span className="text-text-muted select-none">–</span>
