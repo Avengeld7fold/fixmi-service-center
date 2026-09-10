@@ -369,7 +369,7 @@ function getCubicBezierSubcurve(
   };
 }
 
-// ── Komponen Lingkaran Callout Bersih & Minimalis (Emil Kowalski Tactile Motion, Memoized) ──
+// ── Komponen Lingkaran Callout Bersih & Minimalis (Double-Bezel Hardware Architecture, Memoized) ──
 const InspectionCircleNode = memo(function InspectionCircleNode({
   callout,
   isActive,
@@ -386,45 +386,59 @@ const InspectionCircleNode = memo(function InspectionCircleNode({
   onMouseEnter?: () => void;
 }) {
   const displayName = isEn ? callout.nameEn : callout.name;
+  const categoryCode = callout.code.split(" // ")[0] || "DIAGNOSTIC";
 
   return (
     <div
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      className="flex flex-col items-center gap-2.5 group cursor-pointer select-none active:scale-[0.94] transition-transform duration-150 ease-out"
+      className="flex flex-col items-center gap-2 group cursor-pointer select-none active:scale-[0.95] transition-transform duration-150 ease-out"
     >
-      {/* Circular Image Node with Glowing Border */}
+      {/* Double-Bezel Hardware Node */}
       <div
         id={`callout-circle-node-${callout.id}`}
-        className={`relative w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full border-2 p-1 transition-[transform,border-color,box-shadow,background-color] duration-200 ease-out backdrop-blur-md ${
+        className={`relative w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full p-1 transition-all duration-250 ease-out backdrop-blur-md ${
           isActive && isRevealed
-            ? "border-primary bg-primary/15 shadow-[0_0_28px_rgba(255,107,0,0.55)] scale-110 ring-4 ring-primary/25"
-            : "border-white/25 bg-[#141418] hover:border-primary/80 hover:scale-105 hover:shadow-[0_0_18px_rgba(255,107,0,0.35)]"
+            ? "border border-primary bg-gradient-to-b from-[#2F1F17] via-[#1C1412] to-[#0E0E10] shadow-[0_0_26px_rgba(255,107,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.2)] scale-105 ring-2 ring-primary/30"
+            : "border border-white/12 bg-gradient-to-b from-[#222226] via-[#161619] to-[#0E0E10] shadow-[0_8px_20px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.08)] hover:border-primary/60 hover:scale-102 hover:shadow-[0_0_18px_rgba(255,107,0,0.25)]"
         }`}
       >
-        {/* Inner Circular Viewport */}
-        <div className="relative w-full h-full rounded-full overflow-hidden bg-[#0A0A0C] flex items-center justify-center">
+        {/* Inner Optical Lens Chamber */}
+        <div className="relative w-full h-full rounded-full overflow-hidden bg-[#070709] border border-black/60 flex items-center justify-center shadow-inner">
+          {/* Subtle Lens Specular Flare */}
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_32%_28%,rgba(255,255,255,0.09),transparent_60%)]" />
+
+          {/* Component Image */}
           <Image
             src={callout.circleImage}
             alt={displayName}
             fill
             sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, (max-width: 1024px) 80px, 88px"
-            className="object-contain p-2.5 group-hover:scale-115 transition-transform duration-250 ease-out drop-shadow-md"
+            className="object-contain p-2.5 group-hover:scale-110 transition-transform duration-250 ease-out drop-shadow-md"
           />
-          {/* Dark overlay with inspection icon on hover */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out flex items-center justify-center">
-            <Info className="w-5 h-5 text-primary animate-bounce" />
+
+          {/* Inspection Hover Glass Overlay */}
+          <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out flex items-center justify-center">
+            <Info className="w-5 h-5 text-primary animate-pulse" />
           </div>
+
+          {/* Active Laser Dot Marker on Node Rim */}
+          {isActive && isRevealed && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#FF6B00] animate-pulse" />
+          )}
         </div>
       </div>
 
-      {/* Component Title Label Below Circle */}
-      <div className="text-center">
-        <span className="font-mono text-xs text-neutral-200 font-semibold tracking-wide block group-hover:text-primary transition-colors duration-150">
+      {/* Component Title & Diagnostic Category Tag */}
+      <div className="text-center max-w-[120px] sm:max-w-[140px]">
+        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary/80 font-medium block leading-none mb-1">
+          {categoryCode}
+        </span>
+        <span className="font-mono text-xs text-neutral-200 font-semibold tracking-tight block group-hover:text-primary transition-colors duration-150 leading-tight">
           {displayName}
         </span>
-        <span className="font-mono text-[9px] text-neutral-400 uppercase tracking-wider block">
-          {isEn ? "Click for Details" : "Klik untuk Detail"}
+        <span className="font-mono text-[8px] text-neutral-400 uppercase tracking-widest block mt-0.5 opacity-80 group-hover:opacity-100 group-hover:text-neutral-300">
+          {isEn ? "INSPECT" : "INSPEKSI"}
         </span>
       </div>
     </div>
@@ -737,15 +751,43 @@ export default function ExplodedPhoneSection() {
         className="relative w-full h-screen min-h-[640px] max-h-[1080px] flex flex-col justify-between items-center px-4 sm:px-6 lg:px-12 py-4 sm:py-6 lg:py-8 overflow-hidden bg-[#121212]"
       >
         
-        {/* Background Ambient Glow & Blueprint Grid */}
+        {/* ── ARCHITECTURAL STUDIO ATMOSPHERE & LIGHTING ── */}
+        {/* 1. Precision Technical Grid with Radial Center Fade */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          className="absolute inset-0 pointer-events-none opacity-[0.035]"
           style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
+            backgroundImage: "radial-gradient(rgba(255,255,255,0.85) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%)",
           }}
         />
-        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[38rem] w-[38rem] rounded-full bg-primary/10 blur-[150px]" />
+
+        {/* 2. Vertical Specular Light Column (Tailored to 9:16 iPhone proportions) */}
+        <div
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] lg:w-[500px] h-[580px] sm:h-[680px] lg:h-[780px]"
+          style={{
+            background: "radial-gradient(ellipse 55% 70% at 50% 50%, rgba(255, 107, 0, 0.14) 0%, rgba(255, 107, 0, 0.04) 50%, transparent 80%)",
+            filter: "blur(50px)",
+          }}
+        />
+
+        {/* 3. Directional Downlight Specular Wash */}
+        <div
+          className="pointer-events-none absolute top-[8%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[380px] h-[360px] opacity-60"
+          style={{
+            background: "linear-gradient(180deg, rgba(255, 120, 0, 0.12) 0%, rgba(255, 107, 0, 0.02) 65%, transparent 100%)",
+            filter: "blur(60px)",
+          }}
+        />
+
+        {/* 4. Deep Obsidian Edge Vignette */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 45%, rgba(18, 18, 18, 0.85) 100%)",
+          }}
+        />
 
         {/* ── HEADER TITLE ── */}
         <div className="relative z-20 text-center max-w-3xl mx-auto mb-2 shrink-0">
@@ -758,38 +800,56 @@ export default function ExplodedPhoneSection() {
             {dict.teardown.heading}
           </h2>
 
-          {/* Active Sparepart / Service Component Pill */}
+          {/* Active Diagnostic Status Capsule */}
           <div
             onClick={() => {
               if (isAssembled) {
                 jumpToStep(currentStep === 14 ? 13 : 14);
               }
             }}
-            className={`mt-2 sm:mt-2.5 inline-flex items-center gap-2 font-mono text-[10px] sm:text-[11px] lg:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200 select-none ${
-              isAssembled ? "cursor-pointer hover:border-emerald-400/80 hover:scale-105 active:scale-95" : ""
+            className={`mt-2 sm:mt-2.5 inline-flex items-center gap-2.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-neutral-300 bg-white/[0.03] border border-white/12 hover:border-primary/50 rounded-full px-3.5 sm:px-4 py-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-md transition-all duration-200 select-none ${
+              isAssembled ? "cursor-pointer hover:scale-105 active:scale-95" : ""
             }`}
           >
-            <span
-              className={`h-2 w-2 rounded-full ${
-                currentStep === 14
-                  ? "bg-emerald-400 shadow-[0_0_12px_#34d399] animate-pulse"
-                  : isAssembled
-                  ? "bg-emerald-400 shadow-[0_0_10px_#34d399]"
-                  : "bg-primary animate-ping"
-              }`}
-            />
-            <span className="text-white font-bold tracking-wide transition-colors duration-150">
+            <span className="relative flex h-2 w-2 items-center justify-center">
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                  currentStep === 14
+                    ? "bg-emerald-400 animate-ping"
+                    : isAssembled
+                    ? "bg-emerald-400"
+                    : "bg-primary animate-ping"
+                }`}
+              />
+              <span
+                className={`relative inline-flex h-2 w-2 rounded-full ${
+                  currentStep === 14 || isAssembled
+                    ? "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+                    : "bg-primary shadow-[0_0_8px_#FF6B00]"
+                }`}
+              />
+            </span>
+
+            <span className="text-primary font-semibold tracking-widest text-[10px] sm:text-[11px]">
+              {currentStep === 14
+                ? "14/14"
+                : isAssembled
+                ? "13/14"
+                : `${currentStep.toString().padStart(2, "0")}/13`}
+            </span>
+            <span className="text-neutral-600 font-mono text-[10px]">│</span>
+            <span className="text-white font-medium tracking-wide">
               {currentStep === 14
                 ? isEn
-                  ? "Step 14/14: System Booting & QC Passed"
-                  : "Langkah 14/14: Sistem Booting & Uji Fungsi Sukses"
+                  ? "SYSTEM BOOTING & QC PASSED"
+                  : "SISTEM BOOTING & UJI FUNGSI SUKSES"
                 : isAssembled
                 ? isEn
-                  ? "Step 13/14: iPhone Fully Assembled (Click to Boot)"
-                  : "Langkah 13/14: iPhone Terakit Sempurna (Klik untuk Booting)"
+                  ? "IPHONE ASSEMBLED (CLICK TO BOOT)"
+                  : "IPHONE TERAKIT (KLIK UNTUK BOOT)"
                 : isEn
-                ? (activeCallout?.nameEn || "Screen & Glass")
-                : (activeCallout?.name || "Layar & Glass")}
+                ? (activeCallout?.nameEn.toUpperCase() || "SCREEN & GLASS")
+                : (activeCallout?.name.toUpperCase() || "LAYAR & GLASS")}
             </span>
           </div>
         </div>
@@ -935,8 +995,54 @@ export default function ExplodedPhoneSection() {
           </div>
 
           {/* ── CENTER: SEQUENTIAL 13-LAYER IPHONE ASSEMBLY WITH DEPTH OF FIELD FOCUS ── */}
-          <div className="col-span-1 lg:col-span-6 flex flex-col justify-center items-center py-2">
+          <div className="col-span-1 lg:col-span-6 flex flex-col justify-center items-center py-2 relative">
             
+            {/* ── PRECISION LABORATORY BENCH RETICLE (SVG) ── */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+              <svg
+                viewBox="0 0 700 700"
+                className="w-[340px] sm:w-[460px] md:w-[540px] lg:w-[620px] xl:w-[680px] h-[340px] sm:h-[460px] md:h-[540px] lg:h-[620px] xl:h-[680px] opacity-40"
+                fill="none"
+              >
+                <defs>
+                  <radialGradient id="reticleGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#FF6B00" stopOpacity="0.16" />
+                    <stop offset="45%" stopColor="#FF6B00" stopOpacity="0.04" />
+                    <stop offset="100%" stopColor="#FF6B00" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+
+                {/* Soft Radial Ambient Stage Fill */}
+                <circle cx="350" cy="350" r="320" fill="url(#reticleGlow)" />
+
+                {/* Concentric Calibration Rings */}
+                <circle cx="350" cy="350" r="310" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="3 6" />
+                <circle cx="350" cy="350" r="250" stroke="rgba(255,107,0,0.14)" strokeWidth="1" />
+                <circle cx="350" cy="350" r="190" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="2 4" />
+                <circle cx="350" cy="350" r="130" stroke="rgba(255,107,0,0.1)" strokeWidth="1" />
+
+                {/* Crosshair Axes with Precision Ticks */}
+                <line x1="350" y1="20" x2="350" y2="680" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 8" />
+                <line x1="20" y1="350" x2="680" y2="350" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 8" />
+
+                {/* Axis Tick Marks (North, South, East, West) */}
+                <path d="M 345 40 L 355 40 M 345 80 L 355 80 M 345 620 L 355 620 M 345 660 L 355 660" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                <path d="M 40 345 L 40 355 M 80 345 L 80 355 M 620 345 L 620 355 M 660 345 L 660 355" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+
+                {/* Precision Corner Brackets framing center phone */}
+                <path d="M 220 140 L 200 140 L 200 160" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
+                <path d="M 480 140 L 500 140 L 500 160" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
+                <path d="M 200 540 L 200 560 L 220 560" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
+                <path d="M 500 540 L 500 560 L 480 560" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
+
+                {/* Micro Technical Typography */}
+                <text x="350" y="32" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="8" fontFamily="monospace" letterSpacing="2">FIXMI // PRECISION BENCH 01</text>
+                <text x="350" y="675" textAnchor="middle" fill="rgba(255,107,0,0.35)" fontSize="8" fontFamily="monospace" letterSpacing="2">TOLERANCE ±0.01mm • OEM SPEC</text>
+                <text x="30" y="353" textAnchor="start" fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="monospace">00°</text>
+                <text x="660" y="353" textAnchor="end" fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="monospace">180°</text>
+              </svg>
+            </div>
+
             {/* Clean Transparent Phone Stage Container */}
             <div
               ref={layersContainerRef}
@@ -945,7 +1051,7 @@ export default function ExplodedPhoneSection() {
                   jumpToStep(currentStep === 14 ? 13 : 14);
                 }
               }}
-              className={`relative w-[260px] sm:w-[300px] md:w-[325px] lg:w-[350px] xl:w-[380px] h-[440px] sm:h-[500px] md:h-[540px] lg:h-[580px] xl:h-[640px] flex items-center justify-center ${
+              className={`relative w-[260px] sm:w-[300px] md:w-[325px] lg:w-[350px] xl:w-[380px] h-[440px] sm:h-[500px] md:h-[540px] lg:h-[580px] xl:h-[640px] flex items-center justify-center z-10 ${
                 isAssembled ? "cursor-pointer active:scale-[0.99] transition-transform duration-150" : ""
               }`}
               style={{
@@ -962,8 +1068,8 @@ export default function ExplodedPhoneSection() {
                 const dofFilter = isAssembled
                   ? "none"
                   : isCurrentActiveLayer
-                  ? "brightness(1.18) contrast(1.08) drop-shadow(0 0 18px rgba(255,107,0,0.25))"
-                  : "brightness(0.68) blur(0.6px)";
+                  ? "brightness(1.14) contrast(1.06) drop-shadow(0 14px 28px rgba(0,0,0,0.85)) drop-shadow(0 0 8px rgba(255,107,0,0.3))"
+                  : "brightness(0.65) blur(0.5px)";
 
                 return (
                   <div
@@ -993,7 +1099,7 @@ export default function ExplodedPhoneSection() {
                         priority={index === 0}
                         loading={index === 0 ? undefined : "eager"}
                         sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                        className="object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.85)]"
+                        className="object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.9)]"
                       />
                     </div>
                   </div>
@@ -1009,7 +1115,7 @@ export default function ExplodedPhoneSection() {
                   zIndex: 25,
                 }}
               >
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-full flex items-center justify-center">
                   <Image
                     key={bootKey}
                     src="/images/services/Booting.webp"
@@ -1018,7 +1124,7 @@ export default function ExplodedPhoneSection() {
                     unoptimized
                     priority
                     sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                    className="object-contain drop-shadow-[0_0_35px_rgba(255,107,0,0.3)] select-none pointer-events-none"
+                    className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
                   />
                 </div>
               </div>
@@ -1210,13 +1316,13 @@ export default function ExplodedPhoneSection() {
                   className="flex flex-col items-center gap-1.5 focus:outline-none shrink-0 active:scale-95 transition-[transform,opacity] duration-150 ease-out"
                 >
                   <div
-                    className={`w-14 h-14 rounded-full border-2 p-0.5 transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out ${
+                    className={`w-14 h-14 rounded-full p-0.5 transition-all duration-200 ease-out ${
                       isActive && t > 0.7
-                        ? "border-primary bg-primary/20 scale-105 shadow-[0_0_16px_rgba(255,107,0,0.5)]"
-                        : "border-white/20 bg-[#141418]"
+                        ? "border border-primary bg-gradient-to-b from-[#2F1F17] via-[#1C1412] to-[#0E0E10] scale-105 shadow-[0_0_16px_rgba(255,107,0,0.4)]"
+                        : "border border-white/12 bg-gradient-to-b from-[#222226] via-[#161619] to-[#0E0E10]"
                     }`}
                   >
-                    <div className="relative w-full h-full rounded-full overflow-hidden bg-[#0A0A0C]">
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-[#070709] border border-black/60">
                       <Image
                         src={callout.circleImage}
                         alt={displayName}
@@ -1237,7 +1343,7 @@ export default function ExplodedPhoneSection() {
 
         {/* ── FOOTER DOTS BAR ── */}
         <div className="relative z-20 w-full max-w-md mx-auto text-center mt-2 sm:mt-3 shrink-0">
-          <div className="flex items-center justify-center gap-1.5">
+          <div className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
             {STEP_NUMBERS.map((stepNum) => {
               const isPastOrCurrent = stepNum <= currentStep;
               const isCurrent = stepNum === currentStep;
@@ -1257,7 +1363,7 @@ export default function ExplodedPhoneSection() {
                       ? isBootStep
                         ? "w-3.5 bg-emerald-400/80"
                         : "w-3 bg-primary/70"
-                      : "w-1.5 bg-white/20 hover:bg-white/50"
+                      : "w-1.5 bg-white/15 hover:bg-white/40"
                   }`}
                   aria-label={`Lompat ke Langkah ${stepNum}`}
                 />
