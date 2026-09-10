@@ -94,7 +94,7 @@
       768-1023px = layout mobile di-zoom 1.125×, bukan 1.31× yang terasa
       kebesaran.
     */
-    font-size: clamp(14px, calc(100vw / 390 * 16), 18px);
+    font-size: clamp(14px, 4.103vw, 18px);
   }
 
   /*
@@ -107,7 +107,7 @@
   */
   @media (min-width: 1024px) {
     html {
-      font-size: clamp(13px, calc(100vw / 1440 * 16), 16px);
+      font-size: clamp(13px, 1.111vw, 16px);
     }
   }
 }

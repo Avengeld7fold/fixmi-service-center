@@ -145,6 +145,7 @@ export default function Footer() {
               alt="FIXMI Service Center · Phone Service · Sparepart · Tech Academy"
               width={212}
               height={54}
+              style={{ width: "auto" }}
               className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90 drop-shadow-sm"
             />
           </Link>

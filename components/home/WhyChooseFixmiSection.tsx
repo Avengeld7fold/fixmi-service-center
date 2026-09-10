@@ -136,7 +136,7 @@ export default function WhyChooseFixmiSection() {
             onTouchStart={(e) => handleSwipeStart(e.touches[0].clientX)}
             onTouchEnd={(e) => handleSwipeEnd(e.changedTouches[0].clientX)}
           >
-            <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.12] bg-[#121216] shadow-[0_20px_50px_rgba(0,0,0,0.85)] sm:shadow-[0_30px_70px_rgba(0,0,0,0.85)] aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11]">
+            <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.12] bg-[#121216] shadow-[0_20px_50px_rgba(0,0,0,0.85)] sm:shadow-[0_30px_70px_rgba(0,0,0,0.85)] aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11] min-h-[260px] sm:min-h-[340px]">
 
               {/* Photo Slides */}
               {workshopPhotos.map((photo, idx) => (

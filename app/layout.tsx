@@ -208,7 +208,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} h-full antialiased`}
+      className={`${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} antialiased`}
     >
       <head>
         <script
@@ -216,7 +216,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD_STRUCTURED_DATA) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-background text-foreground" suppressHydrationWarning>
         <LoadingGate>
           <I18nProvider>
             <SmoothScrolling>

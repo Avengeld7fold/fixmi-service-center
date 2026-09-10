@@ -121,6 +121,7 @@ export default function Navbar() {
             width={172}
             height={44}
             priority
+            style={{ width: "auto" }}
             className="h-9 sm:h-10 lg:h-11 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
           />
         </Link>

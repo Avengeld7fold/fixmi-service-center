@@ -29,14 +29,16 @@ const CSP = [
   "frame-ancestors 'none'",
   "form-action 'self'",
   scriptSrc,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com blob: data:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://images.unsplash.com https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.ggpht.com https://*.googleusercontent.com",
-  `connect-src 'self' https://maps.googleapis.com https://*.googleapis.com${isDev ? " http://localhost:8400 ws: http:" : ""}`,
+  `connect-src 'self' https://maps.googleapis.com https://*.googleapis.com${isDev ? " http://localhost:8400 ws: wss: http: blob: data:" : ""}`,
   // Peta memakai iframe embed Google sebagai fallback tanpa API key.
   "frame-src https://www.google.com https://maps.google.com",
-  "upgrade-insecure-requests",
-].join("; ");
+  // PENTING: upgrade-insecure-requests HANYA untuk HTTPS di produksi.
+  // Di development (localhost HTTP), Safari akan memaksakan HTTPS pada asset CSS/JS sehingga koneksi gagal dan styling rusak total.
+  isDev ? "" : "upgrade-insecure-requests",
+].filter(Boolean).join("; ");
 
 const SECURITY_HEADERS = [
   { key: "Content-Security-Policy", value: CSP },
@@ -47,9 +49,11 @@ const SECURITY_HEADERS = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
   },
+  // HSTS HANYA untuk production HTTPS. Di localhost HTTP, max-age=0 menghapus cache HSTS Safari
+  // agar Safari tidak memaksakan HTTPS pada http://localhost:3000.
   {
     key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains; preload",
+    value: isDev ? "max-age=0" : "max-age=63072000; includeSubDomains; preload",
   },
 ];
 
