@@ -507,9 +507,9 @@ export default function Hero3D() {
       });
     };
 
-    brokenTex = loader.load("/images/iphone-broken.webp?v=3");
-    fixedTex = loader.load("/images/iphone-fixed.webp?v=3");
-    depthTex = loader.load("/images/iphone-depth.webp?v=3");
+    brokenTex = loader.load("/images/iphone-broken.webp");
+    fixedTex = loader.load("/images/iphone-fixed.webp");
+    depthTex = loader.load("/images/iphone-depth.webp");
 
     // Bebaskan memori GPU saat komponen unmount (navigasi ke halaman lain)
     return () => {
