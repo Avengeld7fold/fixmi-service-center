@@ -1,6 +1,6 @@
 ---
 name: FIXMI Service Center
-description: Premium Smart Device Repair & Diagnostic Service Center Bali
+description: Premium Smart Device Repair & Diagnostic Service Center
 colors:
   primary: "#FF6B00"
   primary-glow: "rgba(255, 107, 0, 0.15)"

@@ -4,7 +4,7 @@ import { whatsappUrl } from "@/lib/constants";
 
 export const metadata = {
   title: "404 — Halaman Tidak Ditemukan",
-  description: "Halaman yang Anda cari tidak tersedia di FIXMI Service Center Bali.",
+  description: "Halaman yang Anda cari tidak tersedia di FIXMI Service Center.",
 };
 
 export default function NotFound() {

@@ -10,7 +10,7 @@ web
 Pemilik perangkat pintar di Bali (iPhone, iPad, MacBook, Android premium) yang membutuhkan perbaikan teknis profesional, transparan, dan bergaransi resmi.
 
 ## Product Purpose
-Menyajikan website interaktif & landing page FIXMI Service Center Bali dengan showcase 3D interaktif, storytelling scroll sequence, dan direktori harga (pricelist) transparan.
+Menyajikan website interaktif & landing page FIXMI Service Center dengan showcase 3D interaktif, storytelling scroll sequence, dan direktori harga (pricelist) transparan.
 
 ## Positioning
 Pusat perbaikan perangkat pintar terkemuka di Bali dengan standar teknisi klinis (diagnostic precision), transparansi estimasi biaya, dan suku cadang presisi.

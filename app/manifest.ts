@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "FIXMI Service Center Bali",
+    name: "FIXMI Service Center",
     short_name: "FIXMI",
     description:
       "Pusat service iPhone, iPad, MacBook & Android terpercaya di Bali sejak 2014. Transparan, rapi, bergaransi.",

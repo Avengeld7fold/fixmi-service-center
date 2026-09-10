@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "FIXMI — Pusat Service iPhone, iPad, MacBook & Android di Bali",
-    template: "%s | FIXMI Service Center Bali",
+    template: "%s | FIXMI Service Center",
   },
   description:
     "Pusat perbaikan perangkat pintar terpercaya di Bali sejak Agustus 2014. Spesialis ganti LCD, baterai, kamera, dan mikrosolder motherboard iPhone, iPad, MacBook & Android. Pengerjaan presisi, transparan, bergaransi resmi. 3 Gerai di Kedonganan, Jimbaran, dan Denpasar.",
@@ -189,7 +189,7 @@ const JSON_LD_STRUCTURED_DATA = {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#website`,
       url: SITE_URL,
-      name: "FIXMI Service Center Bali",
+      name: "FIXMI Service Center",
       publisher: {
         "@id": `${SITE_URL}/#organization`,
       },
