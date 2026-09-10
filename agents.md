@@ -52,6 +52,7 @@ Gunakan struktur ini sebagai acuan saat diminta membuat komponen:
 * **Fokus pada Output:** Berikan blok kode lengkap jika memungkinkan, hindari memotong kode di tengah jalan kecuali panjang karakter dibatasi.
 * **Validasi Aset:** Sadari bahwa kamu tidak bisa membuat file aset fisik (seperti `.glb` atau ratusan gambar `.jpg`). Berikan placeholder atau asumsikan file tersebut sudah diletakkan oleh *user* di folder `/public`.
 * **Git Push Rule:** Jangan pernah melakukan `git push` ke GitHub kecuali diinstruksikan secara eksplisit dan tertulis oleh user. Segala bentuk penyimpanan kode harian hanya boleh dilakukan melalui git commit lokal.
+* **Zip / Bundle Rule:** Jangan pernah melakukan kompresi atau membuat berkas bundle `next-build.zip` (atau arsip zip apapun) kecuali diinstruksikan secara eksplisit dan tertulis oleh user, sama persis seperti aturan Git Push.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
