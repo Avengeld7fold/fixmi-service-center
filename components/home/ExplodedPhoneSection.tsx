@@ -4,9 +4,15 @@ import { useRef, useState, useEffect, memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { useLenis } from "lenis/react";
 import { useI18n } from "@/lib/i18n/context";
 import { X, Clock, Info, ShieldCheck, ArrowUpRight } from "lucide-react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // ── Urutan 13 Layer dari angka tertinggi (13) ke angka terkecil (1) ──
 interface LayerDefinition {
@@ -428,27 +434,16 @@ const InspectionCircleNode = memo(function InspectionCircleNode({
 export default function ExplodedPhoneSection() {
   const { dict, locale, getLocalizedPath } = useI18n();
   const isEn = locale === "en";
+  const lenis = useLenis();
   const containerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const stageGridRef = useRef<HTMLDivElement>(null);
   const layersContainerRef = useRef<HTMLDivElement>(null);
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
-
-  const targetProgressRef = useRef<number>(0);
-  const currentProgressRef = useRef<number>(0);
-  const startRafRef = useRef<(() => void) | null>(null);
-
-  // Helper untuk navigasi langsung ke step tertentu dengan animasi smooth lerp
-  const jumpToStep = (step: number) => {
-    let target = 0;
-    if (step >= 14) target = 1.0;
-    else if (step === 13) target = 0.88;
-    else if (step === 1) target = 0.0;
-    else target = ((step - 1) / 12) * 0.84;
-
-    targetProgressRef.current = target;
-    startRafRef.current?.();
-  };
+  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  const lastQuantizedRef = useRef<number>(-1);
+  const prevStepRef = useRef<number>(1);
 
   const [activeCalloutId, setActiveCalloutId] = useState<string>("backglass");
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -456,8 +451,7 @@ export default function ExplodedPhoneSection() {
   const [isAssembled, setIsAssembled] = useState<boolean>(false);
   const [spatialMap, setSpatialMap] = useState<Record<string, NodeSpatialInfo>>({});
   const [bootKey, setBootKey] = useState<number>(0);
-  const prevStepRef = useRef<number>(1);
-  
+
   // Pre-load Booting.webp (~457KB) for instant display at Step 14 without network lag
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -489,10 +483,71 @@ export default function ExplodedPhoneSection() {
   // Komponen / Part yang sedang aktif (sesuai lingkaran oranye yang aktif)
   const activeCallout = SERVICE_CALLOUTS.find((c) => c.id === activeCalloutId) || SERVICE_CALLOUTS[0];
 
-  // ── GSAP Timeline: Sequential Assembly dari 13.webp (Layer 13) ke 1.webp (Layer 1) ──
+  // Helper untuk hitung step progress
+  const getProgressForStep = (step: number) => {
+    if (step >= 14) return 1.0;
+    if (step === 13) return 0.88;
+    if (step <= 1) return 0.0;
+    return ((step - 1) / 12) * 0.84;
+  };
+
+  // Sinkronisasi state React saat timeline berjalan
+  const applyProgress = (val: number) => {
+    const quantized = Math.round(val * 200) / 200;
+    if (quantized === lastQuantizedRef.current) return;
+    lastQuantizedRef.current = quantized;
+
+    setScrollProgress(quantized);
+
+    let activeStep = 1;
+    if (quantized >= 0.90) {
+      activeStep = 14;
+    } else if (quantized >= 0.85) {
+      activeStep = 13;
+    } else {
+      activeStep = Math.min(12, Math.max(1, Math.floor((quantized / 0.85) * 12) + 1));
+    }
+
+    if (activeStep === 14 && prevStepRef.current !== 14) {
+      setBootKey((k) => k + 1);
+    }
+    prevStepRef.current = activeStep;
+    setCurrentStep(activeStep);
+    setIsAssembled(quantized >= 0.85);
+
+    const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
+    if (currentLayerDef && currentLayerDef.calloutId) {
+      setActiveCalloutId(currentLayerDef.calloutId);
+    }
+  };
+
+  // Helper untuk navigasi langsung ke step tertentu dengan smooth scroll
+  const jumpToStep = (step: number) => {
+    const targetProg = getProgressForStep(step);
+    const st = scrollTriggerRef.current;
+    if (st) {
+      const targetScroll = st.start + (st.end - st.start) * targetProg;
+      if (lenis) {
+        lenis.scrollTo(targetScroll, {
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        });
+      } else {
+        window.scrollTo({
+          top: targetScroll,
+          behavior: "smooth",
+        });
+      }
+    } else {
+      timelineRef.current?.progress(targetProg);
+      applyProgress(targetProg);
+    }
+  };
+
+  // ── GSAP Timeline & ScrollTrigger: Apple-Style Sticky Pinning 13-Layer Assembly ──
   useGSAP(
     () => {
-      if (!layersContainerRef.current) return;
+      if (!layersContainerRef.current || !containerRef.current || !stageRef.current) return;
 
       const layers = layerRefs.current.filter(Boolean) as HTMLDivElement[];
       if (layers.length !== 13) return;
@@ -518,10 +573,20 @@ export default function ExplodedPhoneSection() {
         });
       }
 
-      // Standalone timeline dikendalikan secara presisi oleh wheel/touch di area gambar
+      // Standalone timeline dikendalikan oleh ScrollTrigger pinning
       const stepDuration = 0.5;
       const overlap = 0.15;
-      const tl = gsap.timeline({ paused: true });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=2200",
+          pin: stageRef.current,
+          pinSpacing: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+        },
+      });
 
       for (let i = 1; i < layers.length; i++) {
         const startTime = (i - 1) * (stepDuration - overlap);
@@ -540,149 +605,19 @@ export default function ExplodedPhoneSection() {
       }
 
       // Alokasikan waktu jeda setelah layer 13 (LCD) terpasang sempurna untuk fase Booting (Langkah 14)
-      // Fisik ponsel terakit sempurna pada progres 0.85, menyisakan 15% progres akhir untuk booting
       const physicalDuration = (layers.length - 2) * (stepDuration - overlap) + stepDuration;
       const totalTimelineDuration = physicalDuration / 0.85;
       tl.set({}, {}, totalTimelineDuration);
 
+      tl.eventCallback("onUpdate", () => {
+        applyProgress(tl.progress());
+      });
+
       timelineRef.current = tl;
+      scrollTriggerRef.current = tl.scrollTrigger ?? null;
     },
     { scope: containerRef }
   );
-
-  // ── Wheel & Touch Scrubbing: rAF Exponential Lerp Loop 120fps (Apple / Emil Fluid Motion) ──
-  useEffect(() => {
-    const phoneEl = layersContainerRef.current;
-    if (!phoneEl) return;
-
-    let isHovered = false;
-    let rafId: number | null = null;
-    // Nilai progress terakhir yang dikirim ke React state (quantized).
-    // GSAP timeline tetap di-update SETIAP frame (animasi layer tetap 60fps mulus),
-    // tetapi React state hanya di-update saat perubahan terlihat (>= 0.005)
-    // sehingga komponen besar ini tidak re-render pada setiap frame settle lerp.
-    let lastQuantized = -1;
-
-    const applyProgress = (val: number, isFinal: boolean) => {
-      currentProgressRef.current = val;
-
-      // Update GSAP timeline langsung ke DOM — bebas biaya re-render React
-      if (timelineRef.current) {
-        timelineRef.current.progress(val);
-      }
-
-      const quantized = isFinal ? val : Math.round(val * 200) / 200;
-      if (quantized === lastQuantized) return;
-      lastQuantized = quantized;
-
-      setScrollProgress(quantized);
-
-      let activeStep = 1;
-      if (quantized >= 0.90) {
-        activeStep = 14;
-      } else if (quantized >= 0.85) {
-        activeStep = 13;
-      } else {
-        activeStep = Math.min(12, Math.max(1, Math.floor((quantized / 0.85) * 12) + 1));
-      }
-
-      if (activeStep === 14 && prevStepRef.current !== 14) {
-        setBootKey((k) => k + 1);
-      }
-      prevStepRef.current = activeStep;
-      setCurrentStep(activeStep);
-      setIsAssembled(quantized >= 0.85);
-
-      const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
-      if (currentLayerDef && currentLayerDef.calloutId) {
-        setActiveCalloutId(currentLayerDef.calloutId);
-      }
-    };
-
-    const startRaf = () => {
-      if (rafId !== null) return;
-      const tick = () => {
-        const target = targetProgressRef.current;
-        const current = currentProgressRef.current;
-        const diff = target - current;
-
-        if (Math.abs(diff) > 0.0002) {
-          // Exponential smoothing lerp (Apple CADisplayLink feel)
-          applyProgress(current + diff * 0.16, false);
-          rafId = requestAnimationFrame(tick);
-        } else {
-          applyProgress(target, true);
-          rafId = null;
-        }
-      };
-      rafId = requestAnimationFrame(tick);
-    };
-
-    startRafRef.current = startRaf;
-
-    const handleMouseEnter = () => {
-      isHovered = true;
-    };
-    const handleMouseLeave = () => {
-      isHovered = false;
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      // Jika kursor DI LUAR area gambar ponsel, biarkan website scroll normal
-      if (!isHovered) return;
-
-      const delta = e.deltaY;
-      const speed = 0.0015; // Kecepatan scrub responsif & presisi
-
-      const current = targetProgressRef.current;
-      const next = Math.max(0, Math.min(1, current + delta * speed));
-
-      // Jika masih dalam proses merakit/membongkar (0 < prog < 1), cegah scroll website
-      if ((delta > 0 && current < 1) || (delta < 0 && current > 0)) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        targetProgressRef.current = next;
-        startRaf();
-      }
-    };
-
-    // Touch Swipe Gesture untuk Perangkat Mobile
-    let startY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY;
-    };
-    const handleTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const deltaY = startY - currentY;
-      startY = currentY;
-
-      const speed = 0.0032;
-      const current = targetProgressRef.current;
-      const next = Math.max(0, Math.min(1, current + deltaY * speed));
-
-      if ((deltaY > 0 && current < 1) || (deltaY < 0 && current > 0)) {
-        e.preventDefault();
-        targetProgressRef.current = next;
-        startRaf();
-      }
-    };
-
-    phoneEl.addEventListener("mouseenter", handleMouseEnter);
-    phoneEl.addEventListener("mouseleave", handleMouseLeave);
-    phoneEl.addEventListener("wheel", handleWheel, { passive: false });
-    phoneEl.addEventListener("touchstart", handleTouchStart, { passive: true });
-    phoneEl.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      phoneEl.removeEventListener("mouseenter", handleMouseEnter);
-      phoneEl.removeEventListener("mouseleave", handleMouseLeave);
-      phoneEl.removeEventListener("wheel", handleWheel);
-      phoneEl.removeEventListener("touchstart", handleTouchStart);
-      phoneEl.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, []);
 
   // ── Hitung Koordinat Vektor Spasial Titik Tengah (Dot) & Posisi Akhir Lingkaran ──
   useEffect(() => {
@@ -739,7 +674,7 @@ export default function ExplodedPhoneSection() {
       throttleTimer = setTimeout(() => {
         throttleTimer = null;
         updateSpatialMap();
-      }, 150);
+      }, 100);
     };
 
     updateSpatialMap();
@@ -751,14 +686,14 @@ export default function ExplodedPhoneSection() {
     }
 
     window.addEventListener("resize", throttledUpdate);
-    window.addEventListener("scroll", throttledUpdate, { passive: true });
+    ScrollTrigger.addEventListener("refresh", throttledUpdate);
 
     const t = setTimeout(updateSpatialMap, 300);
 
     return () => {
       ro?.disconnect();
       window.removeEventListener("resize", throttledUpdate);
-      window.removeEventListener("scroll", throttledUpdate);
+      ScrollTrigger.removeEventListener("refresh", throttledUpdate);
       if (throttleTimer !== null) clearTimeout(throttleTimer);
       clearTimeout(t);
     };
@@ -794,10 +729,13 @@ export default function ExplodedPhoneSection() {
   const assemblyFade = Math.min(1, Math.max(0, rawFade * rawFade * (3 - 2 * rawFade)));
 
   return (
-    <div ref={containerRef} className="relative w-full bg-[#121212] text-white select-none py-12 sm:py-16 lg:py-20">
+    <div ref={containerRef} className="relative w-full bg-[#121212] text-white select-none">
       
-      {/* ── MAIN STAGE CONTAINER ── */}
-      <div className="relative w-full flex flex-col justify-between items-center px-4 sm:px-6 lg:px-12 overflow-hidden">
+      {/* ── PINNED STAGE CONTAINER ── */}
+      <div
+        ref={stageRef}
+        className="relative w-full h-screen min-h-[640px] max-h-[1080px] flex flex-col justify-between items-center px-4 sm:px-6 lg:px-12 py-4 sm:py-6 lg:py-8 overflow-hidden bg-[#121212]"
+      >
         
         {/* Background Ambient Glow & Blueprint Grid */}
         <div
@@ -810,9 +748,9 @@ export default function ExplodedPhoneSection() {
         <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[38rem] w-[38rem] rounded-full bg-primary/10 blur-[150px]" />
 
         {/* ── HEADER TITLE ── */}
-        <div className="relative z-20 text-center max-w-3xl mx-auto mb-4">
+        <div className="relative z-20 text-center max-w-3xl mx-auto mb-2 shrink-0">
           <h2
-            className="font-bayon text-3xl sm:text-4xl lg:text-5xl uppercase leading-[0.95] tracking-[-0.01em] text-[#f5f5f5]"
+            className="font-bayon text-2xl sm:text-3xl lg:text-4xl xl:text-5xl uppercase leading-[0.95] tracking-[-0.01em] text-[#f5f5f5]"
             style={{
               fontFamily: "var(--font-bayon), sans-serif",
             }}
@@ -827,7 +765,7 @@ export default function ExplodedPhoneSection() {
                 jumpToStep(currentStep === 14 ? 13 : 14);
               }
             }}
-            className={`mt-3.5 sm:mt-4 inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3.5 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200 select-none ${
+            className={`mt-2 sm:mt-2.5 inline-flex items-center gap-2 font-mono text-[10px] sm:text-[11px] lg:text-xs uppercase tracking-wider text-neutral-300 bg-white/[0.04] border border-primary/40 rounded-full px-3 sm:px-4 py-1 sm:py-1.5 shadow-lg backdrop-blur-md transition-all duration-200 select-none ${
               isAssembled ? "cursor-pointer hover:border-emerald-400/80 hover:scale-105 active:scale-95" : ""
             }`}
           >
@@ -1007,7 +945,7 @@ export default function ExplodedPhoneSection() {
                   jumpToStep(currentStep === 14 ? 13 : 14);
                 }
               }}
-              className={`relative w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] h-[520px] sm:h-[580px] md:h-[620px] lg:h-[660px] flex items-center justify-center ${
+              className={`relative w-[260px] sm:w-[300px] md:w-[325px] lg:w-[350px] xl:w-[380px] h-[440px] sm:h-[500px] md:h-[540px] lg:h-[580px] xl:h-[640px] flex items-center justify-center ${
                 isAssembled ? "cursor-pointer active:scale-[0.99] transition-transform duration-150" : ""
               }`}
               style={{
@@ -1298,7 +1236,7 @@ export default function ExplodedPhoneSection() {
         </div>
 
         {/* ── FOOTER DOTS BAR ── */}
-        <div className="relative z-20 w-full max-w-md mx-auto text-center mt-6">
+        <div className="relative z-20 w-full max-w-md mx-auto text-center mt-2 sm:mt-3 shrink-0">
           <div className="flex items-center justify-center gap-1.5">
             {STEP_NUMBERS.map((stepNum) => {
               const isPastOrCurrent = stepNum <= currentStep;
