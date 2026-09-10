@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useLenis } from "lenis/react";
 import { useI18n } from "@/lib/i18n/context";
-import { X, Clock, Info, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { X, Clock, ShieldCheck, ArrowUpRight } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -369,7 +369,7 @@ function getCubicBezierSubcurve(
   };
 }
 
-// ── Komponen Lingkaran Callout Bersih & Minimalis (Double-Bezel Hardware Architecture, Memoized) ──
+// ── Komponen Lingkaran Callout Apple-Minimalis (Memoized) ──
 const InspectionCircleNode = memo(function InspectionCircleNode({
   callout,
   isActive,
@@ -386,59 +386,43 @@ const InspectionCircleNode = memo(function InspectionCircleNode({
   onMouseEnter?: () => void;
 }) {
   const displayName = isEn ? callout.nameEn : callout.name;
-  const categoryCode = callout.code.split(" // ")[0] || "DIAGNOSTIC";
 
   return (
     <div
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      className="flex flex-col items-center gap-2 group cursor-pointer select-none active:scale-[0.95] transition-transform duration-150 ease-out"
+      className="flex flex-col items-center gap-2.5 group cursor-pointer select-none active:scale-[0.97] transition-transform duration-200 ease-out"
     >
-      {/* Double-Bezel Hardware Node */}
+      {/* Minimalist Hardware Node */}
       <div
         id={`callout-circle-node-${callout.id}`}
-        className={`relative w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full p-1 transition-all duration-250 ease-out backdrop-blur-md ${
+        className={`relative w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full p-2 transition-all duration-300 ease-out backdrop-blur-md ${
           isActive && isRevealed
-            ? "border border-primary bg-gradient-to-b from-[#2F1F17] via-[#1C1412] to-[#0E0E10] shadow-[0_0_26px_rgba(255,107,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.2)] scale-105 ring-2 ring-primary/30"
-            : "border border-white/12 bg-gradient-to-b from-[#222226] via-[#161619] to-[#0E0E10] shadow-[0_8px_20px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.08)] hover:border-primary/60 hover:scale-102 hover:shadow-[0_0_18px_rgba(255,107,0,0.25)]"
+            ? "bg-[#18181b]/90 border border-primary shadow-[0_0_24px_rgba(255,107,0,0.22)] scale-105"
+            : "bg-[#141416]/70 border border-white/10 hover:border-white/25 hover:bg-[#18181b]/80 hover:scale-102"
         }`}
       >
-        {/* Inner Optical Lens Chamber */}
-        <div className="relative w-full h-full rounded-full overflow-hidden bg-[#070709] border border-black/60 flex items-center justify-center shadow-inner">
-          {/* Subtle Lens Specular Flare */}
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_32%_28%,rgba(255,255,255,0.09),transparent_60%)]" />
-
-          {/* Component Image */}
+        <div className="relative w-full h-full">
           <Image
             src={callout.circleImage}
             alt={displayName}
             fill
             sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, (max-width: 1024px) 80px, 88px"
-            className="object-contain p-2.5 group-hover:scale-110 transition-transform duration-250 ease-out drop-shadow-md"
+            className="object-contain p-1.5 group-hover:scale-105 transition-transform duration-300 ease-out"
           />
-
-          {/* Inspection Hover Glass Overlay */}
-          <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out flex items-center justify-center">
-            <Info className="w-5 h-5 text-primary animate-pulse" />
-          </div>
-
-          {/* Active Laser Dot Marker on Node Rim */}
-          {isActive && isRevealed && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#FF6B00] animate-pulse" />
-          )}
         </div>
       </div>
 
-      {/* Component Title & Diagnostic Category Tag */}
+      {/* Clean Component Title */}
       <div className="text-center max-w-[120px] sm:max-w-[140px]">
-        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary/80 font-medium block leading-none mb-1">
-          {categoryCode}
-        </span>
-        <span className="font-mono text-xs text-neutral-200 font-semibold tracking-tight block group-hover:text-primary transition-colors duration-150 leading-tight">
+        <span
+          className={`font-mono text-xs tracking-tight block transition-colors duration-200 leading-snug ${
+            isActive && isRevealed
+              ? "text-primary font-semibold"
+              : "text-neutral-400 group-hover:text-white font-medium"
+          }`}
+        >
           {displayName}
-        </span>
-        <span className="font-mono text-[8px] text-neutral-400 uppercase tracking-widest block mt-0.5 opacity-80 group-hover:opacity-100 group-hover:text-neutral-300">
-          {isEn ? "INSPECT" : "INSPEKSI"}
         </span>
       </div>
     </div>
@@ -751,41 +735,12 @@ export default function ExplodedPhoneSection() {
         className="relative w-full h-screen min-h-[640px] max-h-[1080px] flex flex-col justify-between items-center px-4 sm:px-6 lg:px-12 py-4 sm:py-6 lg:py-8 overflow-hidden bg-[#121212]"
       >
         
-        {/* ── ARCHITECTURAL STUDIO ATMOSPHERE & LIGHTING ── */}
-        {/* 1. Precision Technical Grid with Radial Center Fade */}
+        {/* ── SUBTLE AMBIENT STAGE HALO ── */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.035]"
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] sm:w-[540px] lg:w-[640px] h-[520px] sm:h-[640px] lg:h-[720px]"
           style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.85) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-            maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%)",
-            WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%)",
-          }}
-        />
-
-        {/* 2. Vertical Specular Light Column (Tailored to 9:16 iPhone proportions) */}
-        <div
-          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] lg:w-[500px] h-[580px] sm:h-[680px] lg:h-[780px]"
-          style={{
-            background: "radial-gradient(ellipse 55% 70% at 50% 50%, rgba(255, 107, 0, 0.14) 0%, rgba(255, 107, 0, 0.04) 50%, transparent 80%)",
-            filter: "blur(50px)",
-          }}
-        />
-
-        {/* 3. Directional Downlight Specular Wash */}
-        <div
-          className="pointer-events-none absolute top-[8%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[380px] h-[360px] opacity-60"
-          style={{
-            background: "linear-gradient(180deg, rgba(255, 120, 0, 0.12) 0%, rgba(255, 107, 0, 0.02) 65%, transparent 100%)",
+            background: "radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.08) 0%, rgba(255, 107, 0, 0.02) 45%, transparent 70%)",
             filter: "blur(60px)",
-          }}
-        />
-
-        {/* 4. Deep Obsidian Edge Vignette */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 45%, rgba(18, 18, 18, 0.85) 100%)",
           }}
         />
 
@@ -800,45 +755,26 @@ export default function ExplodedPhoneSection() {
             {dict.teardown.heading}
           </h2>
 
-          {/* Active Diagnostic Status Capsule */}
+          {/* Minimalist Step Indicator */}
           <div
             onClick={() => {
               if (isAssembled) {
                 jumpToStep(currentStep === 14 ? 13 : 14);
               }
             }}
-            className={`mt-2 sm:mt-2.5 inline-flex items-center gap-2.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-neutral-300 bg-white/[0.03] border border-white/12 hover:border-primary/50 rounded-full px-3.5 sm:px-4 py-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-md transition-all duration-200 select-none ${
-              isAssembled ? "cursor-pointer hover:scale-105 active:scale-95" : ""
+            className={`mt-2 sm:mt-2.5 flex items-center justify-center gap-2 font-mono text-[11px] sm:text-xs uppercase tracking-widest select-none ${
+              isAssembled ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
             }`}
           >
-            <span className="relative flex h-2 w-2 items-center justify-center">
-              <span
-                className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                  currentStep === 14
-                    ? "bg-emerald-400 animate-ping"
-                    : isAssembled
-                    ? "bg-emerald-400"
-                    : "bg-primary animate-ping"
-                }`}
-              />
-              <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${
-                  currentStep === 14 || isAssembled
-                    ? "bg-emerald-400 shadow-[0_0_8px_#34d399]"
-                    : "bg-primary shadow-[0_0_8px_#FF6B00]"
-                }`}
-              />
-            </span>
-
-            <span className="text-primary font-semibold tracking-widest text-[10px] sm:text-[11px]">
+            <span className="text-primary font-semibold">
               {currentStep === 14
                 ? "14/14"
                 : isAssembled
                 ? "13/14"
                 : `${currentStep.toString().padStart(2, "0")}/13`}
             </span>
-            <span className="text-neutral-600 font-mono text-[10px]">│</span>
-            <span className="text-white font-medium tracking-wide">
+            <span className="text-neutral-600">•</span>
+            <span className="text-neutral-300 font-medium">
               {currentStep === 14
                 ? isEn
                   ? "SYSTEM BOOTING & QC PASSED"
@@ -864,17 +800,6 @@ export default function ExplodedPhoneSection() {
             className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none z-30"
             style={{ overflow: "visible" }}
           >
-            <defs>
-              <filter id="activeLineGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#FF6B00" floodOpacity="0.9" />
-              </filter>
-              <linearGradient id="activeLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#FFA040" />
-                <stop offset="50%" stopColor="#FF6B00" />
-                <stop offset="100%" stopColor="#FF4500" />
-              </linearGradient>
-            </defs>
-
             {SERVICE_CALLOUTS.map((callout) => {
               const spatial = spatialMap[callout.id];
               if (!spatial) return null;
@@ -906,7 +831,7 @@ export default function ExplodedPhoneSection() {
                   <g
                     key={`${callout.id}-${dotIdx}`}
                     style={{ opacity: lineOpacity }}
-                    className="cursor-pointer group/line transition-opacity duration-150"
+                    className="cursor-pointer group/line transition-opacity duration-200"
                     onMouseEnter={() => {
                       if (assemblyFade > 0.1) setActiveCalloutId(callout.id);
                     }}
@@ -919,32 +844,27 @@ export default function ExplodedPhoneSection() {
                       d={pathD}
                       fill="none"
                       stroke="transparent"
-                      strokeWidth={28}
+                      strokeWidth={24}
                       className={`cursor-pointer ${assemblyFade > 0.1 ? "pointer-events-auto" : "pointer-events-none"}`}
                     />
 
-                    {/* Organic Wave / Curved Dashed Line */}
+                    {/* Precision Minimalist Leader Line */}
                     <path
                       d={pathD}
                       fill="none"
-                      stroke={isActive ? "url(#activeLineGrad)" : "rgba(255, 255, 255, 0.4)"}
-                      strokeWidth={isActive ? 2.5 : 1.5}
-                      strokeDasharray={isActive ? "6 5" : "4 4"}
+                      stroke={isActive ? "#FF6B00" : "rgba(255, 255, 255, 0.2)"}
+                      strokeWidth={isActive ? 1.5 : 1}
+                      strokeDasharray={isActive ? "4 4" : "3 3"}
                       strokeLinecap="round"
-                      filter={isActive ? "url(#activeLineGlow)" : undefined}
-                      className={`transition-[stroke,stroke-width] duration-200 pointer-events-none ${
-                        isActive ? "animate-pulse" : "group-hover/line:stroke-primary/80"
-                      }`}
+                      className="transition-[stroke,stroke-width] duration-200 pointer-events-none group-hover/line:stroke-primary/70"
                     />
 
-                    {/* Leading Pulse Dot on Tip of Growing Line */}
+                    {/* Leading Dot on Tip of Growing Line */}
                     <circle
                       cx={tipX}
                       cy={tipY}
-                      r={isActive ? 4.5 : 3}
-                      fill={isActive ? "#FF6B00" : "rgba(255, 255, 255, 0.9)"}
-                      stroke={isActive ? "#FFFFFF" : "none"}
-                      strokeWidth={1.5}
+                      r={isActive ? 3.5 : 2.5}
+                      fill={isActive ? "#FF6B00" : "rgba(255, 255, 255, 0.5)"}
                       className="pointer-events-none"
                     />
                   </g>
@@ -996,53 +916,6 @@ export default function ExplodedPhoneSection() {
 
           {/* ── CENTER: SEQUENTIAL 13-LAYER IPHONE ASSEMBLY WITH DEPTH OF FIELD FOCUS ── */}
           <div className="col-span-1 lg:col-span-6 flex flex-col justify-center items-center py-2 relative">
-            
-            {/* ── PRECISION LABORATORY BENCH RETICLE (SVG) ── */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-              <svg
-                viewBox="0 0 700 700"
-                className="w-[340px] sm:w-[460px] md:w-[540px] lg:w-[620px] xl:w-[680px] h-[340px] sm:h-[460px] md:h-[540px] lg:h-[620px] xl:h-[680px] opacity-40"
-                fill="none"
-              >
-                <defs>
-                  <radialGradient id="reticleGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#FF6B00" stopOpacity="0.16" />
-                    <stop offset="45%" stopColor="#FF6B00" stopOpacity="0.04" />
-                    <stop offset="100%" stopColor="#FF6B00" stopOpacity="0" />
-                  </radialGradient>
-                </defs>
-
-                {/* Soft Radial Ambient Stage Fill */}
-                <circle cx="350" cy="350" r="320" fill="url(#reticleGlow)" />
-
-                {/* Concentric Calibration Rings */}
-                <circle cx="350" cy="350" r="310" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="3 6" />
-                <circle cx="350" cy="350" r="250" stroke="rgba(255,107,0,0.14)" strokeWidth="1" />
-                <circle cx="350" cy="350" r="190" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="2 4" />
-                <circle cx="350" cy="350" r="130" stroke="rgba(255,107,0,0.1)" strokeWidth="1" />
-
-                {/* Crosshair Axes with Precision Ticks */}
-                <line x1="350" y1="20" x2="350" y2="680" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 8" />
-                <line x1="20" y1="350" x2="680" y2="350" stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 8" />
-
-                {/* Axis Tick Marks (North, South, East, West) */}
-                <path d="M 345 40 L 355 40 M 345 80 L 355 80 M 345 620 L 355 620 M 345 660 L 355 660" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                <path d="M 40 345 L 40 355 M 80 345 L 80 355 M 620 345 L 620 355 M 660 345 L 660 355" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-
-                {/* Precision Corner Brackets framing center phone */}
-                <path d="M 220 140 L 200 140 L 200 160" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
-                <path d="M 480 140 L 500 140 L 500 160" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
-                <path d="M 200 540 L 200 560 L 220 560" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
-                <path d="M 500 540 L 500 560 L 480 560" stroke="rgba(255,107,0,0.3)" strokeWidth="1.5" fill="none" />
-
-                {/* Micro Technical Typography */}
-                <text x="350" y="32" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="8" fontFamily="monospace" letterSpacing="2">FIXMI // PRECISION BENCH 01</text>
-                <text x="350" y="675" textAnchor="middle" fill="rgba(255,107,0,0.35)" fontSize="8" fontFamily="monospace" letterSpacing="2">TOLERANCE ±0.01mm • OEM SPEC</text>
-                <text x="30" y="353" textAnchor="start" fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="monospace">00°</text>
-                <text x="660" y="353" textAnchor="end" fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="monospace">180°</text>
-              </svg>
-            </div>
-
             {/* Clean Transparent Phone Stage Container */}
             <div
               ref={layersContainerRef}
@@ -1316,23 +1189,27 @@ export default function ExplodedPhoneSection() {
                   className="flex flex-col items-center gap-1.5 focus:outline-none shrink-0 active:scale-95 transition-[transform,opacity] duration-150 ease-out"
                 >
                   <div
-                    className={`w-14 h-14 rounded-full p-0.5 transition-all duration-200 ease-out ${
+                    className={`w-14 h-14 rounded-full p-1.5 transition-all duration-200 ease-out ${
                       isActive && t > 0.7
-                        ? "border border-primary bg-gradient-to-b from-[#2F1F17] via-[#1C1412] to-[#0E0E10] scale-105 shadow-[0_0_16px_rgba(255,107,0,0.4)]"
-                        : "border border-white/12 bg-gradient-to-b from-[#222226] via-[#161619] to-[#0E0E10]"
+                        ? "bg-[#18181b] border border-primary shadow-[0_0_16px_rgba(255,107,0,0.2)] scale-105"
+                        : "bg-[#141416]/80 border border-white/10"
                     }`}
                   >
-                    <div className="relative w-full h-full rounded-full overflow-hidden bg-[#070709] border border-black/60">
+                    <div className="relative w-full h-full">
                       <Image
                         src={callout.circleImage}
                         alt={displayName}
                         fill
                         sizes="56px"
-                        className="object-contain p-1"
+                        className="object-contain p-0.5"
                       />
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] text-neutral-300 whitespace-nowrap">
+                  <span
+                    className={`font-mono text-[10px] whitespace-nowrap transition-colors ${
+                      isActive && t > 0.7 ? "text-primary font-semibold" : "text-neutral-400"
+                    }`}
+                  >
                     {displayName}
                   </span>
                 </button>
@@ -1342,34 +1219,32 @@ export default function ExplodedPhoneSection() {
         </div>
 
         {/* ── FOOTER DOTS BAR ── */}
-        <div className="relative z-20 w-full max-w-md mx-auto text-center mt-2 sm:mt-3 shrink-0">
-          <div className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.06] backdrop-blur-sm shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
-            {STEP_NUMBERS.map((stepNum) => {
-              const isPastOrCurrent = stepNum <= currentStep;
-              const isCurrent = stepNum === currentStep;
-              const isBootStep = stepNum === 14;
+        <div className="relative z-20 flex items-center justify-center gap-1.5 mt-2 sm:mt-3 shrink-0">
+          {STEP_NUMBERS.map((stepNum) => {
+            const isPastOrCurrent = stepNum <= currentStep;
+            const isCurrent = stepNum === currentStep;
+            const isBootStep = stepNum === 14;
 
-              return (
-                <button
-                  key={stepNum}
-                  type="button"
-                  onClick={() => jumpToStep(stepNum)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer focus:outline-none ${
-                    isCurrent && isBootStep
-                      ? "w-6 bg-emerald-400 shadow-[0_0_12px_#34d399]"
-                      : isCurrent
-                      ? "w-5 bg-primary shadow-[0_0_10px_#FF6B00]"
-                      : isPastOrCurrent
-                      ? isBootStep
-                        ? "w-3.5 bg-emerald-400/80"
-                        : "w-3 bg-primary/70"
-                      : "w-1.5 bg-white/15 hover:bg-white/40"
-                  }`}
-                  aria-label={`Lompat ke Langkah ${stepNum}`}
-                />
-              );
-            })}
-          </div>
+            return (
+              <button
+                key={stepNum}
+                type="button"
+                onClick={() => jumpToStep(stepNum)}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer focus:outline-none ${
+                  isCurrent && isBootStep
+                    ? "w-5 bg-emerald-400 shadow-[0_0_8px_#34d399]"
+                    : isCurrent
+                    ? "w-5 bg-primary shadow-[0_0_8px_#FF6B00]"
+                    : isPastOrCurrent
+                    ? isBootStep
+                      ? "w-2.5 bg-emerald-400/70"
+                      : "w-2.5 bg-primary/60"
+                    : "w-1.5 bg-white/15 hover:bg-white/40"
+                }`}
+                aria-label={`Lompat ke Langkah ${stepNum}`}
+              />
+            );
+          })}
         </div>
       </div>
 
