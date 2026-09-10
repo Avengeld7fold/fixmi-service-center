@@ -5,23 +5,23 @@ import AboutJourneyTimeline from "@/components/about/AboutJourneyTimeline";
 import AboutCtaBanner from "@/components/about/AboutCtaBanner";
 
 export const metadata: Metadata = {
-  title: "Tentang Kami — Rekam Jejak & Standar PT Fixmi Bali Digital",
+  title: "Tentang Kami — Rekam Jejak & Standar FIXMI Service Center",
   description:
-    "Profil resmi PT Fixmi Bali Digital: laboratorium perbaikan perangkat pintar terpercaya sejak Agustus 2014 di Bali. Spesialis mikrosolder, FIXMI Tech Academy, dan kemitraan B2B di 3 gerai Bali.",
+    "Profil resmi FIXMI Service Center: laboratorium perbaikan perangkat pintar terpercaya sejak Agustus 2014 di Bali. Spesialis mikrosolder, FIXMI Tech Academy, dan kemitraan B2B di 3 gerai Bali.",
   alternates: {
     canonical: "/about",
   },
   openGraph: {
-    title: "Tentang Kami — Rekam Jejak & Standar PT Fixmi Bali Digital",
+    title: "Tentang Kami — Rekam Jejak & Standar FIXMI Service Center",
     description:
-      "Perjalanan 10+ tahun PT Fixmi Bali Digital menghadirkan layanan perbaikan gadget terpercaya, lab mikrosolder, dan pusat pelatihan teknisi di Bali.",
+      "Perjalanan 10+ tahun FIXMI Service Center menghadirkan layanan perbaikan gadget terpercaya, lab mikrosolder, dan pusat pelatihan teknisi di Bali.",
     url: "/about",
     images: [
       {
         url: "/images/faq-portrait.jpg",
         width: 1200,
         height: 630,
-        alt: "Tentang PT Fixmi Bali Digital",
+        alt: "Tentang FIXMI Service Center",
       },
     ],
   },

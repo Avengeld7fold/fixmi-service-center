@@ -27,12 +27,12 @@ export const enDictionary: Dictionary = {
     admin: "Admin",
   },
   hero: {
-    badge: "FIXMI SERVICE CENTER BALI",
+    badge: "FIXMI SERVICE CENTER",
     titleBroken: "DEVICE BROKEN?",
     subtitlePrefix: "YOUR TRUSTED",
     subtitleMiddle: "SMART DEVICE REPAIR",
     subtitleSuffix: "SERVICE!",
-    titleSolusinya1: "FIXMI BALI",
+    titleSolusinya1: "FIXMI SERVICE CENTER",
     titleSolusinya2: "SOLVES IT!",
     taglineDescription:
       "Bali's premier certified repair laboratory for iPhone, iPad, MacBook, Apple Watch, and Android devices with transparent diagnostics & warranty.",
@@ -43,7 +43,7 @@ export const enDictionary: Dictionary = {
   whyUs: {
     badge: "HIGH QUALITY STANDARDS",
     heading1: "WHY THOUSANDS OF CLIENTS",
-    heading2: "TRUST FIXMI BALI?",
+    heading2: "TRUST FIXMI SERVICE CENTER?",
     description:
       "Setting the benchmark for smart device repairs in Bali with 100% transparency, OEM-certified components, and micro-soldering specialists.",
     pillar1Value: "IDR 0,-",
@@ -113,7 +113,7 @@ export const enDictionary: Dictionary = {
   reviews: {
     badge: "OFFICIAL GOOGLE MAPS REVIEWS",
     heading: "CLIENT SATISFACTION IS OUR FOREMOST PRIORITY.",
-    subheading: "Authentic, unedited reviews from travelers, digital nomads, and local residents who trust FIXMI Bali.",
+    subheading: "Authentic, unedited reviews from travelers, digital nomads, and local residents who trust FIXMI Service Center.",
     filterRelevant: "Most Relevant",
     filterNewest: "Newest",
     readMore: "Read more",
@@ -214,7 +214,7 @@ export const enDictionary: Dictionary = {
   promo: {
     badge: "SPECIAL OFFERS",
     title: "PROMOS & EXCLUSIVE DEALS",
-    subtitle: "Enjoy exclusive discounts and complimentary services for your smart devices at FIXMI Bali.",
+    subtitle: "Enjoy exclusive discounts and complimentary services for your smart devices at FIXMI Service Center.",
     claimBtn: "Claim Offer via WhatsApp",
     emptyPromo: "No active promotions at this time. Contact us for our best direct rates!",
   },
@@ -226,9 +226,9 @@ export const enDictionary: Dictionary = {
     emptyGallery: "No showcase photos available in this category yet.",
   },
   about: {
-    metaTitle: "About Us — Track Record & Standards of PT Fixmi Bali Digital",
+    metaTitle: "About Us — Track Record & Standards of FIXMI Service Center",
     metaDescription:
-      "Official profile of PT Fixmi Bali Digital: Bali's premier certified smart device repair laboratory since August 2014. Micro-soldering specialists, FIXMI Tech Academy, and B2B partnerships across 3 Bali service centers.",
+      "Official profile of FIXMI Service Center: Bali's premier certified smart device repair laboratory since August 2014. Micro-soldering specialists, FIXMI Tech Academy, and B2B partnerships across 3 Bali service centers.",
     headline: "ABOUT US",
     driveBadge: "01 / THE DRIVE",
     driveHeadline:
@@ -256,7 +256,7 @@ export const enDictionary: Dictionary = {
       "Professional technician training and skill certification hub in Bali.",
     communityBadge: "03 / THE COMMUNITY & TRUST",
     communityP1:
-      "Beyond serving thousands of individual residents and international travelers in Bali, PT Fixmi Bali Digital is trusted as the official technical repair partner by leading",
+      "Beyond serving thousands of individual residents and international travelers in Bali, FIXMI Service Center is trusted as the official technical repair partner by leading",
     communityP2:
       "We invite you to visit our central workshop at Jalan Raya Uluwatu No. 79, Kedonganan, Kuta, for a comprehensive live diagnostic and the highest standard repair solution for your device.",
     partnersLabel: "premier retail networks in Bali",
@@ -314,7 +314,7 @@ export const enDictionary: Dictionary = {
       {
         year: "2024 – Present",
         role: "INTEGRATED ECOSYSTEM: SERVICE, ACADEMY & B2B",
-        company: "PT FIXMI BALI DIGITAL",
+        company: "FIXMI SERVICE CENTER",
         description:
           "Expanding smart device repair services, standardized certified micro-soldering labs, and providing enterprise B2B technical support across corporate networks in Bali.",
       },
@@ -334,7 +334,7 @@ export const enDictionary: Dictionary = {
       },
       {
         year: "2014 – 2017",
-        role: "FOUNDING OF PT FIXMI BALI DIGITAL",
+        role: "FOUNDING OF FIXMI SERVICE CENTER",
         company: "JL. RAYA ULUWATU",
         description:
           "Founded in August 2014 in Kedonganan, Badung by Dedik Bowo Sutrisno with a firm commitment to fast, precise, transparent, and officially warrantied repairs.",
@@ -348,7 +348,7 @@ export const enDictionary: Dictionary = {
   contact: {
     metaTitle: "Locations & Contact — 3 FIXMI Service Centers in Bali",
     metaDescription:
-      "Visit our 3 official FIXMI Bali service centers in Kedonganan (Kuta), Jimbaran (Taman Griya), and Denpasar (Teuku Umar). Online WhatsApp consultation and repair request form.",
+      "Visit our 3 official FIXMI Service Center locations in Kedonganan (Kuta), Jimbaran (Taman Griya), and Denpasar (Teuku Umar). Online WhatsApp consultation and repair request form.",
     requestBadge: "CONSULTATION & REPAIR",
     requestHeading1: "CONTACT US &",
     requestHeading2: "REQUEST SERVICE",

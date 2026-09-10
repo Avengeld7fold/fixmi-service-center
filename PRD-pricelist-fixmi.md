@@ -194,7 +194,7 @@ Di bawah daftar akordeon: satu blok CTA "Tidak menemukan model kamu? Konsultasi 
 ### 7.2 Kesegaran data (WAJIB — jebakan utama)
 - **Dilarang `import pricelist from "@/data/pricelist.json"` statis** di halaman ini. Import statis dibekukan saat build → perubahan dari admin panel tidak akan pernah tampil di produksi.
 - Halaman membaca file via `fs` saat render. Strategi cache: `export const dynamic = "force-dynamic"` (paling sederhana) **atau** cached + `revalidatePath("/pricelist")` dipanggil admin panel setiap kali data berubah (lebih hemat; pilih ini jika admin panel dibangun bersamaan).
-- SEO: karena server-rendered, seluruh harga tetap terindeks meski interaksinya client-side. Tambahkan `metadata` title/description khusus ("Daftar Harga Service iPhone, iPad, MacBook — FIXMI Bali").
+- SEO: karena server-rendered, seluruh harga tetap terindeks meski interaksinya client-side. Tambahkan `metadata` title/description khusus ("Daftar Harga Service iPhone, iPad, MacBook — FIXMI Service Center").
 
 ### 7.3 Validasi & ketahanan
 - Helper memvalidasi struktur saat baca; data korup → lempar error yang ditangkap halaman (→ §6.5).

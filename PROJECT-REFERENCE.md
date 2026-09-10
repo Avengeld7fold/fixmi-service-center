@@ -146,7 +146,7 @@ BUKAN model GLTF. Ini **shader GLSL kustom** pada satu `planeGeometry` full-canv
   - Desktop: `lg:top-1/2 lg:-translate-y-1/2 lg:h-[44rem]` (tinggi TETAP → ukuran iPhone konsisten di semua tinggi layar)
 
 ### 5.3 Hero Section ([app/page.tsx](app/page.tsx))
-- **Desktop (lg+)**: komposisi asimetris — "HP KAMU RUSAK?" kiri-atas, iPhone tengah, caption + "FIXMI BALI SOLUSINYA!" kanan-bawah, ikon sosial kiri-bawah. Grid 12 kolom (4-4-4).
+- **Desktop (lg+)**: komposisi asimetris — "HP KAMU RUSAK?" kiri-atas, iPhone tengah, caption + "FIXMI SERVICE CENTER SOLUSINYA!" kanan-bawah, ikon sosial kiri-bawah. Grid 12 kolom (4-4-4).
 - **Mobile/tablet (<lg)**: poster satu sumbu tengah — judul besar center → iPhone → caption → brand title center → ikon sosial center.
 - Ukuran judul: `text-[4.25rem] md:text-[5.25rem] lg:text-[7.25rem]`, font Bayon, warna primary.
 - Animasi entrance: GSAP timeline (fade + y, stagger) via `useGSAP` — jangan sentuh pola `opacity: 0` inline pada elemen ber-ref (dibutuhkan animasi).

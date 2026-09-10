@@ -24,9 +24,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = categories.find((c) => c.Slug.toLowerCase() === kategori.toLowerCase());
 
   const categoryName = category?.Name || (kategori.charAt(0).toUpperCase() + kategori.slice(1));
-  const title = `Daftar Harga Service ${categoryName} — FIXMI Service Center Bali`;
+  const title = `Daftar Harga Service ${categoryName} — FIXMI Service Center`;
   const description = category?.description ||
-    `Estimasi biaya perbaikan & harga sparepart resmi ${categoryName} (LCD, Baterai, Kamera, Logicboard) di FIXMI Bali. Bergaransi resmi & transparan.`;
+    `Estimasi biaya perbaikan & harga sparepart resmi ${categoryName} (LCD, Baterai, Kamera, Logicboard) di FIXMI Service Center. Bergaransi resmi & transparan.`;
   const image = category?.Image || "/images/faq-portrait.jpg";
 
   return {
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           url: image,
           width: 1200,
           height: 630,
-          alt: `Daftar Harga Service ${categoryName} FIXMI Bali`,
+          alt: `Daftar Harga Service ${categoryName} FIXMI Service Center`,
         },
       ],
     },

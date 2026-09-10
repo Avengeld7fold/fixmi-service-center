@@ -342,7 +342,7 @@ export default function CustomerReviewsSection() {
                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                         <span>{dict.locale === "en" ? "Verified on Google" : "Terverifikasi Google"}</span>
                       </span>
-                      <span className="text-neutral-500 font-mono text-[0.7rem]">FIXMI Bali</span>
+                      <span className="text-neutral-500 font-mono text-[0.7rem]">FIXMI Service Center</span>
                     </div>
                   </div>
                 );

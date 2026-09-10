@@ -287,7 +287,7 @@ export async function uploadPromoAction(formData: FormData): Promise<ActionResul
     const created = await addPromoItem({
       Title: title || undefined,
       Image: finalImagePath,
-      altText: title || "Banner Promo FIXMI Bali",
+      altText: title || "Banner Promo FIXMI Service Center",
       badge: badge || undefined,
       validUntil: validUntil || undefined,
       link: link || undefined,
@@ -348,7 +348,7 @@ export async function uploadGalleryAction(formData: FormData): Promise<ActionRes
     const created = await addGalleryImage({
       Title: title || undefined,
       Image: finalImagePath,
-      altText: altText || title || `Dokumentasi servis ${category} FIXMI Bali`,
+      altText: altText || title || `Dokumentasi servis ${category} FIXMI Service Center`,
       category,
     });
 

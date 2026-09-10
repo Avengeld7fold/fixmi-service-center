@@ -178,7 +178,7 @@ export default function AboutHeroEditorial() {
             </div>
             <div className="p-2 pt-2.5">
               <div className="font-mono text-[0.625rem] uppercase tracking-widest text-primary font-semibold">
-                PT FIXMI BALI DIGITAL
+                FIXMI SERVICE CENTER
               </div>
               <p className="mt-1 text-xs text-neutral-300 leading-snug">
                 {hoveredData.caption}

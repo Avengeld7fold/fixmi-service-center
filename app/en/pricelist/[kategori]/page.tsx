@@ -24,9 +24,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = categories.find((c) => c.Slug.toLowerCase() === kategori.toLowerCase());
 
   const categoryName = category?.Name || (kategori.charAt(0).toUpperCase() + kategori.slice(1));
-  const title = `${categoryName} Repair Price List — FIXMI Service Center Bali`;
+  const title = `${categoryName} Repair Price List — FIXMI Service Center`;
   const description =
-    `Official repair price list and genuine spare parts for ${categoryName} (Screen, Battery, Camera, Logic Board) at FIXMI Bali. Certified warranty & transparent walk-in service.`;
+    `Official repair price list and genuine spare parts for ${categoryName} (Screen, Battery, Camera, Logic Board) at FIXMI Service Center. Certified warranty & transparent walk-in service.`;
   const image = category?.Image || "/images/faq-portrait.jpg";
 
   return {
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           url: image,
           width: 1200,
           height: 630,
-          alt: `${categoryName} Repair Price List FIXMI Bali`,
+          alt: `${categoryName} Repair Price List FIXMI Service Center`,
         },
       ],
     },

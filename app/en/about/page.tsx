@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         url: "/images/faq-portrait.jpg",
         width: 1200,
         height: 630,
-        alt: "About PT Fixmi Bali Digital",
+        alt: "About FIXMI Service Center",
       },
     ],
   },

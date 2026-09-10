@@ -27,12 +27,12 @@ export const idDictionary: Dictionary = {
     admin: "Admin",
   },
   hero: {
-    badge: "FIXMI SERVICE CENTER BALI",
+    badge: "FIXMI SERVICE CENTER",
     titleBroken: "HP KAMU RUSAK?",
     subtitlePrefix: "YOUR TRUSTED",
     subtitleMiddle: "SMART DEVICE REPAIR",
     subtitleSuffix: "SERVICE!",
-    titleSolusinya1: "FIXMI BALI",
+    titleSolusinya1: "FIXMI SERVICE CENTER",
     titleSolusinya2: "SOLUSINYA!",
     taglineDescription:
       "FIXMI hadir sejak 2014 sebagai laboratorium perbaikan Apple dan Android di Bali — dengan standar diagnosa terbuka, komponen bersertifikasi, dan garansi resmi yang terdokumentasi.",
@@ -214,21 +214,21 @@ export const idDictionary: Dictionary = {
   promo: {
     badge: "PENAWARAN SPESIAL",
     title: "PROMO & PENAWARAN KHUSUS",
-    subtitle: "Dapatkan potongan harga dan keuntungan ekstra untuk perbaikan perangkat kesayangan Anda di FIXMI Bali.",
+    subtitle: "Dapatkan potongan harga dan keuntungan ekstra untuk perbaikan perangkat kesayangan Anda di FIXMI Service Center.",
     claimBtn: "Klaim Promo via WhatsApp",
     emptyPromo: "Saat ini belum ada promo aktif. Hubungi kami untuk penawaran menarik!",
   },
   gallery: {
     badge: "DOKUMENTASI REPAIR",
     title: "GALERI PORTOFOLIO SERVIS",
-    subtitle: "Dokumentasi nyata proses perbaikan di laboratorium dan meja kerja teknisi FIXMI Bali.",
+    subtitle: "Dokumentasi nyata proses perbaikan di laboratorium dan meja kerja teknisi FIXMI Service Center.",
     allFilter: "Semua Foto",
     emptyGallery: "Belum ada foto dokumentasi di kategori ini.",
   },
   about: {
-    metaTitle: "Tentang Kami — Rekam Jejak & Standar PT Fixmi Bali Digital",
+    metaTitle: "Tentang Kami — Rekam Jejak & Standar FIXMI Service Center",
     metaDescription:
-      "Profil resmi PT Fixmi Bali Digital: laboratorium perbaikan perangkat pintar terpercaya sejak Agustus 2014 di Bali. Spesialis mikrosolder, FIXMI Tech Academy, dan kemitraan B2B di 3 gerai Bali.",
+      "Profil resmi FIXMI Service Center: laboratorium perbaikan perangkat pintar terpercaya sejak Agustus 2014 di Bali. Spesialis mikrosolder, FIXMI Tech Academy, dan kemitraan B2B di 3 gerai Bali.",
     headline: "TENTANG KAMI",
     driveBadge: "01 / THE DRIVE",
     driveHeadline:
@@ -256,7 +256,7 @@ export const idDictionary: Dictionary = {
       "Pusat pelatihan & sertifikasi keahlian teknisi profesional di Bali.",
     communityBadge: "03 / THE COMMUNITY & TRUST",
     communityP1:
-      "Selain melayani ribuan pelanggan individu dan wisatawan di Bali, PT Fixmi Bali Digital dipercaya sebagai mitra teknis resmi oleh berbagai",
+      "Selain melayani ribuan pelanggan individu dan wisatawan di Bali, FIXMI Service Center dipercaya sebagai mitra teknis resmi oleh berbagai",
     communityP2:
       "Kami menyambut Anda untuk berkonsultasi langsung di workshop pusat kami di Jalan Raya Uluwatu No. 79, Kedonganan, Kuta, guna memperoleh diagnosa menyeluruh dan solusi perbaikan terbaik bagi perangkat Anda.",
     partnersLabel: "jaringan retail terkemuka di Bali",
@@ -314,7 +314,7 @@ export const idDictionary: Dictionary = {
       {
         year: "2024 – Sekarang",
         role: "EKOSISTEM TERPADU: SERVICE, ACADEMY & B2B",
-        company: "PT FIXMI BALI DIGITAL",
+        company: "FIXMI SERVICE CENTER",
         description:
           "Memperluas layanan perbaikan perangkat cerdas, standarisasi laboratorium mikrosolder bersertifikasi, serta penyediaan dukungan teknis dan operasional B2B untuk jaringan perusahaan di Bali.",
       },
@@ -334,7 +334,7 @@ export const idDictionary: Dictionary = {
       },
       {
         year: "2014 – 2017",
-        role: "PENDIRIAN PT FIXMI BALI DIGITAL",
+        role: "PENDIRIAN FIXMI SERVICE CENTER",
         company: "JL. RAYA ULUWATU",
         description:
           "Didirikan pada Agustus 2014 di Kedonganan, Badung oleh Dedik Bowo Sutrisno dengan komitmen menghadirkan layanan perbaikan gadget yang cepat, presisi, transparan, dan bergaransi resmi.",
@@ -348,7 +348,7 @@ export const idDictionary: Dictionary = {
   contact: {
     metaTitle: "Lokasi & Kontak — 3 Outlet Service Center FIXMI di Bali",
     metaDescription:
-      "Kunjungi 3 outlet resmi FIXMI Bali di Kedonganan (Kuta), Jimbaran (Taman Griya), dan Denpasar (Teuku Umar). Konsultasi online via WhatsApp dan form perbaikan.",
+      "Kunjungi 3 outlet resmi FIXMI Service Center di Kedonganan (Kuta), Jimbaran (Taman Griya), dan Denpasar (Teuku Umar). Konsultasi online via WhatsApp dan form perbaikan.",
     requestBadge: "KONSULTASI & PERBAIKAN",
     requestHeading1: "HUBUNGI KAMI &",
     requestHeading2: "REQUEST SERVIS",

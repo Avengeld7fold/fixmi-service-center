@@ -8,23 +8,23 @@ import type { Category } from "@/lib/data";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Daftar Harga Service iPhone, iPad, MacBook & Android — FIXMI Bali",
+  title: "Daftar Harga Service iPhone, iPad, MacBook & Android — FIXMI Service Center",
   description:
-    "Estimasi harga service transparan & bergaransi resmi untuk iPhone, iPad, MacBook, Apple Watch, dan Android di FIXMI Bali. Cek biaya ganti LCD, baterai, kamera, dan perbaikan motherboard.",
+    "Estimasi harga service transparan & bergaransi resmi untuk iPhone, iPad, MacBook, Apple Watch, dan Android di FIXMI Service Center. Cek biaya ganti LCD, baterai, kamera, dan perbaikan motherboard.",
   alternates: {
     canonical: "/pricelist",
   },
   openGraph: {
-    title: "Daftar Harga Service iPhone, iPad, MacBook & Android — FIXMI Bali",
+    title: "Daftar Harga Service iPhone, iPad, MacBook & Android — FIXMI Service Center",
     description:
-      "Cek biaya perbaikan perangkat Apple & Android di FIXMI Bali. Transparan, bergaransi resmi, tanpa biaya tersembunyi.",
+      "Cek biaya perbaikan perangkat Apple & Android di FIXMI Service Center. Transparan, bergaransi resmi, tanpa biaya tersembunyi.",
     url: "/pricelist",
     images: [
       {
         url: "/images/faq-portrait.jpg",
         width: 1200,
         height: 630,
-        alt: "Daftar Harga Service FIXMI Bali",
+        alt: "Daftar Harga Service FIXMI Service Center",
       },
     ],
   },

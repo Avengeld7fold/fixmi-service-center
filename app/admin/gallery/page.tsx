@@ -52,7 +52,7 @@ export default async function AdminGalleryPage() {
               className="mt-4 sm:mt-5 max-w-[56ch] text-sm sm:text-base leading-relaxed text-text-secondary"
               style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
             >
-              Unggah dan kelola portofolio visual hasil pengerjaan nyata teknisi FIXMI Bali. Foto yang diunggah akan langsung muncul di halaman galeri publik dengan tag kategori perangkat.
+              Unggah dan kelola portofolio visual hasil pengerjaan nyata teknisi FIXMI Service Center. Foto yang diunggah akan langsung muncul di halaman galeri publik dengan tag kategori perangkat.
             </p>
           </div>
         </div>
