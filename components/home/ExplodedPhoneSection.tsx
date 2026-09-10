@@ -754,7 +754,7 @@ export default function ExplodedPhoneSection() {
         {/* ── ARCHITECTURAL STUDIO ATMOSPHERE & LIGHTING ── */}
         {/* 1. Precision Technical Grid with Radial Center Fade */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.035]"
+          className="absolute inset-0 pointer-events-none opacity-[0.05]"
           style={{
             backgroundImage: "radial-gradient(rgba(255,255,255,0.85) 1px, transparent 1px)",
             backgroundSize: "28px 28px",
@@ -765,19 +765,19 @@ export default function ExplodedPhoneSection() {
 
         {/* 2. Vertical Specular Light Column (Tailored to 9:16 iPhone proportions) */}
         <div
-          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[440px] lg:w-[500px] h-[580px] sm:h-[680px] lg:h-[780px]"
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] sm:w-[500px] lg:w-[560px] h-[620px] sm:h-[740px] lg:h-[840px]"
           style={{
-            background: "radial-gradient(ellipse 55% 70% at 50% 50%, rgba(255, 107, 0, 0.14) 0%, rgba(255, 107, 0, 0.04) 50%, transparent 80%)",
-            filter: "blur(50px)",
+            background: "radial-gradient(ellipse 58% 72% at 50% 50%, rgba(255, 107, 0, 0.22) 0%, rgba(255, 107, 0, 0.08) 50%, transparent 82%)",
+            filter: "blur(40px)",
           }}
         />
 
         {/* 3. Directional Downlight Specular Wash */}
         <div
-          className="pointer-events-none absolute top-[8%] left-1/2 -translate-x-1/2 w-[280px] sm:w-[380px] h-[360px] opacity-60"
+          className="pointer-events-none absolute top-[6%] left-1/2 -translate-x-1/2 w-[320px] sm:w-[440px] h-[400px]"
           style={{
-            background: "linear-gradient(180deg, rgba(255, 120, 0, 0.12) 0%, rgba(255, 107, 0, 0.02) 65%, transparent 100%)",
-            filter: "blur(60px)",
+            background: "linear-gradient(180deg, rgba(255, 120, 0, 0.18) 0%, rgba(255, 107, 0, 0.05) 60%, transparent 100%)",
+            filter: "blur(55px)",
           }}
         />
 
@@ -785,7 +785,32 @@ export default function ExplodedPhoneSection() {
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 45%, rgba(18, 18, 18, 0.85) 100%)",
+            background: "radial-gradient(ellipse 85% 85% at 50% 50%, transparent 55%, rgba(18, 18, 18, 0.5) 100%)",
+          }}
+        />
+
+        {/* 5. Ambient Warm Floor Glow — reflective studio floor, prevents pitch-black base */}
+        <div
+          className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] sm:w-[800px] h-[200px] sm:h-[260px]"
+          style={{
+            background: "radial-gradient(ellipse 80% 100% at 50% 100%, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.03) 50%, transparent 80%)",
+            filter: "blur(40px)",
+          }}
+        />
+
+        {/* 6. Top Edge Transition — gradual warm fade-in from section above */}
+        <div
+          className="pointer-events-none absolute top-0 inset-x-0 h-28 sm:h-36 lg:h-44 z-[1]"
+          style={{
+            background: "linear-gradient(180deg, rgba(18, 18, 18, 0.7) 0%, rgba(18, 18, 18, 0.15) 50%, transparent 100%)",
+          }}
+        />
+
+        {/* 7. Bottom Edge Transition — gradual fade-out to section below */}
+        <div
+          className="pointer-events-none absolute bottom-0 inset-x-0 h-20 sm:h-28 lg:h-36 z-[1]"
+          style={{
+            background: "linear-gradient(0deg, rgba(18, 18, 18, 0.7) 0%, rgba(18, 18, 18, 0.15) 50%, transparent 100%)",
           }}
         />
 
@@ -1001,7 +1026,7 @@ export default function ExplodedPhoneSection() {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
               <svg
                 viewBox="0 0 700 700"
-                className="w-[340px] sm:w-[460px] md:w-[540px] lg:w-[620px] xl:w-[680px] h-[340px] sm:h-[460px] md:h-[540px] lg:h-[620px] xl:h-[680px] opacity-40"
+                className="w-[340px] sm:w-[460px] md:w-[540px] lg:w-[620px] xl:w-[680px] h-[340px] sm:h-[460px] md:h-[540px] lg:h-[620px] xl:h-[680px] opacity-55"
                 fill="none"
               >
                 <defs>
