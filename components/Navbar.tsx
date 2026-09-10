@@ -118,10 +118,10 @@ export default function Navbar() {
           <Image
             src="/images/logo.svg"
             alt="FIXMI Service Center"
-            width={141}
-            height={36}
+            width={172}
+            height={44}
             priority
-            className="h-8 sm:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
+            className="h-9 sm:h-10 lg:h-11 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
           />
         </Link>
 
