@@ -52,3 +52,6 @@ next-env.d.ts
 
 # Archives
 *.zip
+
+# Scratch / testing artifacts
+scratch/

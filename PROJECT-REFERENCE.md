@@ -59,7 +59,7 @@ Fixmi/
 │   ├── pricelist.json      # Sumber harga (lihat §6)
 │   └── gallery.json        # 9 item galeri repair (field Image masih null semua)
 ├── public/
-│   ├── images/             # iphone-broken.png, iphone-fixed.png, iphone-depth.png (2000×1500, utk Hero3D)
+│   ├── images/             # iphone-broken.webp, iphone-fixed.webp, iphone-depth.webp (2000×1500, WebP optimized utk Hero3D; backup di images/backup-iphone-original/)
 │   ├── sequence/           # frame_000000.jpg … frame_000191.jpg (192 frame, ~9.8MB, utk ScrollSequence)
 │   ├── models/             # iphone.glb + folder iphone/ (~66MB — TIDAK dipakai kode saat ini, sisa arsitektur lama)
 │   └── fonts/neue-montreal/  # 8 file .otf (Regular/Medium/Bold/Light + italic)
@@ -138,7 +138,7 @@ html { font-size: clamp(14px, calc(100vw / 390 * 16), 21px); }
 
 ### 5.2 Hero3D ([components/Hero3D.tsx](components/Hero3D.tsx)) — `"use client"`
 BUKAN model GLTF. Ini **shader GLSL kustom** pada satu `planeGeometry` full-canvas:
-- **Tekstur**: `iphone-broken.png` (default), `iphone-fixed.png` (reveal), `iphone-depth.png` (depth map) — dimuat manual via `THREE.LoadingManager` dengan loader progress UI ("INITIALIZING WEBGL 2.5D SHADER")
+- **Tekstur**: `iphone-broken.webp` (default), `iphone-fixed.webp` (reveal), `iphone-depth.webp` (depth map) — format WebP ultra-fidelity (PSNR >41-43dB) 2000×1500 px, menghemat >54% bandwidth tanpa blur, dimuat manual via `THREE.LoadingManager` dengan loader progress UI ("INITIALIZING WEBGL 2.5D SHADER")
 - **Efek**: 2.5D parallax mengikuti kursor/gyroscope (depth map), "shader breathing" (intensitas depth bernapas via sin), **liquid slash mask ala Fruit Ninja** (trail 15 titik, `sdLine` + smooth-min + Perlin noise) yang me-reveal iPhone "fixed" di bekas sapuan kursor, idle floating sinusoidal
 - **Fit**: center-contain dengan koreksi aspect ratio di fragment shader; alpha discard untuk transparansi
 - **Posisi canvas di [app/page.tsx](app/page.tsx)**: dibatasi PITA agar iPhone tidak menimpa teks:

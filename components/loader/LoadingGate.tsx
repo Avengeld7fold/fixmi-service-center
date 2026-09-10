@@ -15,9 +15,9 @@ const DISABLE_LOADER_IN_DEV = true;
 
 const CRITICAL_ASSETS = [
   "/fixmi-logo.png",
-  "/images/iphone-broken.png",
-  "/images/iphone-fixed.png",
-  "/images/iphone-depth.png",
+  "/images/iphone-broken.webp",
+  "/images/iphone-fixed.webp",
+  "/images/iphone-depth.webp",
 ];
 
 export default function LoadingGate({ children }: { children: React.ReactNode }) {
