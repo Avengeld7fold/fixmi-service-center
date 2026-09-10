@@ -104,10 +104,22 @@ export interface ActionResult {
   message?: string;
 }
 
+function revalidatePricelistPaths(): void {
+  try {
+    revalidatePath("/pricelist");
+    revalidatePath("/en/pricelist");
+    revalidatePath("/pricelist/[kategori]", "page");
+    revalidatePath("/en/pricelist/[kategori]", "page");
+  } catch (err) {
+    console.warn("Failed to revalidate pricelist paths:", err);
+  }
+}
+
 export async function savePricelistAction(payloadJson: string): Promise<ActionResult> {
   if (!(await requireSession())) return { ok: false, error: "Sesi berakhir — silakan login ulang." };
   try {
     await writePricelist(JSON.parse(payloadJson));
+    revalidatePricelistPaths();
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Gagal menyimpan." };
@@ -196,6 +208,7 @@ export async function importApplyAction(
     }
 
     await writePricelist(finalCategories);
+    revalidatePricelistPaths();
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Gagal menerapkan import." };
@@ -210,6 +223,7 @@ export async function restoreBackupAction(name: string): Promise<ActionResult> {
   if (!(await requireSession())) return { ok: false, error: "Sesi berakhir — silakan login ulang." };
   try {
     await restoreBackup(name);
+    revalidatePricelistPaths();
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Gagal memulihkan backup." };

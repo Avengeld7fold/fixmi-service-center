@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -36,7 +36,6 @@ export default function PricelistExplorer({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { dict, getLocalizedPath } = useI18n();
   const [warrantyOpen, setWarrantyOpen] = useState(false);
 
@@ -46,8 +45,7 @@ export default function PricelistExplorer({
   // Deteksi slug aktif dari:
   // 1. props initialCategorySlug (server segment)
   // 2. pathname (misal /pricelist/iphone atau /en/pricelist/iphone)
-  // 3. searchParams ?device=slug (backward compatibility)
-  // 4. fallback ke category pertama
+  // 3. fallback ke category pertama
   let pathSlug = "";
   const pathParts = pathname.split("/").filter(Boolean);
   const lastPart = pathParts[pathParts.length - 1];
@@ -55,20 +53,22 @@ export default function PricelistExplorer({
     pathSlug = lastPart;
   }
 
-  const legacyParam = searchParams.get("device");
   const activeSlug =
     (initialCategorySlug && slugs.includes(initialCategorySlug) ? initialCategorySlug : "") ||
     pathSlug ||
-    (legacyParam && slugs.includes(legacyParam) ? legacyParam : "") ||
     categories[0]?.Slug ||
     "";
 
-  // Backward compatibility: jika user mengakses url lama ?device=slug, redirect mulus ke clean path
+  // Backward compatibility: jika user mengakses url lama ?device=slug, redirect mulus ke clean path tanpa butuh useSearchParams hook
   useEffect(() => {
-    if (legacyParam && slugs.includes(legacyParam)) {
-      router.replace(getLocalizedPath(`/pricelist/${legacyParam}`), { scroll: false });
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const legacyParam = sp.get("device");
+      if (legacyParam && slugs.includes(legacyParam)) {
+        router.replace(getLocalizedPath(`/pricelist/${legacyParam}`), { scroll: false });
+      }
     }
-  }, [legacyParam, slugs, router, getLocalizedPath]);
+  }, [slugs, router, getLocalizedPath]);
 
   const activeCategory = categories.find((c) => c.Slug === activeSlug) ?? categories[0];
   const hasPricingData = Boolean(
@@ -133,37 +133,66 @@ export default function PricelistExplorer({
     { scope: ctaRef }
   );
 
-  // Reveal berjenjang kartu akordeon ([data-reveal]) saat masuk viewport —
-  // kartu di atas langsung tampil, yang di bawah menyusul mengikuti scroll
-  // (sekali saja per kartu). Di-reset setiap ganti kategori.
+  // Reveal berjenjang kartu akordeon ([data-reveal]) —
+  // kartu yang sudah berada di viewport langsung muncul, kartu di bawah menyusul saat scroll.
   const listRef = useRef<HTMLDivElement>(null);
   useGSAP(
     () => {
       if (prefersReducedMotion() || !listRef.current) return;
-      // Hanya kartu level ATAS — kartu bersarang (service di dalam merk/series)
-      // dikecualikan: ScrollTrigger hanya recalc saat scroll, sehingga kartu
-      // dalam panel yang dibuka tanpa scroll akan tertinggal opacity 0.
       const items = [...listRef.current.querySelectorAll("[data-reveal]")].filter(
         (el) => !el.parentElement?.closest("[data-reveal]")
       );
       if (!items.length) return;
-      gsap.set(items, { opacity: 0, y: 14 });
-      const batchTriggers = ScrollTrigger.batch(items, {
-        start: "top 94%",
-        once: true,
-        onEnter: (els) =>
-          gsap.to(els, {
+
+      const vh = window.innerHeight || 800;
+      const initialVisible: Element[] = [];
+      const belowViewport: Element[] = [];
+
+      items.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= vh * 0.95) {
+          initialVisible.push(el);
+        } else {
+          belowViewport.push(el);
+        }
+      });
+
+      if (initialVisible.length) {
+        gsap.fromTo(
+          initialVisible,
+          { opacity: 0, y: 12 },
+          {
             opacity: 1,
             y: 0,
-            duration: 0.45,
-            stagger: 0.06,
+            duration: 0.4,
+            stagger: 0.05,
             ease: "power2.out",
             clearProps: "opacity,transform",
-          }),
-      });
+          }
+        );
+      }
+
+      let batchTriggers: ScrollTrigger[] = [];
+      if (belowViewport.length) {
+        gsap.set(belowViewport, { opacity: 0, y: 14 });
+        batchTriggers = ScrollTrigger.batch(belowViewport, {
+          start: "top 94%",
+          once: true,
+          onEnter: (els) =>
+            gsap.to(els, {
+              opacity: 1,
+              y: 0,
+              duration: 0.45,
+              stagger: 0.06,
+              ease: "power2.out",
+              clearProps: "opacity,transform",
+            }),
+        });
+      }
 
       return () => {
         batchTriggers.forEach((st) => st.kill());
+        gsap.set(items, { clearProps: "opacity,transform" });
       };
     },
     { dependencies: [activeSlug], scope: listRef }

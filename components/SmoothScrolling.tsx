@@ -2,6 +2,7 @@
 
 import { ReactLenis, type LenisRef } from "lenis/react";
 import { ReactNode, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 interface SmoothScrollingProps {
@@ -18,6 +19,25 @@ interface SmoothScrollingProps {
  */
 export default function SmoothScrolling({ children }: SmoothScrollingProps) {
   const lenisRef = useRef<LenisRef>(null);
+  const pathname = usePathname();
+
+  // Reset scroll ke paling atas (top: 0) saat berpindah halaman/rute
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+    if (lenisRef.current?.lenis) {
+      lenisRef.current.lenis.scrollTo(0, { immediate: true });
+    }
+
+    // Beri jeda 50ms agar DOM rute baru selesai di-mount sebelum me-recalc limit & trigger
+    const timer = setTimeout(() => {
+      lenisRef.current?.lenis?.resize();
+      ScrollTrigger.refresh();
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   useEffect(() => {
     const lenis = lenisRef.current?.lenis;

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import PricelistExplorer from "@/components/pricelist/PricelistExplorer";
 import { getPricelist, getPricelistLastUpdated } from "@/lib/pricelist-server";
 
@@ -57,12 +56,10 @@ export default async function CategoryPricelistPage({ params }: PageProps) {
   const lastUpdated = await getPricelistLastUpdated();
 
   return (
-    <Suspense fallback={null}>
-      <PricelistExplorer
-        categories={categories}
-        lastUpdated={lastUpdated}
-        initialCategorySlug={kategori.toLowerCase()}
-      />
-    </Suspense>
+    <PricelistExplorer
+      categories={categories}
+      lastUpdated={lastUpdated}
+      initialCategorySlug={kategori.toLowerCase()}
+    />
   );
 }
