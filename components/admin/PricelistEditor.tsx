@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronDown, ChevronsUpDown, GripVertical } from "lucide-react";
+import { Plus, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
 import ConfirmModal from "./ConfirmModal";
@@ -162,11 +162,14 @@ export default function PricelistEditor({ categories }: { categories: Category[]
     );
   };
 
-  // ── Drag and Drop / Touch Hold Reorder State ──
+  // ── Hold & Drag Reorder State (iPhone style) ──
   const [draggingSlug, setDraggingSlug] = useState<string | null>(null);
   const [overSlug, setOverSlug] = useState<string | null>(null);
   const draggingSlugRef = useRef<string | null>(null);
   const overSlugRef = useRef<string | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isDragActiveRef = useRef(false);
+  const startPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const moveServiceBySlug = (fromSlug: string, toSlug: string) => {
     if (!fromSlug || !toSlug || fromSlug === toSlug) return;
@@ -185,40 +188,59 @@ export default function PricelistEditor({ categories }: { categories: Category[]
     setMessage(null);
   };
 
-  const createDragHandleProps = (slug: string) => ({
-    draggable: true,
-    onDragStart: (e: React.DragEvent<HTMLElement>) => {
-      e.dataTransfer.setData("text/plain", slug);
-      e.dataTransfer.effectAllowed = "move";
-      draggingSlugRef.current = slug;
-      setDraggingSlug(slug);
-    },
-    onDragEnd: () => {
-      draggingSlugRef.current = null;
-      overSlugRef.current = null;
-      setDraggingSlug(null);
-      setOverSlug(null);
-    },
+  const createDragRowProps = (slug: string) => ({
     onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
       // Hanya izinkan primary button (left click) atau layar sentuh
       if (e.button !== 0) return;
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {}
+
+      const target = e.target as HTMLElement;
+      // Jangan mulai drag jika yang diklik adalah tombol ikon atau chevron
+      if (target.closest("button")) return;
+
+      const clientX = e.clientX;
+      const clientY = e.clientY;
+      startPosRef.current = { x: clientX, y: clientY };
+      isDragActiveRef.current = false;
       draggingSlugRef.current = slug;
-      overSlugRef.current = null;
-      setDraggingSlug(slug);
-      setOverSlug(null);
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        try {
-          navigator.vibrate(30);
-        } catch {}
-      }
+
+      const currentTarget = e.currentTarget;
+      try {
+        currentTarget.setPointerCapture(e.pointerId);
+      } catch {}
+
+      // Timer hold ~160ms seperti haptic touch di iPhone
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = setTimeout(() => {
+        isDragActiveRef.current = true;
+        setDraggingSlug(slug);
+        setOverSlug(null);
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate(25);
+          } catch {}
+        }
+      }, 160);
     },
     onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
-      const from = draggingSlugRef.current;
-      if (!from) return;
-      // Auto-scroll saat drag mendekati tepi atas/bawah layar
+      if (!draggingSlugRef.current) return;
+
+      // Jika drag bergerak melebihi 6px sebelum timer selesai, langsung aktifkan drag
+      const dx = Math.abs(e.clientX - startPosRef.current.x);
+      const dy = Math.abs(e.clientY - startPosRef.current.y);
+      if (!isDragActiveRef.current && (dy > 6 || dx > 6)) {
+        if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+        isDragActiveRef.current = true;
+        setDraggingSlug(slug);
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate(25);
+          } catch {}
+        }
+      }
+
+      if (!isDragActiveRef.current) return;
+
+      // Auto-scroll saat mendekati batas atas/bawah layar
       const y = e.clientY;
       if (y < 90) {
         window.scrollBy({ top: -14, behavior: "auto" });
@@ -229,72 +251,60 @@ export default function PricelistEditor({ categories }: { categories: Category[]
       const el = document.elementFromPoint(e.clientX, e.clientY);
       const card = el?.closest<HTMLElement>("[data-service-slug]");
       const targetSlug = card?.dataset.serviceSlug;
-      if (targetSlug && targetSlug !== from) {
+      if (targetSlug && targetSlug !== slug) {
         if (overSlugRef.current !== targetSlug) {
           overSlugRef.current = targetSlug;
           setOverSlug(targetSlug);
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            try {
+              navigator.vibrate(15);
+            } catch {}
+          }
         }
       }
     },
     onPointerUp: (e: React.PointerEvent<HTMLElement>) => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+
       const from = draggingSlugRef.current;
-      if (!from) return;
+      const wasDrag = isDragActiveRef.current;
+
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {}
 
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      const card = el?.closest<HTMLElement>("[data-service-slug]");
-      const targetSlug = card?.dataset.serviceSlug || overSlugRef.current;
+      if (wasDrag && from) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const card = el?.closest<HTMLElement>("[data-service-slug]");
+        const targetSlug = card?.dataset.serviceSlug || overSlugRef.current;
 
-      if (targetSlug && targetSlug !== from) {
-        moveServiceBySlug(from, targetSlug);
-        if (typeof navigator !== "undefined" && navigator.vibrate) {
-          try {
-            navigator.vibrate(40);
-          } catch {}
+        if (targetSlug && targetSlug !== from) {
+          moveServiceBySlug(from, targetSlug);
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            try {
+              navigator.vibrate(35);
+            } catch {}
+          }
         }
+      } else if (!wasDrag && from === slug) {
+        // Bukan drag (hanya tap singkat) -> buka/tutup accordion
+        toggleSvc(slug);
       }
+
       draggingSlugRef.current = null;
       overSlugRef.current = null;
+      isDragActiveRef.current = false;
       setDraggingSlug(null);
       setOverSlug(null);
     },
     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {}
       draggingSlugRef.current = null;
       overSlugRef.current = null;
-      setDraggingSlug(null);
-      setOverSlug(null);
-    },
-  });
-
-  const createCardDropProps = (slug: string) => ({
-    onDragOver: (e: React.DragEvent<HTMLElement>) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      if (overSlugRef.current !== slug && draggingSlugRef.current !== slug) {
-        overSlugRef.current = slug;
-        setOverSlug(slug);
-      }
-    },
-    onDragLeave: (e: React.DragEvent<HTMLElement>) => {
-      if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-      if (overSlugRef.current === slug) {
-        overSlugRef.current = null;
-        setOverSlug(null);
-      }
-    },
-    onDrop: (e: React.DragEvent<HTMLElement>) => {
-      e.preventDefault();
-      const fromSlug = e.dataTransfer.getData("text/plain") || draggingSlugRef.current;
-      if (fromSlug && fromSlug !== slug) {
-        moveServiceBySlug(fromSlug, slug);
-      }
-      draggingSlugRef.current = null;
-      overSlugRef.current = null;
+      isDragActiveRef.current = false;
       setDraggingSlug(null);
       setOverSlug(null);
     },
@@ -479,16 +489,10 @@ export default function PricelistEditor({ categories }: { categories: Category[]
 
         {/* ── Quick Expand Controls ── */}
         {activeCategory.service_types.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-text-muted">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono uppercase tracking-wider text-[0.6875rem]">
-                Daftar Layanan Service {activeCategory.Name} ({activeCategory.service_types.length})
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] border border-white/[0.08] px-2 py-0.5 text-[10px] text-neutral-400 select-none">
-                <GripVertical className="h-3 w-3 text-primary" />
-                <span>Tahan & geser untuk atur urutan</span>
-              </span>
-            </div>
+          <div className="flex items-center justify-between text-xs text-text-muted">
+            <span className="font-mono uppercase tracking-wider text-[0.6875rem]">
+              Daftar Layanan Service {activeCategory.Name} ({activeCategory.service_types.length})
+            </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -607,7 +611,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
             const list = activeCategory.service_types;
             const branded = list.filter((s) => s.Brand);
             if (branded.length === 0) {
-              return list.map((svc, idx) => (
+              return list.map((svc) => (
                 <ServiceEditor
                   key={svc.Slug}
                   service={svc}
@@ -617,14 +621,9 @@ export default function PricelistEditor({ categories }: { categories: Category[]
                   onDelete={() => removeService(svc.Slug, svc.Name)}
                   open={openSvcSlugs.has(svc.Slug)}
                   onToggle={() => toggleSvc(svc.Slug)}
-                  index={idx}
-                  totalCount={list.length}
-                  onMoveUp={idx > 0 ? () => moveServiceBySlug(svc.Slug, list[idx - 1].Slug) : undefined}
-                  onMoveDown={idx < list.length - 1 ? () => moveServiceBySlug(svc.Slug, list[idx + 1].Slug) : undefined}
                   isDragging={draggingSlug === svc.Slug}
                   isOver={overSlug === svc.Slug}
-                  dragHandleProps={createDragHandleProps(svc.Slug)}
-                  cardDropProps={createCardDropProps(svc.Slug)}
+                  dragRowProps={createDragRowProps(svc.Slug)}
                 />
               ));
             }
@@ -640,7 +639,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
             }
 
             const renderEditors = (svcList: typeof branded) =>
-              svcList.map((svc, subIdx) => (
+              svcList.map((svc) => (
                 <ServiceEditor
                   key={`${svc.Slug}|${svc.Brand ?? ""}|${svc.Series ?? ""}`}
                   service={svc}
@@ -655,14 +654,9 @@ export default function PricelistEditor({ categories }: { categories: Category[]
                   }
                   open={openSvcSlugs.has(svc.Slug)}
                   onToggle={() => toggleSvc(svc.Slug)}
-                  index={subIdx}
-                  totalCount={svcList.length}
-                  onMoveUp={subIdx > 0 ? () => moveServiceBySlug(svc.Slug, svcList[subIdx - 1].Slug) : undefined}
-                  onMoveDown={subIdx < svcList.length - 1 ? () => moveServiceBySlug(svc.Slug, svcList[subIdx + 1].Slug) : undefined}
                   isDragging={draggingSlug === svc.Slug}
                   isOver={overSlug === svc.Slug}
-                  dragHandleProps={createDragHandleProps(svc.Slug)}
-                  cardDropProps={createCardDropProps(svc.Slug)}
+                  dragRowProps={createDragRowProps(svc.Slug)}
                 />
               ));
 
