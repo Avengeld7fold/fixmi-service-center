@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import ServiceIcon from "@/components/pricelist/ServiceIcon";
 import PriceGrid from "./PriceGrid";
 import ConfirmModal from "./ConfirmModal";
@@ -16,6 +16,14 @@ interface ServiceEditorProps {
   onDelete: () => void;
   open: boolean;
   onToggle: () => void;
+  index?: number;
+  totalCount?: number;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  isDragging?: boolean;
+  isOver?: boolean;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
+  cardDropProps?: React.HTMLAttributes<HTMLElement>;
 }
 
 export default function ServiceEditor({
@@ -26,6 +34,14 @@ export default function ServiceEditor({
   onDelete,
   open,
   onToggle,
+  index,
+  totalCount,
+  onMoveUp,
+  onMoveDown,
+  isDragging,
+  isOver,
+  dragHandleProps,
+  cardDropProps,
 }: ServiceEditorProps) {
   const [newLabel, setNewLabel] = useState("");
   const [newNote, setNewNote] = useState("");
@@ -119,48 +135,130 @@ export default function ServiceEditor({
 
   return (
     <>
-      <div className="overflow-hidden rounded-[12px] border border-panel-border bg-panel">
-        {/* Header service — buka tutup panel */}
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          aria-controls={panelId}
-          className="flex w-full items-center gap-4 px-5 py-4 text-left outline-none transition-colors hover:bg-panel-raised focus-visible:bg-panel-raised"
-        >
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenIconPicker(true);
-            }}
+      <div
+        data-service-slug={service.Slug}
+        {...cardDropProps}
+        className={`relative overflow-hidden rounded-[12px] border transition-all duration-200 ${
+          isDragging
+            ? "opacity-50 scale-[0.99] border-primary/60 shadow-[0_10px_30px_rgba(255,107,0,0.25)] ring-2 ring-primary/40 z-20"
+            : isOver
+            ? "border-primary ring-2 ring-primary/50 bg-primary/[0.04] shadow-[0_4px_24px_rgba(255,107,0,0.2)]"
+            : "border-panel-border bg-panel hover:border-white/[0.15]"
+        }`}
+      >
+        {isOver && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-primary shadow-[0_0_12px_#ff6b00] z-30 animate-pulse" />
+        )}
+
+        {/* Header service */}
+        <div className="flex items-center gap-2 sm:gap-3.5 px-3.5 sm:px-5 py-3.5 sm:py-4 transition-colors hover:bg-panel-raised/50">
+          {/* ── Drag Grip Handle & Sequence Badge ── */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {dragHandleProps && (
+              <div
+                {...dragHandleProps}
+                role="button"
+                tabIndex={0}
+                title="Tahan & geser untuk mengubah urutan layanan"
+                aria-label={`Tahan dan geser untuk memindahkan layanan ${service.Name}`}
+                className="flex h-9 w-7 sm:w-8 items-center justify-center rounded-lg text-neutral-400 hover:text-primary hover:bg-white/[0.08] active:bg-primary/20 active:text-primary cursor-grab active:cursor-grabbing touch-none select-none transition-all"
+              >
+                <GripVertical className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+            )}
+            {typeof index === "number" && (
+              <span
+                title={`Urutan #${index + 1}`}
+                className="inline-flex items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-semibold text-neutral-400 select-none"
+              >
+                #{index + 1}
+              </span>
+            )}
+            {(onMoveUp || onMoveDown) && (
+              <div className="hidden sm:flex flex-col gap-0.5 shrink-0 ml-0.5">
+                <button
+                  type="button"
+                  disabled={!onMoveUp}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp?.();
+                  }}
+                  title="Pindah urutan ke atas"
+                  aria-label={`Pindah ${service.Name} ke atas`}
+                  className="flex h-3.5 w-4 items-center justify-center rounded text-neutral-500 hover:text-primary hover:bg-white/[0.08] disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
+                >
+                  <ChevronUp className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  disabled={!onMoveDown}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown?.();
+                  }}
+                  title="Pindah urutan ke bawah"
+                  aria-label={`Pindah ${service.Name} ke bawah`}
+                  className="flex h-3.5 w-4 items-center justify-center rounded text-neutral-500 hover:text-primary hover:bg-white/[0.08] disabled:opacity-20 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
+                >
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ── Tombol Ubah Ikon ── */}
+          <button
+            type="button"
+            onClick={() => setOpenIconPicker(true)}
             title="Klik untuk mengganti ikon"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-panel-raised transition-all hover:bg-white/[0.12] hover:scale-105 active:scale-95 group/icon"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-panel-raised transition-all hover:bg-white/[0.12] hover:scale-105 active:scale-95 group/icon cursor-pointer border border-transparent hover:border-white/10"
           >
             <ServiceIcon name={service.icon} className="h-5 w-5 text-primary group-hover/icon:scale-110 transition-transform" />
-          </span>
-          <span className="flex-1">
-            <span className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <span>{service.Name}</span>
+          </button>
+
+          {/* ── Nama Layanan & Info (Klik untuk buka/tutup accordion) ── */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={onToggle}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onToggle();
+              }
+            }}
+            aria-expanded={open}
+            aria-controls={panelId}
+            className="flex-1 min-w-0 cursor-pointer text-left select-none outline-none focus-visible:ring-1 focus-visible:ring-primary/40 rounded-lg p-1"
+          >
+            <div className="flex items-center gap-2 text-sm sm:text-base font-semibold text-foreground truncate">
+              <span className="truncate">{service.Name}</span>
               {service.Name_en && (
-                <span className="rounded-md border border-primary/20 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-normal text-primary">
+                <span className="hidden sm:inline-block shrink-0 rounded-md border border-primary/20 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-normal text-primary">
                   EN: {service.Name_en}
                 </span>
               )}
-            </span>
-            <span className="block text-xs text-text-muted">
+            </div>
+            <span className="block text-[11px] sm:text-xs text-text-muted truncate mt-0.5">
               {service.Brand ? `${service.Brand} · ${service.Series} · ` : ""}
               {service.device_prices.length} model perangkat · {service.variants.length} pilihan kualitas
             </span>
-          </span>
-          <span
-            className={`flex h-8 w-8 items-center justify-center rounded-lg border border-panel-border bg-background text-text-muted transition-transform duration-200 ${
+          </div>
+
+          {/* ── Tombol Toggle Accordion ── */}
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label={open ? "Tutup panel layanan" : "Buka panel layanan"}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-panel-border bg-background text-text-muted transition-transform duration-200 cursor-pointer hover:border-white/20 hover:text-white ${
               open ? "rotate-180 text-primary border-primary/40" : ""
             }`}
-            aria-hidden="true"
           >
             <ChevronDown className="h-4 w-4" />
-          </span>
-        </button>
+          </button>
+        </div>
 
         {/* Panel kolaps */}
         <div

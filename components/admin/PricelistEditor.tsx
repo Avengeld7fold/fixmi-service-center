@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Plus, ChevronDown, ChevronsUpDown, GripVertical } from "lucide-react";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
 import ConfirmModal from "./ConfirmModal";
@@ -161,6 +161,144 @@ export default function PricelistEditor({ categories }: { categories: Category[]
       )
     );
   };
+
+  // ── Drag and Drop / Touch Hold Reorder State ──
+  const [draggingSlug, setDraggingSlug] = useState<string | null>(null);
+  const [overSlug, setOverSlug] = useState<string | null>(null);
+  const draggingSlugRef = useRef<string | null>(null);
+  const overSlugRef = useRef<string | null>(null);
+
+  const moveServiceBySlug = (fromSlug: string, toSlug: string) => {
+    if (!fromSlug || !toSlug || fromSlug === toSlug) return;
+    setDraft((prev) =>
+      prev.map((cat) => {
+        if (cat.Slug !== activeCategory.Slug) return cat;
+        const list = [...cat.service_types];
+        const fromIdx = list.findIndex((s) => s.Slug === fromSlug);
+        const toIdx = list.findIndex((s) => s.Slug === toSlug);
+        if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return cat;
+        const [moved] = list.splice(fromIdx, 1);
+        list.splice(toIdx, 0, moved);
+        return { ...cat, service_types: list };
+      })
+    );
+    setMessage(null);
+  };
+
+  const createDragHandleProps = (slug: string) => ({
+    draggable: true,
+    onDragStart: (e: React.DragEvent<HTMLElement>) => {
+      e.dataTransfer.setData("text/plain", slug);
+      e.dataTransfer.effectAllowed = "move";
+      draggingSlugRef.current = slug;
+      setDraggingSlug(slug);
+    },
+    onDragEnd: () => {
+      draggingSlugRef.current = null;
+      overSlugRef.current = null;
+      setDraggingSlug(null);
+      setOverSlug(null);
+    },
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+      // Hanya izinkan primary button (left click) atau layar sentuh
+      if (e.button !== 0) return;
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {}
+      draggingSlugRef.current = slug;
+      overSlugRef.current = null;
+      setDraggingSlug(slug);
+      setOverSlug(null);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try {
+          navigator.vibrate(30);
+        } catch {}
+      }
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+      const from = draggingSlugRef.current;
+      if (!from) return;
+      // Auto-scroll saat drag mendekati tepi atas/bawah layar
+      const y = e.clientY;
+      if (y < 90) {
+        window.scrollBy({ top: -14, behavior: "auto" });
+      } else if (y > window.innerHeight - 90) {
+        window.scrollBy({ top: 14, behavior: "auto" });
+      }
+
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const card = el?.closest<HTMLElement>("[data-service-slug]");
+      const targetSlug = card?.dataset.serviceSlug;
+      if (targetSlug && targetSlug !== from) {
+        if (overSlugRef.current !== targetSlug) {
+          overSlugRef.current = targetSlug;
+          setOverSlug(targetSlug);
+        }
+      }
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLElement>) => {
+      const from = draggingSlugRef.current;
+      if (!from) return;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {}
+
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const card = el?.closest<HTMLElement>("[data-service-slug]");
+      const targetSlug = card?.dataset.serviceSlug || overSlugRef.current;
+
+      if (targetSlug && targetSlug !== from) {
+        moveServiceBySlug(from, targetSlug);
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate(40);
+          } catch {}
+        }
+      }
+      draggingSlugRef.current = null;
+      overSlugRef.current = null;
+      setDraggingSlug(null);
+      setOverSlug(null);
+    },
+    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {}
+      draggingSlugRef.current = null;
+      overSlugRef.current = null;
+      setDraggingSlug(null);
+      setOverSlug(null);
+    },
+  });
+
+  const createCardDropProps = (slug: string) => ({
+    onDragOver: (e: React.DragEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (overSlugRef.current !== slug && draggingSlugRef.current !== slug) {
+        overSlugRef.current = slug;
+        setOverSlug(slug);
+      }
+    },
+    onDragLeave: (e: React.DragEvent<HTMLElement>) => {
+      if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+      if (overSlugRef.current === slug) {
+        overSlugRef.current = null;
+        setOverSlug(null);
+      }
+    },
+    onDrop: (e: React.DragEvent<HTMLElement>) => {
+      e.preventDefault();
+      const fromSlug = e.dataTransfer.getData("text/plain") || draggingSlugRef.current;
+      if (fromSlug && fromSlug !== slug) {
+        moveServiceBySlug(fromSlug, slug);
+      }
+      draggingSlugRef.current = null;
+      overSlugRef.current = null;
+      setDraggingSlug(null);
+      setOverSlug(null);
+    },
+  });
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -341,10 +479,16 @@ export default function PricelistEditor({ categories }: { categories: Category[]
 
         {/* ── Quick Expand Controls ── */}
         {activeCategory.service_types.length > 0 && (
-          <div className="flex items-center justify-between text-xs text-text-muted">
-            <span className="font-mono uppercase tracking-wider text-[0.6875rem]">
-              Daftar Layanan Service {activeCategory.Name} ({activeCategory.service_types.length})
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-text-muted">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono uppercase tracking-wider text-[0.6875rem]">
+                Daftar Layanan Service {activeCategory.Name} ({activeCategory.service_types.length})
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] border border-white/[0.08] px-2 py-0.5 text-[10px] text-neutral-400 select-none">
+                <GripVertical className="h-3 w-3 text-primary" />
+                <span>Tahan & geser untuk atur urutan</span>
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -463,7 +607,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
             const list = activeCategory.service_types;
             const branded = list.filter((s) => s.Brand);
             if (branded.length === 0) {
-              return list.map((svc) => (
+              return list.map((svc, idx) => (
                 <ServiceEditor
                   key={svc.Slug}
                   service={svc}
@@ -473,6 +617,14 @@ export default function PricelistEditor({ categories }: { categories: Category[]
                   onDelete={() => removeService(svc.Slug, svc.Name)}
                   open={openSvcSlugs.has(svc.Slug)}
                   onToggle={() => toggleSvc(svc.Slug)}
+                  index={idx}
+                  totalCount={list.length}
+                  onMoveUp={idx > 0 ? () => moveServiceBySlug(svc.Slug, list[idx - 1].Slug) : undefined}
+                  onMoveDown={idx < list.length - 1 ? () => moveServiceBySlug(svc.Slug, list[idx + 1].Slug) : undefined}
+                  isDragging={draggingSlug === svc.Slug}
+                  isOver={overSlug === svc.Slug}
+                  dragHandleProps={createDragHandleProps(svc.Slug)}
+                  cardDropProps={createCardDropProps(svc.Slug)}
                 />
               ));
             }
@@ -488,7 +640,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
             }
 
             const renderEditors = (svcList: typeof branded) =>
-              svcList.map((svc) => (
+              svcList.map((svc, subIdx) => (
                 <ServiceEditor
                   key={`${svc.Slug}|${svc.Brand ?? ""}|${svc.Series ?? ""}`}
                   service={svc}
@@ -503,6 +655,14 @@ export default function PricelistEditor({ categories }: { categories: Category[]
                   }
                   open={openSvcSlugs.has(svc.Slug)}
                   onToggle={() => toggleSvc(svc.Slug)}
+                  index={subIdx}
+                  totalCount={svcList.length}
+                  onMoveUp={subIdx > 0 ? () => moveServiceBySlug(svc.Slug, svcList[subIdx - 1].Slug) : undefined}
+                  onMoveDown={subIdx < svcList.length - 1 ? () => moveServiceBySlug(svc.Slug, svcList[subIdx + 1].Slug) : undefined}
+                  isDragging={draggingSlug === svc.Slug}
+                  isOver={overSlug === svc.Slug}
+                  dragHandleProps={createDragHandleProps(svc.Slug)}
+                  cardDropProps={createCardDropProps(svc.Slug)}
                 />
               ));
 
