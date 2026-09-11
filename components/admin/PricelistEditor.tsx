@@ -73,6 +73,8 @@ export default function PricelistEditor({
     return uiPos.cat && slugs.includes(uiPos.cat) ? uiPos.cat : (categories[0]?.Slug ?? "");
   });
 
+  const isRestoredRef = useRef(false);
+
   // Multi-expandable services support dengan persistensi sessionStorage & URL hash
   const [openSvcSlugs, setOpenSvcSlugs] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
@@ -112,8 +114,98 @@ export default function PricelistEditor({
     return uiPos.series;
   });
 
-  // Catat posisi ke uiPos dan sessionStorage setiap berubah
+  // 1. Matikan auto scroll restoration browser & pulihkan state accordion dan posisi scroll saat mount
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    try {
+      const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${activeSlug}`);
+      if (storedSvcs) {
+        const parsed = JSON.parse(storedSvcs);
+        if (Array.isArray(parsed)) {
+          setOpenSvcSlugs(new Set(parsed));
+        }
+      } else if (window.location.hash) {
+        const hashSlug = window.location.hash.replace(/^#/, "");
+        if (hashSlug) setOpenSvcSlugs(new Set([hashSlug]));
+      }
+
+      const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${activeSlug}`);
+      if (storedBrand) setOpenBrand(storedBrand);
+
+      const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${activeSlug}`);
+      if (storedSeries) setOpenSeries(storedSeries);
+    } catch {}
+
+    // Pulihkan posisi scroll yang tersimpan sebelum refresh
+    const savedY =
+      sessionStorage.getItem(`fixmi_admin_scroll_y_${activeSlug}`) ||
+      sessionStorage.getItem("fixmi_admin_scroll_y");
+
+    let t1: NodeJS.Timeout | undefined;
+    let t2: NodeJS.Timeout | undefined;
+    let t3: NodeJS.Timeout | undefined;
+
+    if (savedY) {
+      const targetY = parseInt(savedY, 10);
+      if (!isNaN(targetY) && targetY > 0) {
+        window.scrollTo({ top: targetY, behavior: "instant" });
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: targetY, behavior: "instant" });
+        });
+        t1 = setTimeout(() => {
+          window.scrollTo({ top: targetY, behavior: "instant" });
+        }, 60);
+        t2 = setTimeout(() => {
+          window.scrollTo({ top: targetY, behavior: "instant" });
+        }, 180);
+        t3 = setTimeout(() => {
+          window.scrollTo({ top: targetY, behavior: "instant" });
+        }, 350);
+      }
+    }
+
+    const tRestore = setTimeout(() => {
+      isRestoredRef.current = true;
+    }, 100);
+
+    return () => {
+      if (t1) clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+      if (t3) clearTimeout(t3);
+      clearTimeout(tRestore);
+    };
+  }, [activeSlug]);
+
+  // 2. Simpan posisi scroll secara real-time saat user melakukan scroll
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const recordScroll = () => {
+      const y = window.scrollY;
+      sessionStorage.setItem("fixmi_admin_scroll_y", String(y));
+      if (activeSlug) {
+        sessionStorage.setItem(`fixmi_admin_scroll_y_${activeSlug}`, String(y));
+      }
+    };
+
+    window.addEventListener("scroll", recordScroll, { passive: true });
+    window.addEventListener("beforeunload", recordScroll);
+
+    return () => {
+      window.removeEventListener("scroll", recordScroll);
+      window.removeEventListener("beforeunload", recordScroll);
+    };
+  }, [activeSlug]);
+
+  // 3. Catat posisi accordion ke uiPos dan sessionStorage setiap berubah
+  useEffect(() => {
+    if (!isRestoredRef.current) return;
+
     uiPos.cat = activeSlug;
     uiPos.svcs = Array.from(openSvcSlugs);
     uiPos.brand = openBrand;
@@ -136,6 +228,7 @@ export default function PricelistEditor({
   // Navigasi tab kategori secara mulus dengan Next.js Router (zero lag & update URL otomatis)
   const handleSelectCategory = (slug: string) => {
     if (slug === activeSlug) return;
+    isRestoredRef.current = false;
     setActiveSlug(slug);
     router.push(`/admin/pricelist/${slug}`, { scroll: false });
 
@@ -152,6 +245,17 @@ export default function PricelistEditor({
       setOpenBrand(null);
       setOpenSeries(null);
     }
+
+    // Reset posisi scroll untuk kategori baru agar mulai dari atas
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("fixmi_admin_scroll_y", "0");
+      sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, "0");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    setTimeout(() => {
+      isRestoredRef.current = true;
+    }, 100);
   };
 
   // Dengarkan perubahan URL / pathname (misal tombol Back / Forward browser)
@@ -159,6 +263,7 @@ export default function PricelistEditor({
     const parts = pathname.split("/").filter(Boolean);
     const last = parts[parts.length - 1];
     if (last && slugs.includes(last) && last !== activeSlug) {
+      isRestoredRef.current = false;
       setActiveSlug(last);
       try {
         const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${last}`);
@@ -172,6 +277,20 @@ export default function PricelistEditor({
         setOpenBrand(null);
         setOpenSeries(null);
       }
+
+      if (typeof window !== "undefined") {
+        const savedY = sessionStorage.getItem(`fixmi_admin_scroll_y_${last}`);
+        if (savedY) {
+          const targetY = parseInt(savedY, 10);
+          if (!isNaN(targetY) && targetY > 0) {
+            window.scrollTo({ top: targetY, behavior: "instant" });
+          }
+        }
+      }
+
+      setTimeout(() => {
+        isRestoredRef.current = true;
+      }, 100);
     }
   }, [pathname, slugs, activeSlug]);
 
@@ -281,16 +400,41 @@ export default function PricelistEditor({
       const next = new Set(prev);
       if (next.has(slug)) next.delete(slug);
       else next.add(slug);
+      if (typeof window !== "undefined" && activeSlug) {
+        try {
+          sessionStorage.setItem(
+            `fixmi_admin_open_svcs_${activeSlug}`,
+            JSON.stringify(Array.from(next))
+          );
+        } catch {}
+      }
       return next;
     });
   };
 
   const expandAllSvcs = () => {
-    setOpenSvcSlugs(new Set(activeCategory.service_types.map((s) => s.Slug)));
+    const all = new Set(activeCategory.service_types.map((s) => s.Slug));
+    setOpenSvcSlugs(all);
+    if (typeof window !== "undefined" && activeSlug) {
+      try {
+        sessionStorage.setItem(
+          `fixmi_admin_open_svcs_${activeSlug}`,
+          JSON.stringify(Array.from(all))
+        );
+      } catch {}
+    }
   };
 
   const collapseAllSvcs = () => {
     setOpenSvcSlugs(new Set());
+    if (typeof window !== "undefined" && activeSlug) {
+      try {
+        sessionStorage.setItem(
+          `fixmi_admin_open_svcs_${activeSlug}`,
+          JSON.stringify([])
+        );
+      } catch {}
+    }
   };
 
   const updateService = (svcSlug: string, next: ServiceType) => {
@@ -492,6 +636,14 @@ export default function PricelistEditor({
         setOpenSvcSlugs((prev) => {
           const next = new Set(prev);
           next.delete(svcSlug);
+          if (typeof window !== "undefined" && activeSlug) {
+            try {
+              sessionStorage.setItem(
+                `fixmi_admin_open_svcs_${activeSlug}`,
+                JSON.stringify(Array.from(next))
+              );
+            } catch {}
+          }
           return next;
         });
         setConfirmModal((prev) => ({ ...prev, isOpen: false }));
@@ -551,7 +703,18 @@ export default function PricelistEditor({
       )
     );
     // Langsung buka layanan baru (beserta grup merk/series-nya bila ada).
-    setOpenSvcSlugs((prev) => new Set([...prev, slug]));
+    setOpenSvcSlugs((prev) => {
+      const next = new Set([...prev, slug]);
+      if (typeof window !== "undefined" && activeSlug) {
+        try {
+          sessionStorage.setItem(
+            `fixmi_admin_open_svcs_${activeSlug}`,
+            JSON.stringify(Array.from(next))
+          );
+        } catch {}
+      }
+      return next;
+    });
     setOpenBrand(brand || null);
     setOpenSeries(brand ? `${brand}::${series || "Semua Model"}` : null);
     setNewName("");
