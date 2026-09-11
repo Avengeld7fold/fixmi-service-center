@@ -65,54 +65,16 @@ export default function PricelistEditor({
     if (initialCategorySlug && slugs.includes(initialCategorySlug)) {
       return initialCategorySlug;
     }
-    if (typeof window !== "undefined") {
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      const last = parts[parts.length - 1];
-      if (last && slugs.includes(last)) return last;
-    }
     return uiPos.cat && slugs.includes(uiPos.cat) ? uiPos.cat : (categories[0]?.Slug ?? "");
   });
 
   const isRestoredRef = useRef(false);
 
   // Multi-expandable services support dengan persistensi sessionStorage & URL hash
-  const [openSvcSlugs, setOpenSvcSlugs] = useState<Set<string>>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = sessionStorage.getItem(`fixmi_admin_open_svcs_${activeSlug}`);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) return new Set(parsed);
-        }
-      } catch {}
-
-      if (window.location.hash) {
-        const hashSlug = window.location.hash.replace(/^#/, "");
-        if (hashSlug) return new Set([hashSlug]);
-      }
-    }
-    return new Set(uiPos.svcs);
-  });
-
-  const [openBrand, setOpenBrand] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = sessionStorage.getItem(`fixmi_admin_brand_${activeSlug}`);
-        if (stored) return stored;
-      } catch {}
-    }
-    return uiPos.brand;
-  });
-
-  const [openSeries, setOpenSeries] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = sessionStorage.getItem(`fixmi_admin_series_${activeSlug}`);
-        if (stored) return stored;
-      } catch {}
-    }
-    return uiPos.series;
-  });
+  // Inisialisasi awal identik antara Server & Client untuk mencegah hydration mismatch error
+  const [openSvcSlugs, setOpenSvcSlugs] = useState<Set<string>>(() => new Set());
+  const [openBrand, setOpenBrand] = useState<string | null>(null);
+  const [openSeries, setOpenSeries] = useState<string | null>(null);
 
   // 1. Matikan auto scroll restoration browser & pulihkan state accordion dan posisi scroll saat mount
   useEffect(() => {
