@@ -68,6 +68,7 @@ export default function PricelistEditor({
   });
 
   const isRestoredRef = useRef(false);
+  const tabBarRef = useRef<HTMLDivElement>(null);
 
   // Multi-expandable services support dengan persistensi sessionStorage & URL hash
   // Inisialisasi awal identik antara Server & Client untuk mencegah hydration mismatch error
@@ -211,8 +212,19 @@ export default function PricelistEditor({
       setOpenSeries(null);
     }
 
-    // Pertahankan posisi scroll saat ini agar tidak melompat atau reset ke judul
+    // Kunci posisi scroll di area kategori agar judul/header tidak pernah muncul kembali saat switch
     if (typeof window !== "undefined") {
+      if (tabBarRef.current) {
+        const tabRect = tabBarRef.current.getBoundingClientRect();
+        const tabAbsoluteTop = Math.max(0, tabRect.top + window.scrollY);
+        // Jika user sudah berada di area kategori/layanan (header di atas sudah tidak terlihat):
+        if (window.scrollY > tabAbsoluteTop - 30) {
+          window.scrollTo({ top: tabAbsoluteTop, behavior: "instant" });
+          sessionStorage.setItem("fixmi_admin_scroll_y", String(tabAbsoluteTop));
+          sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, String(tabAbsoluteTop));
+          return;
+        }
+      }
       const currentY = window.scrollY;
       sessionStorage.setItem("fixmi_admin_scroll_y", String(currentY));
       sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, String(currentY));
@@ -703,12 +715,13 @@ export default function PricelistEditor({
 
   return (
     <>
-      <div className="mt-8 space-y-6">
-        {/* ── Tab Kategori (Smooth swipe on mobile) ── */}
+      <div className="mt-8 space-y-6 min-h-[75vh]">
+        {/* ── Tab Kategori (Sticky saat scroll agar selalu siap switch) ── */}
         <div
+          ref={tabBarRef}
           role="tablist"
           aria-label="Pilih kategori perangkat"
-          className="flex items-center gap-2 border-b border-white/[0.08] pb-4 overflow-x-auto scrollbar-none sm:flex-wrap max-w-full"
+          className="sticky top-0 z-20 flex items-center gap-2 border-b border-white/[0.08] py-3 -mx-2 px-2 bg-background/95 backdrop-blur-md overflow-x-auto scrollbar-none sm:flex-wrap max-w-full transition-colors"
         >
           {draft.map((c) => {
             const active = c.Slug === activeCategory.Slug;
@@ -859,7 +872,7 @@ export default function PricelistEditor({
         />
 
         {/* ── Daftar Layanan Aktif ── */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-[500px]">
           {(() => {
             const list = activeCategory.service_types;
             const branded = list.filter((s) => s.Brand);

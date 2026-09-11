@@ -56,7 +56,7 @@ export default async function CategoryAdminPricelistPage({ params }: PageProps) 
   }));
 
   return (
-    <div className="mx-auto w-full max-w-[75rem] px-3.5 sm:px-6 md:px-10 py-6 sm:py-10 lg:py-14">
+    <div className="mx-auto w-full max-w-[75rem] px-3.5 sm:px-6 md:px-10 py-6 sm:py-10 lg:py-14 min-h-[120vh]">
       {/* ── Shared Admin Navigation Switcher ── */}
       <AdminNav
         showExport
