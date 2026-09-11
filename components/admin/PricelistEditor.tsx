@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Plus, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
@@ -56,6 +56,7 @@ export default function PricelistEditor({
   initialCategorySlug?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const slugs = categories.map((c) => c.Slug);
 
   const [baseline, setBaseline] = useState(() => JSON.stringify(categories));
@@ -71,13 +72,6 @@ export default function PricelistEditor({
     }
     return uiPos.cat && slugs.includes(uiPos.cat) ? uiPos.cat : (categories[0]?.Slug ?? "");
   });
-
-  // Sinkronkan jika initialCategorySlug berubah dari luar
-  useEffect(() => {
-    if (initialCategorySlug && slugs.includes(initialCategorySlug) && initialCategorySlug !== activeSlug) {
-      setActiveSlug(initialCategorySlug);
-    }
-  }, [initialCategorySlug, slugs, activeSlug]);
 
   // Multi-expandable services support dengan persistensi sessionStorage & URL hash
   const [openSvcSlugs, setOpenSvcSlugs] = useState<Set<string>>(() => {
@@ -139,21 +133,39 @@ export default function PricelistEditor({
     }
   }, [activeSlug, openSvcSlugs, openBrand, openSeries]);
 
-  // Navigasi tab kategori secara halus via pushState (zero flicker, draft tetap aman di memori)
+  // Navigasi tab kategori secara mulus dengan Next.js Router (zero lag & update URL otomatis)
   const handleSelectCategory = (slug: string) => {
     if (slug === activeSlug) return;
     setActiveSlug(slug);
+    router.push(`/admin/pricelist/${slug}`, { scroll: false });
 
-    if (typeof window !== "undefined") {
-      window.history.pushState(null, "", `/admin/pricelist/${slug}`);
+    // Pulihkan state layanan yang terbuka untuk kategori yang baru dipilih dari sessionStorage
+    try {
+      const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${slug}`);
+      setOpenSvcSlugs(storedSvcs ? new Set(JSON.parse(storedSvcs)) : new Set());
+      const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${slug}`);
+      setOpenBrand(storedBrand || null);
+      const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${slug}`);
+      setOpenSeries(storedSeries || null);
+    } catch {
+      setOpenSvcSlugs(new Set());
+      setOpenBrand(null);
+      setOpenSeries(null);
+    }
+  };
 
-      // Pulihkan state layanan yang terbuka untuk kategori yang baru dipilih dari sessionStorage
+  // Dengarkan perubahan URL / pathname (misal tombol Back / Forward browser)
+  useEffect(() => {
+    const parts = pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1];
+    if (last && slugs.includes(last) && last !== activeSlug) {
+      setActiveSlug(last);
       try {
-        const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${slug}`);
+        const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${last}`);
         setOpenSvcSlugs(storedSvcs ? new Set(JSON.parse(storedSvcs)) : new Set());
-        const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${slug}`);
+        const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${last}`);
         setOpenBrand(storedBrand || null);
-        const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${slug}`);
+        const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${last}`);
         setOpenSeries(storedSeries || null);
       } catch {
         setOpenSvcSlugs(new Set());
@@ -161,29 +173,7 @@ export default function PricelistEditor({
         setOpenSeries(null);
       }
     }
-  };
-
-  // Dengarkan tombol Back / Forward browser
-  useEffect(() => {
-    const handlePopState = () => {
-      if (typeof window === "undefined") return;
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      const last = parts[parts.length - 1];
-      if (last && slugs.includes(last) && last !== activeSlug) {
-        setActiveSlug(last);
-        try {
-          const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${last}`);
-          setOpenSvcSlugs(storedSvcs ? new Set(JSON.parse(storedSvcs)) : new Set());
-          const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${last}`);
-          setOpenBrand(storedBrand || null);
-          const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${last}`);
-          setOpenSeries(storedSeries || null);
-        } catch {}
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [slugs, activeSlug]);
+  }, [pathname, slugs, activeSlug]);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
