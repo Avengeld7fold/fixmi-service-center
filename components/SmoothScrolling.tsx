@@ -21,13 +21,25 @@ export default function SmoothScrolling({ children }: SmoothScrollingProps) {
   const lenisRef = useRef<LenisRef>(null);
   const pathname = usePathname();
 
-  // Reset scroll ke paling atas (top: 0) saat berpindah halaman/rute
+  const prevPathnameRef = useRef(pathname);
+
+  // Reset scroll ke paling atas (top: 0) saat berpindah ke halaman/rute baru yang berbeda
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo(0, 0);
-    }
-    if (lenisRef.current?.lenis) {
-      lenisRef.current.lenis.scrollTo(0, { immediate: true });
+    const prev = prevPathnameRef.current;
+    prevPathnameRef.current = pathname;
+
+    // Jangan reset scroll ke nol jika hanya berpindah sub-kategori di halaman pricelist (admin maupun publik)
+    const isPricelistSubRoute =
+      (prev.startsWith("/admin/pricelist") && pathname.startsWith("/admin/pricelist")) ||
+      (prev.startsWith("/pricelist") && pathname.startsWith("/pricelist"));
+
+    if (!isPricelistSubRoute) {
+      if (typeof window !== "undefined") {
+        window.scrollTo(0, 0);
+      }
+      if (lenisRef.current?.lenis) {
+        lenisRef.current.lenis.scrollTo(0, { immediate: true });
+      }
     }
 
     // Beri jeda 50ms agar DOM rute baru selesai di-mount sebelum me-recalc limit & trigger

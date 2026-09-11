@@ -212,19 +212,8 @@ export default function PricelistEditor({
       setOpenSeries(null);
     }
 
-    // Kunci posisi scroll di area kategori agar judul/header tidak pernah muncul kembali saat switch
+    // Pertahankan posisi scroll saat ini 100% di posisi user berada (tetap di 20%, 50%, dll)
     if (typeof window !== "undefined") {
-      if (tabBarRef.current) {
-        const tabRect = tabBarRef.current.getBoundingClientRect();
-        const tabAbsoluteTop = Math.max(0, tabRect.top + window.scrollY);
-        // Jika user sudah berada di area kategori/layanan (header di atas sudah tidak terlihat):
-        if (window.scrollY > tabAbsoluteTop - 30) {
-          window.scrollTo({ top: tabAbsoluteTop, behavior: "instant" });
-          sessionStorage.setItem("fixmi_admin_scroll_y", String(tabAbsoluteTop));
-          sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, String(tabAbsoluteTop));
-          return;
-        }
-      }
       const currentY = window.scrollY;
       sessionStorage.setItem("fixmi_admin_scroll_y", String(currentY));
       sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, String(currentY));
