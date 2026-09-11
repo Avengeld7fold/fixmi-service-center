@@ -48,30 +48,142 @@ function autoDetectIcon(name: string, brand?: string): string {
   return "wrench";
 }
 
-export default function PricelistEditor({ categories }: { categories: Category[] }) {
+export default function PricelistEditor({
+  categories,
+  initialCategorySlug,
+}: {
+  categories: Category[];
+  initialCategorySlug?: string;
+}) {
   const router = useRouter();
+  const slugs = categories.map((c) => c.Slug);
+
   const [baseline, setBaseline] = useState(() => JSON.stringify(categories));
   const [draft, setDraft] = useState<Category[]>(() => structuredClone(categories));
-  const [activeSlug, setActiveSlug] = useState(() =>
-    uiPos.cat && categories.some((c) => c.Slug === uiPos.cat)
-      ? uiPos.cat
-      : categories[0]?.Slug ?? ""
-  );
+  const [activeSlug, setActiveSlug] = useState(() => {
+    if (initialCategorySlug && slugs.includes(initialCategorySlug)) {
+      return initialCategorySlug;
+    }
+    if (typeof window !== "undefined") {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const last = parts[parts.length - 1];
+      if (last && slugs.includes(last)) return last;
+    }
+    return uiPos.cat && slugs.includes(uiPos.cat) ? uiPos.cat : (categories[0]?.Slug ?? "");
+  });
 
-  // Multi-expandable services support
-  const [openSvcSlugs, setOpenSvcSlugs] = useState<Set<string>>(
-    () => new Set(uiPos.svcs)
-  );
-  const [openBrand, setOpenBrand] = useState<string | null>(() => uiPos.brand);
-  const [openSeries, setOpenSeries] = useState<string | null>(() => uiPos.series);
+  // Sinkronkan jika initialCategorySlug berubah dari luar
+  useEffect(() => {
+    if (initialCategorySlug && slugs.includes(initialCategorySlug) && initialCategorySlug !== activeSlug) {
+      setActiveSlug(initialCategorySlug);
+    }
+  }, [initialCategorySlug, slugs, activeSlug]);
 
-  // Catat posisi ke uiPos setiap berubah
+  // Multi-expandable services support dengan persistensi sessionStorage & URL hash
+  const [openSvcSlugs, setOpenSvcSlugs] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem(`fixmi_admin_open_svcs_${activeSlug}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return new Set(parsed);
+        }
+      } catch {}
+
+      if (window.location.hash) {
+        const hashSlug = window.location.hash.replace(/^#/, "");
+        if (hashSlug) return new Set([hashSlug]);
+      }
+    }
+    return new Set(uiPos.svcs);
+  });
+
+  const [openBrand, setOpenBrand] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem(`fixmi_admin_brand_${activeSlug}`);
+        if (stored) return stored;
+      } catch {}
+    }
+    return uiPos.brand;
+  });
+
+  const [openSeries, setOpenSeries] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem(`fixmi_admin_series_${activeSlug}`);
+        if (stored) return stored;
+      } catch {}
+    }
+    return uiPos.series;
+  });
+
+  // Catat posisi ke uiPos dan sessionStorage setiap berubah
   useEffect(() => {
     uiPos.cat = activeSlug;
     uiPos.svcs = Array.from(openSvcSlugs);
     uiPos.brand = openBrand;
     uiPos.series = openSeries;
+
+    if (typeof window !== "undefined" && activeSlug) {
+      try {
+        sessionStorage.setItem(
+          `fixmi_admin_open_svcs_${activeSlug}`,
+          JSON.stringify(Array.from(openSvcSlugs))
+        );
+        if (openBrand) sessionStorage.setItem(`fixmi_admin_brand_${activeSlug}`, openBrand);
+        else sessionStorage.removeItem(`fixmi_admin_brand_${activeSlug}`);
+        if (openSeries) sessionStorage.setItem(`fixmi_admin_series_${activeSlug}`, openSeries);
+        else sessionStorage.removeItem(`fixmi_admin_series_${activeSlug}`);
+      } catch {}
+    }
   }, [activeSlug, openSvcSlugs, openBrand, openSeries]);
+
+  // Navigasi tab kategori secara halus via pushState (zero flicker, draft tetap aman di memori)
+  const handleSelectCategory = (slug: string) => {
+    if (slug === activeSlug) return;
+    setActiveSlug(slug);
+
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", `/admin/pricelist/${slug}`);
+
+      // Pulihkan state layanan yang terbuka untuk kategori yang baru dipilih dari sessionStorage
+      try {
+        const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${slug}`);
+        setOpenSvcSlugs(storedSvcs ? new Set(JSON.parse(storedSvcs)) : new Set());
+        const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${slug}`);
+        setOpenBrand(storedBrand || null);
+        const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${slug}`);
+        setOpenSeries(storedSeries || null);
+      } catch {
+        setOpenSvcSlugs(new Set());
+        setOpenBrand(null);
+        setOpenSeries(null);
+      }
+    }
+  };
+
+  // Dengarkan tombol Back / Forward browser
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === "undefined") return;
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const last = parts[parts.length - 1];
+      if (last && slugs.includes(last) && last !== activeSlug) {
+        setActiveSlug(last);
+        try {
+          const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${last}`);
+          setOpenSvcSlugs(storedSvcs ? new Set(JSON.parse(storedSvcs)) : new Set());
+          const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${last}`);
+          setOpenBrand(storedBrand || null);
+          const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${last}`);
+          setOpenSeries(storedSeries || null);
+        } catch {}
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [slugs, activeSlug]);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -85,6 +197,52 @@ export default function PricelistEditor({ categories }: { categories: Category[]
   const [iconManuallyPicked, setIconManuallyPicked] = useState(false);
   const [openAddIconPicker, setOpenAddIconPicker] = useState(false);
   const [addError, setAddError] = useState("");
+
+  // Pulihkan draf ketikan Tambah Layanan saat activeSlug berubah atau mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && activeSlug) {
+      try {
+        const draftStr = sessionStorage.getItem(`fixmi_admin_draft_add_${activeSlug}`);
+        if (draftStr) {
+          const parsed = JSON.parse(draftStr);
+          if (parsed.name) setNewName(parsed.name);
+          if (parsed.nameEn) setNewNameEn(parsed.nameEn);
+          if (parsed.brand) setNewBrand(parsed.brand);
+          if (parsed.series) setNewSeries(parsed.series);
+          if (parsed.icon) setNewIcon(parsed.icon);
+        } else {
+          setNewName("");
+          setNewNameEn("");
+          setNewBrand("");
+          setNewSeries("");
+          setNewIcon("smartphone");
+        }
+      } catch {}
+    }
+  }, [activeSlug]);
+
+  // Simpan draf saat admin mengetik
+  useEffect(() => {
+    if (typeof window !== "undefined" && activeSlug) {
+      try {
+        if (newName || newNameEn || newBrand || newSeries) {
+          sessionStorage.setItem(
+            `fixmi_admin_draft_add_${activeSlug}`,
+            JSON.stringify({
+              name: newName,
+              nameEn: newNameEn,
+              brand: newBrand,
+              series: newSeries,
+              icon: newIcon,
+            })
+          );
+        } else {
+          sessionStorage.removeItem(`fixmi_admin_draft_add_${activeSlug}`);
+        }
+      } catch {}
+    }
+  }, [newName, newNameEn, newBrand, newSeries, newIcon, activeSlug]);
+
   // Modal pemilih icon untuk level Merk Android
   const [brandIconModal, setBrandIconModal] = useState<{
     isOpen: boolean;
@@ -412,6 +570,13 @@ export default function PricelistEditor({ categories }: { categories: Category[]
     setNewSeries("");
     setNewIcon("smartphone");
     setIconManuallyPicked(false);
+
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem(`fixmi_admin_draft_add_${activeSlug}`);
+        window.history.replaceState(null, "", `/admin/pricelist/${activeSlug}#${slug}`);
+      } catch {}
+    }
   };
 
   const save = async () => {
@@ -460,12 +625,7 @@ export default function PricelistEditor({ categories }: { categories: Category[]
                 key={c.Slug}
                 role="tab"
                 aria-selected={active}
-                onClick={() => {
-                  setActiveSlug(c.Slug);
-                  setOpenBrand(null);
-                  setOpenSeries(null);
-                  setOpenSvcSlugs(new Set());
-                }}
+                onClick={() => handleSelectCategory(c.Slug)}
                 className={`inline-flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all duration-150 shrink-0 active:scale-[0.98] ${
                   active
                     ? "border border-primary/50 bg-white/[0.08] text-white shadow-[0_0_15px_rgba(255,107,0,0.1)] ring-1 ring-primary/20"

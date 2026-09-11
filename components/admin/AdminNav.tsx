@@ -70,18 +70,29 @@ export default function AdminNav({ showExport = false, exportCategories = [] }: 
 
         {/* Action Controls */}
         <div className="flex items-center justify-end gap-2 sm:gap-2.5 shrink-0">
-          {/* Quick link to live public site */}
-          <a
-            href={currentItem.publicHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Buka halaman publik di tab baru"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-neutral-300 transition-all duration-150 hover:bg-white/[0.08] hover:text-white hover:border-white/20"
-          >
-            <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-neutral-400" />
-            <span className="hidden sm:inline">Lihat Web</span>
-            <span className="sm:hidden">Web</span>
-          </a>
+          {/* Quick link to live public site (peka terhadap kategori yang sedang aktif) */}
+          {(() => {
+            let publicHref = currentItem.publicHref;
+            if (pathname.startsWith("/admin/pricelist")) {
+              const parts = pathname.split("/").filter(Boolean);
+              if (parts.length >= 3 && parts[1] === "pricelist") {
+                publicHref = `/pricelist/${parts[2]}`;
+              }
+            }
+            return (
+              <a
+                href={publicHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Buka halaman publik di tab baru"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-neutral-300 transition-all duration-150 hover:bg-white/[0.08] hover:text-white hover:border-white/20"
+              >
+                <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-neutral-400" />
+                <span className="hidden sm:inline">Lihat Web</span>
+                <span className="sm:hidden">Web</span>
+              </a>
+            );
+          })()}
 
           {/* Export Excel only if showExport is true */}
           {showExport && (
