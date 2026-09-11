@@ -49,8 +49,8 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
     });
   };
 
-  const updatePrice = (originalIndex: number, variantKey: string, raw: string) => {
-    const price = parseThousands(raw);
+  const updatePrice = (originalIndex: number, variantKey: string, raw: string, isText = false) => {
+    const price = isText ? (raw.trim() === "" ? null : raw) : parseThousands(raw);
     onChange({
       ...service,
       device_prices: service.device_prices.map((dp, i) =>
@@ -345,21 +345,32 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                         />
                       </span>
                     </td>
-                    {service.variants.map((v, colIdx) => (
-                      <td key={v.Key} className="px-2 py-1.5 text-right">
-                        <input
-                          data-row={visibleRowIdx}
-                          data-col={colIdx + 1}
-                          inputMode="numeric"
-                          value={formatThousands(dp.prices[v.Key])}
-                          onChange={(e) => updatePrice(originalIndex, v.Key, e.target.value)}
-                          onKeyDown={(e) => handleCellKeyDown(e, visibleRowIdx, colIdx + 1)}
-                          placeholder="–"
-                          aria-label={`Harga ${dp.DeviceModel || `baris ${originalIndex + 1}`} pilihan ${v.Label}`}
-                          className="w-full rounded-[6px] border border-transparent bg-transparent px-2 py-1.5 text-right font-mono text-sm tabular-nums text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:bg-background"
-                        />
-                      </td>
-                    ))}
+                    {service.variants.map((v, colIdx) => {
+                      const val = dp.prices[v.Key];
+                      const isText = v.Type === "text" || typeof val === "string";
+
+                      return (
+                        <td key={v.Key} className="px-2 py-1.5 text-right">
+                          <input
+                            data-row={visibleRowIdx}
+                            data-col={colIdx + 1}
+                            inputMode={isText ? "text" : "numeric"}
+                            value={
+                              isText
+                                ? (val !== null && val !== undefined ? String(val) : "")
+                                : formatThousands(val as number)
+                            }
+                            onChange={(e) => updatePrice(originalIndex, v.Key, e.target.value, isText)}
+                            onKeyDown={(e) => handleCellKeyDown(e, visibleRowIdx, colIdx + 1)}
+                            placeholder="–"
+                            aria-label={`Nilai ${dp.DeviceModel || `baris ${originalIndex + 1}`} pilihan ${v.Label}`}
+                            className={`w-full rounded-[6px] border border-transparent bg-transparent px-2 py-1.5 font-mono text-sm tabular-nums outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:bg-background ${
+                              isText ? "text-center text-foreground font-normal" : "text-right text-primary font-medium"
+                            }`}
+                          />
+                        </td>
+                      );
+                    })}
                     <td className="px-2 py-1.5 text-center">
                       <button
                         type="button"

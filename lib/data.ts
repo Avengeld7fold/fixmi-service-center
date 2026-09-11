@@ -11,11 +11,12 @@ export interface Variant {
   Label: string; // teks kolom, mis. "ORIGINAL APPLE"
   Label_en?: string; // teks kolom bahasa Inggris, mis. "PRICE" atau "ORIGINAL APPLE"
   Note: string; // keterangan garansi di bawah label, boleh kosong
+  Type?: "price" | "text"; // tipe kolom: "price" (default nominal rupiah) atau "text" (seri perangkat / keterangan teks)
 }
 
 export interface DevicePrice {
   DeviceModel: string;
-  prices: Record<string, number | null>; // key = Variant.Key; null / absen = tidak tersedia
+  prices: Record<string, number | string | null>; // key = Variant.Key; number untuk harga, string untuk teks/kode seri, null / absen = tidak tersedia
 }
 
 export interface ServiceType {
@@ -119,15 +120,36 @@ export function formatRupiah(value: number | null | undefined): string {
 
 /**
  * Titik ribuan gaya Indonesia tanpa prefix "Rp" — untuk input harga di editor.
- * 3000 → "3.000", 30000 → "30.000", 3000000 → "3.000.000". null/kosong → "".
+ * 3000 → "3.000", 30000 → "30.000", 3000000 → "3.000.000".
+ * Bila value berupa teks (mis. "A1489" atau "2 Minggu"), dikembalikan apa adanya.
+ * null/kosong → "".
  */
-export function formatThousands(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "";
-  return new Intl.NumberFormat("id-ID").format(value);
+export function formatThousands(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "";
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (/^\d+$/.test(trimmed)) {
+      return new Intl.NumberFormat("id-ID").format(Number(trimmed));
+    }
+    return trimmed;
+  }
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return new Intl.NumberFormat("id-ID").format(value);
+  }
+  return "";
 }
 
-/** Ambil digit dari teks harga ("Rp 3.000" / "3.000") → 3000, atau null bila kosong. */
-export function parseThousands(text: string): number | null {
-  const digits = text.replace(/[^0-9]/g, "");
+/** Ambil digit dari teks harga ("Rp 3.000" / "3.000") → 3000, atau pertahankan teks bila berupa string identitas ("A1489" / "2 Minggu"). */
+export function parseThousands(text: string): number | string | null {
+  if (!text) return null;
+  const trimmed = text.trim();
+  if (!trimmed || trimmed === "-" || trimmed === "–" || trimmed === "---") return null;
+
+  // Jika mengandung huruf atau garis miring kode seri ("A1489", "A1538/A1550", "2 Minggu")
+  if (/[a-zA-Z]/.test(trimmed) || /[/]/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const digits = trimmed.replace(/[^0-9]/g, "");
   return digits === "" ? null : Number(digits);
 }

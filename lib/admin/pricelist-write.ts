@@ -87,6 +87,7 @@ export function validateAndStrip(input: unknown): StoredCategory[] {
           Label: v.Label.trim(),
           ...(typeof v.Label_en === "string" && v.Label_en.trim() ? { Label_en: v.Label_en.trim() } : {}),
           Note: typeof v.Note === "string" ? v.Note.trim() : "",
+          ...(v.Type === "text" ? { Type: "text" as const } : {}),
         };
       });
 
@@ -103,15 +104,17 @@ export function validateAndStrip(input: unknown): StoredCategory[] {
           fail(`Model "${model}" (${s.Name}, ${c.Name}): prices bukan objek.`);
 
         // Hanya simpan kunci varian yang dikenal (forward-compatible, PRD §7.3).
-        const prices: Record<string, number | null> = {};
+        const prices: Record<string, number | string | null> = {};
         for (const v of variants) {
           const raw = (dp.prices as Record<string, unknown>)[v.Key];
-          if (raw === null || raw === undefined || raw === "") {
+          if (raw === null || raw === undefined || raw === "" || raw === "-" || raw === "–" || raw === "---") {
             prices[v.Key] = null;
+          } else if (v.Type === "text" || typeof raw === "string") {
+            prices[v.Key] = String(raw).trim();
           } else if (typeof raw === "number" && Number.isInteger(raw) && raw >= 0) {
             prices[v.Key] = raw;
           } else {
-            fail(`Model "${model}" (${s.Name}, ${c.Name}): harga varian "${v.Label}" harus bilangan bulat ≥ 0.`);
+            fail(`Model "${model}" (${s.Name}, ${c.Name}): nilai varian "${v.Label}" tidak valid.`);
           }
         }
         return { DeviceModel: model, prices };

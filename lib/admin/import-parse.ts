@@ -149,11 +149,24 @@ async function parseXlsx(buffer: Buffer): Promise<string[][]> {
 // Struktur bangunan bersama
 // ============================================================
 
-function parsePrice(raw: string): number | null {
-  const digits = raw.replace(/[^0-9]/g, "");
-  if (!digits) return null;
-  const n = Number(digits);
-  return Number.isSafeInteger(n) ? n : null;
+function parsePrice(raw: string): number | string | null {
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed === "-" || trimmed === "–" || trimmed === "---") return null;
+
+  // Cek apakah string ini berformat mata uang (mis. "Rp. 969.000", "Rp 1.200.000", "969.000", "969000")
+  const isCurrencyFormat = /^(\s*rp\.?\s*|\s*idr\s*)?[0-9]{1,3}(\.[0-9]{3})+(\s*|\s*,-)?$/i.test(trimmed);
+  const isPureDigits = /^(\s*rp\.?\s*)?[0-9]+$/i.test(trimmed);
+
+  if (isCurrencyFormat || isPureDigits) {
+    const digits = trimmed.replace(/[^0-9]/g, "");
+    if (!digits) return null;
+    const n = Number(digits);
+    return Number.isSafeInteger(n) ? n : null;
+  }
+
+  // Bukan format angka murni/rupiah (misal kode model "A1489", "A1538/A1550", keterangan "2 Minggu")
+  // Kembalikan teks asli utuh, jangan dipotong hurufnya!
+  return trimmed;
 }
 
 interface BuildingService {
@@ -261,6 +274,25 @@ export async function parseImportFile(
     }
     if (errors.length > 0) return { merged: null, preview: emptyPreview() };
 
+    // Evaluasi tipe kolom varian ("text" vs "price") berdasarkan isi datanya
+    for (const vCol of variantCols) {
+      let textCount = 0;
+      let nonNullCount = 0;
+      for (let r = 1; r < rows.length; r++) {
+        const val = (rows[r][vCol.col] ?? "").trim();
+        if (val && val !== "-" && val !== "–" && val !== "---") {
+          nonNullCount++;
+          const parsed = parsePrice(val);
+          if (typeof parsed === "string") textCount++;
+        }
+      }
+      if (nonNullCount > 0 && textCount / nonNullCount >= 0.3) {
+        vCol.variant.Type = "text";
+      } else {
+        vCol.variant.Type = "price";
+      }
+    }
+
     // Kumpulkan baris model + deteksi harga-dalam-ribuan (dua tahap).
     const service: BuildingService = {
       Name: targetServiceName,
@@ -286,13 +318,17 @@ export async function parseImportFile(
         continue;
       }
 
-      const prices: Record<string, number | null> = {};
+      const prices: Record<string, number | string | null> = {};
       for (const { col, variant } of variantCols) {
         const raw = (cells[col] ?? "").trim();
         const parsed = parsePrice(raw);
-        // "0", kosong, atau non-angka = varian tidak tersedia.
-        prices[variant.Key] = parsed === null || parsed === 0 ? null : parsed;
-        if (parsed !== null && parsed > maxPrice) maxPrice = parsed;
+        if (variant.Type === "text") {
+          prices[variant.Key] = parsed === null || raw === "0" ? null : String(parsed);
+        } else {
+          // Pada kolom harga: "0", kosong, atau teks non-angka = varian tidak tersedia
+          prices[variant.Key] = parsed === null || parsed === 0 || typeof parsed === "string" ? null : parsed;
+          if (typeof parsed === "number" && parsed > maxPrice) maxPrice = parsed;
+        }
       }
       service.rows.set(modelKey, { DeviceModel: model, prices });
     }
@@ -300,10 +336,11 @@ export async function parseImportFile(
     if (errors.length > 0) return { merged: null, preview: emptyPreview() };
 
     // Seluruh harga kecil → file memakai satuan ribuan; konversi diam-diam (600 → 600.000).
+    // Hanya berlaku untuk nilai number pada kolom harga.
     if (maxPrice > 0 && maxPrice <= RIBUAN_THRESHOLD) {
       for (const dp of service.rows.values()) {
         for (const k of Object.keys(dp.prices)) {
-          if (dp.prices[k] !== null) dp.prices[k] = dp.prices[k]! * 1000;
+          if (typeof dp.prices[k] === "number") dp.prices[k] = (dp.prices[k] as number) * 1000;
         }
       }
     }
@@ -368,10 +405,10 @@ export async function parseImportFile(
       }
 
       const price = parsePrice(rawPrice);
-      if (price === null) {
+      if (price === null && rawPrice.trim() !== "" && rawPrice.trim() !== "-" && rawPrice.trim() !== "–" && rawPrice.trim() !== "---") {
         errors.push({
           row: rowNum,
-          message: `Harga "${rawPrice}" tidak valid — isi angka bulat ≥ 0 (varian yang tidak tersedia: hapus barisnya, jangan isi 0/kosong).`,
+          message: `Nilai "${rawPrice}" tidak valid.`,
         });
         continue;
       }
@@ -397,9 +434,15 @@ export async function parseImportFile(
           });
           continue;
         }
-        variant = { Key: variantKey, Label: rawVariant.toUpperCase(), Note: rawNote };
+        variant = {
+          Key: variantKey,
+          Label: rawVariant.toUpperCase(),
+          Note: rawNote,
+          ...(typeof price === "string" ? { Type: "text" as const } : {}),
+        };
         service.variants.push(variant);
       } else {
+        if (typeof price === "string") variant.Type = "text";
         if (variant.Label.toLowerCase() !== rawVariant.toLowerCase()) {
           warnings.push(
             `Baris ${rowNum}: varian "${rawVariant}" dianggap sama dengan "${variant.Label}" (${category.Name} / ${service.Name}).`

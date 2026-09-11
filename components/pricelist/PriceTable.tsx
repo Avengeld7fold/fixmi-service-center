@@ -87,6 +87,13 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
     if (!q) return service.device_prices;
     return service.device_prices.filter((d) => {
       if (d.DeviceModel.toLowerCase().includes(q)) return true;
+      if (
+        Object.values(d.prices).some(
+          (val) => typeof val === "string" && val.toLowerCase().includes(q)
+        )
+      ) {
+        return true;
+      }
       return service.variants.some(
         (v) =>
           v.Label.toLowerCase().includes(q) ||
@@ -271,20 +278,27 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                       {row.DeviceModel}
                     </td>
                     {variants.map((v) => {
-                      const price = row.prices[v.Key];
+                      const val = row.prices[v.Key];
+                      const isText = v.Type === "text" || typeof val === "string";
 
                       return (
                         <td
                           key={v.Key}
-                          className="border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap"
+                          className={`border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap ${
+                            isText ? "text-foreground font-normal" : ""
+                          }`}
                         >
-                          {price == null || price === 0 ? (
+                          {val == null || val === "" || val === 0 ? (
                             <span className="text-text-muted select-none">–</span>
+                          ) : isText ? (
+                            <span className="text-foreground/90 font-medium">
+                              {String(val)}
+                            </span>
                           ) : (
                             <>
                               <span className="mr-1.5 text-[0.6875rem] text-primary/80">Rp</span>
                               <span className="text-primary font-medium">
-                                {formatThousands(price)}
+                                {formatThousands(val as number)}
                               </span>
                             </>
                           )}
