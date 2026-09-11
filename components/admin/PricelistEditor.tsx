@@ -211,9 +211,11 @@ export default function PricelistEditor({
       setOpenSeries(null);
     }
 
-    // Jika user sedang scroll jauh ke bawah melampaui area tab, kembalikan pandangan dengan nyaman ke area tab
-    if (typeof window !== "undefined" && window.scrollY > 350) {
-      window.scrollTo({ top: 120, behavior: "smooth" });
+    // Pertahankan posisi scroll saat ini agar tidak melompat atau reset ke judul
+    if (typeof window !== "undefined") {
+      const currentY = window.scrollY;
+      sessionStorage.setItem("fixmi_admin_scroll_y", String(currentY));
+      sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, String(currentY));
     }
   };
 
@@ -713,6 +715,7 @@ export default function PricelistEditor({
             return (
               <button
                 key={c.Slug}
+                type="button"
                 role="tab"
                 aria-selected={active}
                 onClick={() => handleSelectCategory(c.Slug)}
