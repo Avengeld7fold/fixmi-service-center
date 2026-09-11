@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Plus, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
@@ -56,7 +56,6 @@ export default function PricelistEditor({
   initialCategorySlug?: string;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const slugs = categories.map((c) => c.Slug);
 
   const [baseline, setBaseline] = useState(() => JSON.stringify(categories));
@@ -141,7 +140,8 @@ export default function PricelistEditor({
       if (t3) clearTimeout(t3);
       clearTimeout(tRestore);
     };
-  }, [activeSlug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 2. Simpan posisi scroll secara real-time saat user melakukan scroll
   useEffect(() => {
@@ -187,12 +187,15 @@ export default function PricelistEditor({
     }
   }, [activeSlug, openSvcSlugs, openBrand, openSeries]);
 
-  // Navigasi tab kategori secara mulus dengan Next.js Router (zero lag & update URL otomatis)
-  const handleSelectCategory = (slug: string) => {
+  // Navigasi tab kategori secara instan & mulus (zero lag, zero glitch, zero flickering)
+  const handleSelectCategory = (slug: string, shouldPushState = true) => {
     if (slug === activeSlug) return;
-    isRestoredRef.current = false;
     setActiveSlug(slug);
-    router.push(`/admin/pricelist/${slug}`, { scroll: false });
+
+    // Update URL di browser secara shallow tanpa memicu network roundtrip RSC atau re-render server
+    if (shouldPushState && typeof window !== "undefined") {
+      window.history.pushState(null, "", `/admin/pricelist/${slug}`);
+    }
 
     // Pulihkan state layanan yang terbuka untuk kategori yang baru dipilih dari sessionStorage
     try {
@@ -208,53 +211,25 @@ export default function PricelistEditor({
       setOpenSeries(null);
     }
 
-    // Reset posisi scroll untuk kategori baru agar mulai dari atas
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("fixmi_admin_scroll_y", "0");
-      sessionStorage.setItem(`fixmi_admin_scroll_y_${slug}`, "0");
-      window.scrollTo({ top: 0, behavior: "instant" });
+    // Jika user sedang scroll jauh ke bawah melampaui area tab, kembalikan pandangan dengan nyaman ke area tab
+    if (typeof window !== "undefined" && window.scrollY > 350) {
+      window.scrollTo({ top: 120, behavior: "smooth" });
     }
-
-    setTimeout(() => {
-      isRestoredRef.current = true;
-    }, 100);
   };
 
-  // Dengarkan perubahan URL / pathname (misal tombol Back / Forward browser)
+  // Tangani tombol Back / Forward browser tanpa memicu flickering
   useEffect(() => {
-    const parts = pathname.split("/").filter(Boolean);
-    const last = parts[parts.length - 1];
-    if (last && slugs.includes(last) && last !== activeSlug) {
-      isRestoredRef.current = false;
-      setActiveSlug(last);
-      try {
-        const storedSvcs = sessionStorage.getItem(`fixmi_admin_open_svcs_${last}`);
-        setOpenSvcSlugs(storedSvcs ? new Set(JSON.parse(storedSvcs)) : new Set());
-        const storedBrand = sessionStorage.getItem(`fixmi_admin_brand_${last}`);
-        setOpenBrand(storedBrand || null);
-        const storedSeries = sessionStorage.getItem(`fixmi_admin_series_${last}`);
-        setOpenSeries(storedSeries || null);
-      } catch {
-        setOpenSvcSlugs(new Set());
-        setOpenBrand(null);
-        setOpenSeries(null);
+    const handlePopState = () => {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const last = parts[parts.length - 1];
+      if (last && slugs.includes(last) && last !== activeSlug) {
+        handleSelectCategory(last, false);
       }
-
-      if (typeof window !== "undefined") {
-        const savedY = sessionStorage.getItem(`fixmi_admin_scroll_y_${last}`);
-        if (savedY) {
-          const targetY = parseInt(savedY, 10);
-          if (!isNaN(targetY) && targetY > 0) {
-            window.scrollTo({ top: targetY, behavior: "instant" });
-          }
-        }
-      }
-
-      setTimeout(() => {
-        isRestoredRef.current = true;
-      }, 100);
-    }
-  }, [pathname, slugs, activeSlug]);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slugs, activeSlug]);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -881,7 +856,7 @@ export default function PricelistEditor({
         />
 
         {/* ── Daftar Layanan Aktif ── */}
-        <div key={activeCategory.Slug} className="fade-rise space-y-6">
+        <div className="space-y-6">
           {(() => {
             const list = activeCategory.service_types;
             const branded = list.filter((s) => s.Brand);
