@@ -95,14 +95,11 @@ export default async function CategoryAdminPricelistPage({ params }: PageProps) 
               Perubahan langsung aktif di website tanpa perlu build ulang.
             </p>
           </div>
-
-          {/* Panel Impor & Riwayat Backup */}
-          <div className="flex flex-wrap items-center gap-3">
-            <ImportPanel categories={importDestinations} />
-            <BackupPanel backups={backups} />
-          </div>
         </div>
       </header>
+
+      {/* Panel Impor Data Excel / CSV */}
+      <ImportPanel categories={importDestinations} />
 
       {/* Editor Tab per Kategori */}
       <PricelistEditor
@@ -110,6 +107,9 @@ export default async function CategoryAdminPricelistPage({ params }: PageProps) 
         categories={categories}
         initialCategorySlug={targetCategory.Slug}
       />
+
+      {/* Riwayat Cadangan Data (Backup) */}
+      <BackupPanel backups={backups} />
     </div>
   );
 }
