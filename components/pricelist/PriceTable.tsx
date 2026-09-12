@@ -382,7 +382,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                             </span>
                           ) : (
                             <>
-                              <span className="mr-1.5 text-primary font-bold font-instrument">Rp</span>
+                              <span className="mr-1.5 text-primary font-bold font-instrument">Rp.</span>
                               <span className="text-primary font-bold font-instrument">
                                 {formatThousands(val as number)}
                               </span>
