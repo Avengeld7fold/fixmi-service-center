@@ -192,29 +192,29 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             <thead>
               <tr>
                 <th
-                  className={`sticky left-0 z-30 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r px-3 lg:px-4 pb-3 pt-2 text-center align-middle ${
+                  className={`sticky left-0 z-30 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r px-3 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
                     sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                   }`}
                 >
-                  <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
+                  <span className="block font-instrument text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                     {getLocalizedServiceName(service, locale)}
                   </span>
-                  <span className="mt-0.5 block text-[0.625rem] font-normal tracking-wide text-text-muted text-center">
+                  <span className="mt-0.5 block font-instrument text-[0.625rem] font-normal tracking-wide text-text-muted text-center">
                     {categoryName} {isEn ? "Models" : "Model"}
                   </span>
                 </th>
                 {variants.map((v) => (
                   <th
                     key={v.Key}
-                    className={`border-b px-3 lg:px-4 pb-3 pt-2 text-center align-middle ${
+                    className={`border-b px-3 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
                       sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                     }`}
                   >
-                    <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
+                    <span className="block font-instrument text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                       {getLocalizedVariantLabel(v, locale)}
                     </span>
                     {v.Note && (
-                      <span className="mt-0.5 block text-[0.625rem] font-normal normal-case tracking-wide text-text-muted text-center">
+                      <span className="mt-0.5 block font-instrument text-[0.625rem] font-normal normal-case tracking-wide text-text-muted text-center">
                         {getLocalizedVariantNote(v.Note, locale)}
                       </span>
                     )}
