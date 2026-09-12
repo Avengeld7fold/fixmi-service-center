@@ -62,7 +62,7 @@ export const STORES: Store[] = [
   },
   {
     key: "denpasar",
-    role: "Cabang Denpasar",
+    role: "Partner Store Denpasar",
     name: "Mobicare Service Center",
     region: "Denpasar Barat",
     address:

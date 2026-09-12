@@ -386,7 +386,7 @@ export const idDictionary: Dictionary = {
       "Tiga gerai di Bali. Pilih lokasi untuk alamat lengkap, jam buka, dan arahkan rute langsung dari peta.",
     headStore: "Toko Utama",
     branchStore: "Cabang Jimbaran",
-    otherStore: "Cabang Denpasar",
+    otherStore: "Partner Store Denpasar",
     headStoreRegion: "Kedonganan · Badung",
     branchStoreRegion: "Jimbaran · Badung",
     otherStoreRegion: "Denpasar Barat",

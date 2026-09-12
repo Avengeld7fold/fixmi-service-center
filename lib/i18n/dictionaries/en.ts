@@ -386,7 +386,7 @@ export const enDictionary: Dictionary = {
       "Three service centers across Bali. Select a location for full address, opening hours, and direct navigation.",
     headStore: "Main Store",
     branchStore: "Jimbaran Branch",
-    otherStore: "Denpasar Branch",
+    otherStore: "Partner Store Denpasar",
     headStoreRegion: "Kedonganan · Badung",
     branchStoreRegion: "Jimbaran · Badung",
     otherStoreRegion: "West Denpasar",
