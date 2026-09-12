@@ -155,6 +155,7 @@ export async function getPricelist(): Promise<Category[]> {
             Label: v.Label,
             ...(v.Label_en ? { Label_en: v.Label_en } : {}),
             Note: v.Note || "",
+            ...(v.Type ? { Type: v.Type } : {}),
           })),
           device_prices: s.device_prices as DevicePrice[],
           title: (typeof s.title === "string" && s.title.trim()) ? s.title.trim() : s.Name,

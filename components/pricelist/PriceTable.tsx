@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MoveLeft, MoveRight, Search, X, MessageCircle } from "lucide-react";
 import { formatThousands, type ServiceType } from "@/lib/data";
 import { whatsappUrl } from "@/lib/constants";
@@ -105,9 +105,42 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
 
   const variants = service.variants;
 
+  const isSeriesCol = useCallback(
+    (v: { Key: string; Label: string; Type?: string }) => {
+      const k = v.Key.toLowerCase();
+      const l = v.Label.toLowerCase();
+      if (
+        k.includes("series") ||
+        l.includes("series") ||
+        k.includes("model") ||
+        l.includes("model")
+      ) {
+        return true;
+      }
+      return service.device_prices.some((d) => {
+        const val = d.prices[v.Key];
+        return (
+          typeof val === "string" &&
+          (val.includes("/") || /^A\d{3,4}/.test(val.trim()))
+        );
+      });
+    },
+    [service.device_prices]
+  );
+
   const tableMinWidth = useMemo(() => {
-    return `max(100%, calc(9.5rem + ${variants.length} * 7.5rem))`;
-  }, [variants.length]);
+    let remSum = 9.5;
+    for (const v of variants) {
+      if (isSeriesCol(v)) {
+        remSum += 13.5;
+      } else if (v.Type === "text") {
+        remSum += 8.5;
+      } else {
+        remSum += 8.0;
+      }
+    }
+    return `max(100%, ${remSum}rem)`;
+  }, [variants, isSeriesCol]);
 
   return (
     <div className="pt-4">
@@ -186,7 +219,16 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             <colgroup>
               <col className="w-[9.5rem] lg:w-[13.5rem]" />
               {variants.map((v) => (
-                <col key={v.Key} />
+                <col
+                  key={v.Key}
+                  className={
+                    isSeriesCol(v)
+                      ? "w-[13.5rem] lg:w-[16rem]"
+                      : v.Type === "text"
+                      ? "w-[8.5rem] lg:w-[10.5rem]"
+                      : "w-[8rem] lg:w-[10rem]"
+                  }
+                />
               ))}
             </colgroup>
             <thead>
@@ -210,11 +252,11 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                       sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                     }`}
                   >
-                    <span className="block font-instrument text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
+                    <span className="block font-instrument text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center leading-snug">
                       {getLocalizedVariantLabel(v, locale)}
                     </span>
                     {v.Note && (
-                      <span className="mt-0.5 block font-instrument text-[0.625rem] font-normal normal-case tracking-wide text-text-muted text-center">
+                      <span className="mt-0.5 block font-instrument text-[0.625rem] font-normal normal-case tracking-wide text-text-muted text-center leading-tight">
                         {getLocalizedVariantNote(v.Note, locale)}
                       </span>
                     )}
@@ -239,7 +281,16 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             <colgroup>
               <col className="w-[9.5rem] lg:w-[13.5rem]" />
               {variants.map((v) => (
-                <col key={v.Key} />
+                <col
+                  key={v.Key}
+                  className={
+                    isSeriesCol(v)
+                      ? "w-[13.5rem] lg:w-[16rem]"
+                      : v.Type === "text"
+                      ? "w-[8.5rem] lg:w-[10.5rem]"
+                      : "w-[8rem] lg:w-[10rem]"
+                  }
+                />
               ))}
             </colgroup>
             <tbody>
@@ -296,17 +347,35 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                     </td>
                     {variants.map((v) => {
                       const val = row.prices[v.Key];
+                      const isSeries = isSeriesCol(v);
                       const isText = v.Type === "text" || typeof val === "string";
 
                       return (
                         <td
                           key={v.Key}
-                          className={`border-b px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap ${
+                          className={`border-b px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums ${
                             sub ? "border-[#262626]" : "border-panel-border/60"
-                          } ${isText ? "text-foreground font-normal" : ""}`}
+                          } ${isSeries ? "whitespace-normal" : "whitespace-nowrap"} ${
+                            isText ? "text-foreground font-normal" : ""
+                          }`}
                         >
                           {val == null || val === "" || val === 0 ? (
                             <span className="text-text-muted select-none">–</span>
+                          ) : isSeries && typeof val === "string" ? (
+                            <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 py-0.5">
+                              {val
+                                .split(/[/,]/)
+                                .map((c) => c.trim())
+                                .filter(Boolean)
+                                .map((code) => (
+                                  <span
+                                    key={code}
+                                    className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.7rem] sm:text-xs font-medium text-neutral-200 shadow-sm"
+                                  >
+                                    {code}
+                                  </span>
+                                ))}
+                            </div>
                           ) : isText ? (
                             <span className="text-foreground/90 font-medium">
                               {String(val)}
