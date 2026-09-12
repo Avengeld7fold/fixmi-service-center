@@ -397,6 +397,7 @@ export const enDictionary: Dictionary = {
     openHoursLabel: "Opening Hours",
     hoursMonSat: "Monday – Saturday 09:00 AM – 09:00 PM WITA",
     hoursSun: "Sunday Closed",
+    hoursDaily: "Every Day 09:00 AM – 10:00 PM WITA",
     directContactLabel: "Contact & Consultation",
     locationLabel: "Address",
     routeBtn: "Directions",

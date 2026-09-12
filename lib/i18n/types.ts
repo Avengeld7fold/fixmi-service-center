@@ -248,6 +248,7 @@ export interface Dictionary {
     openHoursLabel: string;
     hoursMonSat: string;
     hoursSun: string;
+    hoursDaily: string;
     directContactLabel: string;
     locationLabel: string;
     routeBtn: string;

@@ -397,6 +397,7 @@ export const idDictionary: Dictionary = {
     openHoursLabel: "Jam Buka",
     hoursMonSat: "Senin – Sabtu 09.00 – 21.00 WITA",
     hoursSun: "Minggu Tutup",
+    hoursDaily: "Setiap Hari 09.00 – 22.00 WITA",
     directContactLabel: "Kontak & Konsultasi",
     locationLabel: "Alamat",
     routeBtn: "Rute",

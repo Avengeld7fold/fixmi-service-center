@@ -67,14 +67,14 @@ export const STORES: Store[] = [
     region: "Denpasar Barat",
     address:
       "Cellular World Arena, Jl. Teuku Umar No. 57, Dauh Puri Kauh, Kec. Denpasar Barat, Kota Denpasar, Bali 80113",
-    phone: "0819-9933-6722",
-    hours: "Senin – Sabtu 09.00 – 21.00 WITA · Minggu Tutup",
+    phone: "+62 899-1099-999",
+    hours: "Setiap Hari 09.00 – 22.00 WITA",
     map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
     lat: -8.67049674423244,
     lng: 115.209545433761,
     openHour: 9,
-    closeHourWeekday: 21,
-    closeHourSunday: 0,
+    closeHourWeekday: 22,
+    closeHourSunday: 22,
   },
 ];
 

@@ -7,9 +7,9 @@ import { STORES, mapDirectionsUrl, mapSearchUrl } from "@/lib/stores";
 import { getStoreLiveStatus } from "@/lib/storeStatus";
 import { useI18n } from "@/lib/i18n/context";
 
-/** 0819-9933-6722 → tel:+6281999336722 */
+/** 0819-9933-6722 / +62 899-1099-999 → tel:+62... */
 const telHref = (phone: string) =>
-  `tel:+62${phone.replace(/[^0-9]/g, "").replace(/^0/, "")}`;
+  `tel:+62${phone.replace(/[^0-9]/g, "").replace(/^(?:62|0)/, "")}`;
 
 export default function StoreLocator() {
   const { dict } = useI18n();
@@ -22,6 +22,7 @@ export default function StoreLocator() {
       role: dict.locale === "en" ? "Headquarters & Central Workshop" : "Pusat & Workshop Utama",
       region: dict.footer.headStoreRegion,
       hoursDisplay: dict.footer.hoursMonSat,
+      hoursSub: dict.footer.hoursSun,
     },
     {
       ...STORES[1],
@@ -29,13 +30,15 @@ export default function StoreLocator() {
       role: dict.locale === "en" ? "South Bali Branch" : "Gerai Bali Selatan",
       region: dict.footer.branchStoreRegion,
       hoursDisplay: dict.footer.hoursMonSat,
+      hoursSub: dict.footer.hoursSun,
     },
     {
       ...STORES[2],
       name: dict.footer.otherStore,
       role: dict.locale === "en" ? "Express Workshop & Service Point" : "Gerai & Service Point",
       region: dict.footer.otherStoreRegion,
-      hoursDisplay: dict.footer.hoursMonSat,
+      hoursDisplay: dict.footer.hoursDaily,
+      hoursSub: undefined,
     },
   ];
 
@@ -135,7 +138,10 @@ export default function StoreLocator() {
                   >
                     <Clock className="h-4 w-4 shrink-0 text-neutral-400" aria-hidden="true" />
                     <span>
-                      {s.hoursDisplay} · <span className="text-neutral-400">{dict.footer.hoursSun}</span>
+                      {s.hoursDisplay}
+                      {s.hoursSub ? (
+                        <> · <span className="text-neutral-400">{s.hoursSub}</span></>
+                      ) : null}
                     </span>
                   </p>
                 </div>

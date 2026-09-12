@@ -21,13 +21,12 @@ interface Store {
   address: string;
   phone: string;
   map: string;
+  hours: string[];
+  timings: { openHour: number; closeHourWeekday: number; closeHourSunday: number };
 }
 
 const ORDER: StoreKey[] = ["head", "branch", "other"];
 const DISPLAY = "var(--font-bayon), sans-serif";
-
-// ponytail: shared store operating hours configuration (identical across all branches)
-const STORE_TIMINGS = { openHour: 9, closeHourWeekday: 21, closeHourSunday: 0 } as const;
 
 const SOCIALS = [
   {
@@ -56,7 +55,6 @@ export default function Footer() {
 
   const isEn = locale === "en";
 
-  // ponytail: removed dead city property from Store interface & objects
   const STORES: Record<StoreKey, Store> = {
     head: {
       name: "FIXMI Service Center",
@@ -68,6 +66,8 @@ export default function Footer() {
         "Link. Kubu Alit Kedonganan, Jl. Raya Uluwatu, Kedonganan, Kec. Kuta, Kabupaten Badung, Bali 80361",
       phone: "0819-9933-6722",
       map: "Fixmi Service Center Kedonganan Jl Raya Uluwatu Bali 80361",
+      hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
+      timings: { openHour: 9, closeHourWeekday: 21, closeHourSunday: 0 },
     },
     branch: {
       name: "FIXMI Taman Griya",
@@ -79,6 +79,8 @@ export default function Footer() {
         "Taman Griya, Jl. Nuansa Utama No. 33, Jimbaran, Kuta Selatan, Kabupaten Badung, Bali 80361",
       phone: "0851-2357-9557",
       map: "Fixmi Service Center Phone Taman Griya Jl Nuansa Utama Jimbaran Bali",
+      hours: [dict.footer.hoursMonSat, dict.footer.hoursSun],
+      timings: { openHour: 9, closeHourWeekday: 21, closeHourSunday: 0 },
     },
     other: {
       name: "Mobicare by FIXMI",
@@ -88,8 +90,10 @@ export default function Footer() {
       reviews: "310+",
       address:
         "Cellular World Arena, Jl. Teuku Umar No. 57, Dauh Puri Kauh, Kec. Denpasar Barat, Kota Denpasar, Bali 80113",
-      phone: "0819-9933-6722",
+      phone: "+62 899-1099-999",
       map: "Mobicare Service Center Cellular World Arena Jl Teuku Umar Denpasar Bali",
+      hours: [dict.footer.hoursDaily],
+      timings: { openHour: 9, closeHourWeekday: 22, closeHourSunday: 22 },
     },
   };
 
@@ -97,38 +101,42 @@ export default function Footer() {
   const q = encodeURIComponent(s.map);
 
   const waLink = (phone: string) => {
-    const cleanPhone = "62" + phone.replace(/[^0-9]/g, "").replace(/^0/, "");
+    const cleanPhone = "62" + phone.replace(/[^0-9]/g, "").replace(/^(?:62|0)/, "");
     const msg = isEn
       ? `Hello FIXMI Service Center, I would like to consult about gadget repair:\n\n• Device Model: \n• Issue / Damage: `
       : `Halo FIXMI Service Center, saya mau konsultasi perbaikan gadget:\n\n• Tipe Gadget: \n• Kendala / Kerusakan: `;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   };
 
-  // ponytail: calculate real-time status 1x centrally instead of repeatedly inside loop
-  const live = getStoreLiveStatus(STORE_TIMINGS);
-  const statusBadge = live.isHoliday
-    ? {
+  const getBadge = (timings: { openHour: number; closeHourWeekday: number; closeHourSunday: number }) => {
+    const live = getStoreLiveStatus(timings);
+    if (live.isHoliday) {
+      return {
         text: dict.footer.openStatusHoliday,
         badgeClass: "text-amber-400 bg-amber-500/10 border-amber-500/25",
         dotClass: "bg-amber-400",
-      }
-    : live.statusType === "open"
-    ? {
+      };
+    }
+    if (live.statusType === "open") {
+      return {
         text: dict.footer.openStatusOpen,
         badgeClass: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
         dotClass: "bg-emerald-400 shadow-[0_0_8px_#34d399]",
-      }
-    : live.statusType === "closing_soon"
-    ? {
+      };
+    }
+    if (live.statusType === "closing_soon") {
+      return {
         text: dict.footer.openStatusClosingSoon,
         badgeClass: "text-amber-400 bg-amber-500/10 border-amber-500/25",
         dotClass: "bg-amber-400 shadow-[0_0_8px_#f59e0b] animate-pulse",
-      }
-    : {
-        text: dict.footer.openStatusClosed,
-        badgeClass: "text-neutral-400 bg-neutral-800/60 border-white/[0.08]",
-        dotClass: "bg-neutral-500",
       };
+    }
+    return {
+      text: dict.footer.openStatusClosed,
+      badgeClass: "text-neutral-400 bg-neutral-800/60 border-white/[0.08]",
+      dotClass: "bg-neutral-500",
+    };
+  };
 
   return (
     <footer className="border-t border-white/[0.08] bg-[#121212] text-neutral-300">
@@ -172,6 +180,7 @@ export default function Footer() {
                 {ORDER.map((key) => {
                   const st = STORES[key];
                   const on = key === active;
+                  const statusBadge = getBadge(st.timings);
 
                   return (
                     <button
@@ -276,8 +285,9 @@ export default function Footer() {
                     {dict.footer.openHoursLabel}
                   </dt>
                   <dd className="space-y-1 text-sm leading-relaxed text-neutral-300">
-                    <div>{dict.footer.hoursMonSat}</div>
-                    <div>{dict.footer.hoursSun}</div>
+                    {s.hours.map((h, i) => (
+                      <div key={i}>{h}</div>
+                    ))}
                   </dd>
                 </div>
               </dl>
