@@ -129,7 +129,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
   );
 
   const tableMinWidth = useMemo(() => {
-    let remSum = 9.5;
+    let remSum = 11.5;
     for (const v of variants) {
       if (isSeriesCol(v)) {
         remSum += 13.5;
@@ -217,7 +217,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             style={{ minWidth: tableMinWidth }}
           >
             <colgroup>
-              <col className="w-[9.5rem] lg:w-[13.5rem]" />
+              <col className="w-[11.5rem] lg:w-[14.5rem]" />
               {variants.map((v) => (
                 <col
                   key={v.Key}
@@ -234,7 +234,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             <thead>
               <tr>
                 <th
-                  className={`sticky left-0 z-30 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r px-3 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
+                  className={`sticky left-0 z-30 w-[11.5rem] lg:w-[14.5rem] min-w-[11.5rem] lg:min-w-[14.5rem] max-w-[11.5rem] lg:max-w-[14.5rem] border-b border-r px-3.5 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
                     sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                   }`}
                 >
@@ -279,7 +279,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             style={{ minWidth: tableMinWidth }}
           >
             <colgroup>
-              <col className="w-[9.5rem] lg:w-[13.5rem]" />
+              <col className="w-[11.5rem] lg:w-[14.5rem]" />
               {variants.map((v) => (
                 <col
                   key={v.Key}
@@ -337,7 +337,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                     }`}
                   >
                     <td
-                      className={`sticky left-0 z-10 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r border-l-2 border-l-transparent px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:border-l-primary ${
+                      className={`sticky left-0 z-10 w-[11.5rem] lg:w-[14.5rem] min-w-[11.5rem] lg:min-w-[14.5rem] max-w-[11.5rem] lg:max-w-[14.5rem] border-b border-r border-l-2 border-l-transparent px-3.5 lg:px-4 py-3.5 text-xs sm:text-sm font-medium text-foreground leading-snug break-words transition-[colors,border-color] duration-200 group-hover:border-l-primary ${
                         sub
                           ? "border-[#262626] bg-[#161616] group-hover:bg-[#1E1E1E]"
                           : "border-panel-border/60 border-r-panel-border bg-panel group-hover:bg-panel-raised"
