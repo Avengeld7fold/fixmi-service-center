@@ -365,7 +365,7 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                             placeholder="–"
                             aria-label={`Nilai ${dp.DeviceModel || `baris ${originalIndex + 1}`} pilihan ${v.Label}`}
                             className={`w-full rounded-[6px] border border-transparent bg-transparent px-2 py-1.5 text-sm tabular-nums outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:bg-background ${
-                              isText ? "font-mono text-center text-foreground font-normal" : "font-instrument text-right text-primary font-medium"
+                              isText ? "font-mono text-center text-foreground font-normal" : "font-instrument text-right text-primary font-semibold"
                             }`}
                           />
                         </td>
