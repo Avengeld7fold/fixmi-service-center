@@ -14,9 +14,10 @@ import {
 interface PriceTableProps {
   service: ServiceType;
   categoryName: string;
+  sub?: boolean;
 }
 
-export default function PriceTable({ service, categoryName }: PriceTableProps) {
+export default function PriceTable({ service, categoryName, sub = false }: PriceTableProps) {
   const { dict, locale } = useI18n();
   const isEn = locale === "en";
   const [query, setQuery] = useState("");
@@ -123,7 +124,9 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={dict.pricelist.searchPlaceholder}
             aria-label={dict.pricelist.searchPlaceholder}
-            className="w-full rounded-[12px] border border-panel-border bg-background py-2.5 pl-9 pr-9 text-sm text-foreground placeholder:text-text-muted outline-none transition-[border-color,box-shadow] duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+            className={`w-full rounded-[12px] border py-2.5 pl-9 pr-9 text-sm text-foreground placeholder:text-text-muted outline-none transition-[border-color,box-shadow] duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden ${
+              sub ? "border-[#282828] bg-[#121212]" : "border-panel-border bg-background"
+            }`}
           />
           {query && (
             <button
@@ -188,7 +191,11 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
             </colgroup>
             <thead>
               <tr>
-                <th className="sticky left-0 z-30 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 text-center align-middle">
+                <th
+                  className={`sticky left-0 z-30 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r px-3 lg:px-4 pb-3 pt-2 text-center align-middle ${
+                    sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
+                  }`}
+                >
                   <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                     {getLocalizedServiceName(service, locale)}
                   </span>
@@ -199,7 +206,9 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                 {variants.map((v) => (
                   <th
                     key={v.Key}
-                    className="border-b border-panel-border bg-panel px-3 lg:px-4 pb-3 pt-2 text-center align-middle"
+                    className={`border-b px-3 lg:px-4 pb-3 pt-2 text-center align-middle ${
+                      sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
+                    }`}
                   >
                     <span className="block font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                       {getLocalizedVariantLabel(v, locale)}
@@ -272,9 +281,17 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                 rows.map((row) => (
                   <tr
                     key={row.DeviceModel}
-                    className="group transition-colors hover:bg-panel-raised"
+                    className={`group transition-colors ${
+                      sub ? "hover:bg-[#1E1E1E]" : "hover:bg-panel-raised"
+                    }`}
                   >
-                    <td className="sticky left-0 z-10 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-panel-border/60 border-r border-panel-border border-l-2 border-l-transparent bg-panel px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:bg-panel-raised group-hover:border-l-primary">
+                    <td
+                      className={`sticky left-0 z-10 w-[9.5rem] lg:w-[13.5rem] min-w-[9.5rem] lg:min-w-[13.5rem] max-w-[9.5rem] lg:max-w-[13.5rem] border-b border-r border-l-2 border-l-transparent px-3 lg:px-4 py-3.5 text-sm font-medium text-foreground whitespace-nowrap transition-[colors,border-color] duration-200 group-hover:border-l-primary ${
+                        sub
+                          ? "border-[#262626] bg-[#161616] group-hover:bg-[#1E1E1E]"
+                          : "border-panel-border/60 border-r-panel-border bg-panel group-hover:bg-panel-raised"
+                      }`}
+                    >
                       {row.DeviceModel}
                     </td>
                     {variants.map((v) => {
@@ -284,9 +301,9 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                       return (
                         <td
                           key={v.Key}
-                          className={`border-b border-panel-border/60 px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap ${
-                            isText ? "text-foreground font-normal" : ""
-                          }`}
+                          className={`border-b px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums whitespace-nowrap ${
+                            sub ? "border-[#262626]" : "border-panel-border/60"
+                          } ${isText ? "text-foreground font-normal" : ""}`}
                         >
                           {val == null || val === "" || val === 0 ? (
                             <span className="text-text-muted select-none">–</span>
@@ -315,9 +332,9 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
         {/* Gradien fade tepi kanan */}
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 right-0 z-40 w-10 bg-gradient-to-l from-panel to-transparent transition-opacity duration-300 ${
-            canRight ? "opacity-100" : "opacity-0"
-          }`}
+          className={`pointer-events-none absolute inset-y-0 right-0 z-40 w-10 transition-opacity duration-300 ${
+            sub ? "bg-gradient-to-l from-[#161616] to-transparent" : "bg-gradient-to-l from-panel to-transparent"
+          } ${canRight ? "opacity-100" : "opacity-0"}`}
         />
       </div>
     </div>

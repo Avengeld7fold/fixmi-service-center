@@ -74,7 +74,11 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
           <div
             key={service.Slug}
             data-reveal
-            className="overflow-hidden rounded-[10px] lg:rounded-[12px] border border-panel-border bg-panel"
+            className={`overflow-hidden rounded-[10px] lg:rounded-[12px] border transition-colors duration-300 ease-out ${
+              sub && open
+                ? "border-[#2A2A2A] bg-[#161616]"
+                : "border-panel-border bg-panel"
+            }`}
           >
             <button
               id={btnId}
@@ -82,9 +86,17 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
               onClick={() => toggle(service.Slug)}
               aria-expanded={open}
               aria-controls={panelId}
-              className="group flex min-h-[3.5rem] lg:min-h-[4.5rem] w-full items-center gap-3 lg:gap-4 px-3.5 lg:px-5 text-left outline-none transition-colors hover:bg-panel-raised focus-visible:bg-panel-raised"
+              className={`group flex min-h-[3.5rem] lg:min-h-[4.5rem] w-full items-center gap-3 lg:gap-4 px-3.5 lg:px-5 text-left outline-none transition-colors ${
+                sub && open
+                  ? "hover:bg-[#1A1A1A] focus-visible:bg-[#1A1A1A]"
+                  : "hover:bg-panel-raised focus-visible:bg-panel-raised"
+              }`}
             >
-              <span className="flex h-9 w-9 lg:h-11 lg:w-11 shrink-0 items-center justify-center rounded-[8px] lg:rounded-[10px] bg-panel-raised transition-transform duration-300 ease-out group-hover:scale-105">
+              <span
+                className={`flex h-9 w-9 lg:h-11 lg:w-11 shrink-0 items-center justify-center rounded-[8px] lg:rounded-[10px] transition-transform duration-300 ease-out group-hover:scale-105 ${
+                  sub && open ? "bg-[#1E1E1E]" : "bg-panel-raised"
+                }`}
+              >
                 <ServiceIcon name={service.icon} className="h-[1.125rem] w-[1.125rem] lg:h-5 lg:w-5 text-primary" />
               </span>
               <span className="flex-1 text-sm lg:text-base font-medium text-foreground">
@@ -112,8 +124,12 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
             >
               <div className="overflow-hidden">
                 {hasBeenOpened && (
-                  <div className="border-t border-panel-border px-2 pb-2.5 lg:px-5 lg:pb-5">
-                    <PriceTable service={service} categoryName={categoryName} />
+                  <div
+                    className={`px-2 pb-2.5 lg:px-5 lg:pb-5 ${
+                      sub && open ? "border-t border-[#242424]" : "border-t border-panel-border"
+                    }`}
+                  >
+                    <PriceTable service={service} categoryName={categoryName} sub={sub} />
                   </div>
                 )}
               </div>
