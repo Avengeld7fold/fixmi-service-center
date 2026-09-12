@@ -297,7 +297,7 @@ export default function PriceTable({ service, categoryName }: PriceTableProps) {
                           ) : (
                             <>
                               <span className="mr-1.5 text-[0.6875rem] text-primary/80">Rp</span>
-                              <span className="text-primary font-medium">
+                              <span className="text-primary font-medium font-instrument">
                                 {formatThousands(val as number)}
                               </span>
                             </>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Bayon } from "next/font/google";
+import { Geist_Mono, Bayon, Instrument_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -17,6 +17,12 @@ const bayon = Bayon({
 const geistMono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
+});
+
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const neueMontreal = localFont({
@@ -208,7 +214,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} antialiased`}
+      className={`${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} ${instrumentSans.variable} antialiased`}
     >
       <head>
         <script

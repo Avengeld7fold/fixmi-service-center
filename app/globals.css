@@ -71,6 +71,7 @@
   --font-sans: var(--font-neue-montreal);
   --font-mono: var(--font-mono);
   --font-bayon: var(--font-bayon);
+  --font-instrument: var(--font-instrument-sans), sans-serif;
 }
 
 /* ============================
@@ -267,4 +268,9 @@ input[type="search"]::-webkit-search-results-decoration {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Utilitas font Instrument Sans eksklusif untuk angka nominal harga pricelist */
+.font-instrument {
+  font-family: var(--font-instrument-sans), sans-serif;
 }
