@@ -11,67 +11,78 @@ import {
   getLocalizedVariantNote,
 } from "@/lib/i18n/service-translation";
 
-const APPLE_SERIES_REGEX = /^A\d{4}[A-Z]?$/i;
-
-export function isAppleSeriesCode(str: string): boolean {
-  return APPLE_SERIES_REGEX.test(str.trim());
+export interface SmartTextSegment {
+  type: "text" | "badge";
+  value: string;
 }
 
-export function parseDeviceModel(deviceModel: string): {
-  name: string;
-  seriesCodes: string[];
-} {
-  if (!deviceModel) return { name: "", seriesCodes: [] };
-
-  // Rapikan karakter korup encoding (seperti ) menjadi en-dash
-  const normalizedModel = deviceModel.replace(/[\uFFFD\u00bf\u00ef]+/g, "–").trim();
-
-  // 1. Cek akhiran pemisah: " - A1534", " - A1150 / A1211", "(A1534)"
-  const trailingRegex = /\s*(?:[-–—]\s*|\(\s*)(A\d{4}[A-Z]?(?:\s*[/,]\s*A\d{4}[A-Z]?)*)\s*\)?$/i;
-  const match = normalizedModel.match(trailingRegex);
-
-  if (match && match.index !== undefined) {
-    const cleanName = normalizedModel.slice(0, match.index).trim();
-    const codes = match[1]
-      .split(/[/,]/)
-      .map((c) => c.trim().toUpperCase())
-      .filter((c) => APPLE_SERIES_REGEX.test(c));
-    return { name: cleanName, seriesCodes: codes };
+export function parseSmartText(text: string): SmartTextSegment[] {
+  if (!text) return [];
+  const cleanText = text.replace(/[\uFFFD\u00bf\u00ef]+/g, "–").trim();
+  const matches = Array.from(cleanText.matchAll(/\b(A\d{4}[A-Z]?)\b/gi));
+  if (matches.length === 0) {
+    return [{ type: "text", value: cleanText }];
   }
 
-  // 2. Cek kode AXXXX di dalam kurung di mana saja
-  const parenRegex = /\s*\((A\d{4}[A-Z]?(?:\s*[/,]\s*A\d{4}[A-Z]?)*)\)\s*/i;
-  const parenMatch = normalizedModel.match(parenRegex);
-  if (parenMatch) {
-    const cleanName = normalizedModel.replace(parenRegex, " ").replace(/\s+/g, " ").trim();
-    const codes = parenMatch[1]
-      .split(/[/,]/)
-      .map((c) => c.trim().toUpperCase())
-      .filter((c) => APPLE_SERIES_REGEX.test(c));
-    return { name: cleanName, seriesCodes: codes };
+  const segments: SmartTextSegment[] = [];
+  let lastIdx = 0;
+
+  for (const m of matches) {
+    const start = m.index ?? 0;
+    const end = start + m[0].length;
+    if (start > lastIdx) {
+      const before = cleanText.slice(lastIdx, start);
+      const beforeCleaned = before.replace(/^\s*[-–—/,\s]+|[-–—/,\s]+$/g, "").trim();
+      if (beforeCleaned) {
+        segments.push({ type: "text", value: beforeCleaned });
+      }
+    }
+    segments.push({ type: "badge", value: m[0].toUpperCase() });
+    lastIdx = end;
   }
 
-  // 3. Fallback: cari semua kode berformat AXXXX yang berdiri sendiri
-  const allCodes = Array.from(normalizedModel.matchAll(/\b(A\d{4}[A-Z]?)\b/gi), (m) => m[1].toUpperCase());
-  if (allCodes.length > 0) {
-    const cleanName = normalizedModel
-      .replace(/\s*(?:[-–—]\s*)?(?:\bA\d{4}[A-Z]?\b(?:\s*[/,]\s*)?)+\s*/gi, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    return { name: cleanName || normalizedModel, seriesCodes: allCodes };
+  if (lastIdx < cleanText.length) {
+    const after = cleanText.slice(lastIdx);
+    const afterCleaned = after.replace(/^\s*[-–—/,\s]+|[-–—/,\s]+$/g, "").trim();
+    if (afterCleaned) {
+      segments.push({ type: "text", value: afterCleaned });
+    }
   }
 
-  return { name: normalizedModel, seriesCodes: [] };
+  return segments;
 }
 
-export function parseSeriesCodes(raw: string): {
-  hasAnySeries: boolean;
-  tokens: string[];
-} {
-  const parts = raw.split(/[/,]/).map((p) => p.trim()).filter(Boolean);
-  if (parts.length === 0) return { hasAnySeries: false, tokens: [] };
-  const hasAnySeries = parts.some((p) => APPLE_SERIES_REGEX.test(p));
-  return { hasAnySeries, tokens: parts };
+function SmartCell({
+  text,
+  align = "center",
+}: {
+  text: string;
+  align?: "left" | "center";
+}) {
+  const segments = parseSmartText(text);
+
+  return (
+    <span
+      className={`inline-flex flex-wrap items-center gap-x-1.5 gap-y-1 ${
+        align === "center" ? "justify-center text-center" : "justify-start text-left"
+      }`}
+    >
+      {segments.map((s, idx) =>
+        s.type === "badge" ? (
+          <span
+            key={idx}
+            className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.6875rem] sm:text-xs font-medium text-neutral-200 shadow-sm shrink-0"
+          >
+            {s.value}
+          </span>
+        ) : (
+          <span key={idx} className="font-medium text-foreground">
+            {s.value}
+          </span>
+        )
+      )}
+    </span>
+  );
 }
 
 interface PriceTableProps {
@@ -172,7 +183,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
     (v: { Key: string; Label: string; Type?: string }) => {
       return service.device_prices.some((d) => {
         const val = d.prices[v.Key];
-        return typeof val === "string" && parseSeriesCodes(val).hasAnySeries;
+        return typeof val === "string" && /\bA\d{4}[A-Z]?\b/i.test(val);
       });
     },
     [service.device_prices]
@@ -393,31 +404,12 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                           : "border-panel-border/60 border-r-panel-border bg-panel group-hover:bg-panel-raised"
                       }`}
                     >
-                      {(() => {
-                        const parsed = parseDeviceModel(row.DeviceModel);
-                        return parsed.seriesCodes.length > 0 ? (
-                          <span className="font-medium text-foreground">
-                            {parsed.name}
-                            {parsed.seriesCodes.map((code) => (
-                              <span
-                                key={code}
-                                className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.6875rem] sm:text-xs font-medium text-neutral-200 shadow-sm align-middle ml-1.5 my-0.5"
-                              >
-                                {code}
-                              </span>
-                            ))}
-                          </span>
-                        ) : (
-                          row.DeviceModel.replace(/[\uFFFD\u00bf\u00ef]+/g, "–")
-                        );
-                      })()}
+                      <SmartCell text={row.DeviceModel} align="left" />
                     </td>
                     {variants.map((v) => {
                       const val = row.prices[v.Key];
                       const isSeries = isSeriesCol(v);
                       const isText = v.Type === "text" || typeof val === "string";
-                      const strVal = typeof val === "string" ? val.trim() : "";
-                      const seriesInfo = strVal ? parseSeriesCodes(strVal) : null;
 
                       return (
                         <td
@@ -430,27 +422,8 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                         >
                           {val == null || val === "" || val === 0 ? (
                             <span className="text-text-muted select-none">–</span>
-                          ) : seriesInfo && seriesInfo.hasAnySeries ? (
-                            <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 py-0.5">
-                              {seriesInfo.tokens.map((token) =>
-                                isAppleSeriesCode(token) ? (
-                                  <span
-                                    key={token}
-                                    className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.7rem] sm:text-xs font-medium text-neutral-200 shadow-sm"
-                                  >
-                                    {token}
-                                  </span>
-                                ) : (
-                                  <span key={token} className="text-foreground/90 font-medium">
-                                    {token}
-                                  </span>
-                                )
-                              )}
-                            </div>
-                          ) : isText ? (
-                            <span className="text-foreground/90 font-medium">
-                              {String(val)}
-                            </span>
+                          ) : typeof val === "string" || v.Type === "text" ? (
+                            <SmartCell text={String(val)} align="center" />
                           ) : (
                             <>
                               <span className="mr-1.5 text-primary font-bold font-instrument">Rp.</span>
