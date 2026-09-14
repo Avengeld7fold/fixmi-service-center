@@ -11,6 +11,69 @@ import {
   getLocalizedVariantNote,
 } from "@/lib/i18n/service-translation";
 
+const APPLE_SERIES_REGEX = /^A\d{4}[A-Z]?$/i;
+
+export function isAppleSeriesCode(str: string): boolean {
+  return APPLE_SERIES_REGEX.test(str.trim());
+}
+
+export function parseDeviceModel(deviceModel: string): {
+  name: string;
+  seriesCodes: string[];
+} {
+  if (!deviceModel) return { name: "", seriesCodes: [] };
+
+  // Rapikan karakter korup encoding (seperti ) menjadi en-dash
+  const normalizedModel = deviceModel.replace(/[\uFFFD\u00bf\u00ef]+/g, "–").trim();
+
+  // 1. Cek akhiran pemisah: " - A1534", " - A1150 / A1211", "(A1534)"
+  const trailingRegex = /\s*(?:[-–—]\s*|\(\s*)(A\d{4}[A-Z]?(?:\s*[/,]\s*A\d{4}[A-Z]?)*)\s*\)?$/i;
+  const match = normalizedModel.match(trailingRegex);
+
+  if (match && match.index !== undefined) {
+    const cleanName = normalizedModel.slice(0, match.index).trim();
+    const codes = match[1]
+      .split(/[/,]/)
+      .map((c) => c.trim().toUpperCase())
+      .filter((c) => APPLE_SERIES_REGEX.test(c));
+    return { name: cleanName, seriesCodes: codes };
+  }
+
+  // 2. Cek kode AXXXX di dalam kurung di mana saja
+  const parenRegex = /\s*\((A\d{4}[A-Z]?(?:\s*[/,]\s*A\d{4}[A-Z]?)*)\)\s*/i;
+  const parenMatch = normalizedModel.match(parenRegex);
+  if (parenMatch) {
+    const cleanName = normalizedModel.replace(parenRegex, " ").replace(/\s+/g, " ").trim();
+    const codes = parenMatch[1]
+      .split(/[/,]/)
+      .map((c) => c.trim().toUpperCase())
+      .filter((c) => APPLE_SERIES_REGEX.test(c));
+    return { name: cleanName, seriesCodes: codes };
+  }
+
+  // 3. Fallback: cari semua kode berformat AXXXX yang berdiri sendiri
+  const allCodes = Array.from(normalizedModel.matchAll(/\b(A\d{4}[A-Z]?)\b/gi), (m) => m[1].toUpperCase());
+  if (allCodes.length > 0) {
+    const cleanName = normalizedModel
+      .replace(/\s*(?:[-–—]\s*)?(?:\bA\d{4}[A-Z]?\b(?:\s*[/,]\s*)?)+\s*/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return { name: cleanName || normalizedModel, seriesCodes: allCodes };
+  }
+
+  return { name: normalizedModel, seriesCodes: [] };
+}
+
+export function parseSeriesCodes(raw: string): {
+  hasAnySeries: boolean;
+  tokens: string[];
+} {
+  const parts = raw.split(/[/,]/).map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0) return { hasAnySeries: false, tokens: [] };
+  const hasAnySeries = parts.some((p) => APPLE_SERIES_REGEX.test(p));
+  return { hasAnySeries, tokens: parts };
+}
+
 interface PriceTableProps {
   service: ServiceType;
   categoryName: string;
@@ -107,22 +170,9 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
 
   const isSeriesCol = useCallback(
     (v: { Key: string; Label: string; Type?: string }) => {
-      const k = v.Key.toLowerCase();
-      const l = v.Label.toLowerCase();
-      if (
-        k.includes("series") ||
-        l.includes("series") ||
-        k.includes("model") ||
-        l.includes("model")
-      ) {
-        return true;
-      }
       return service.device_prices.some((d) => {
         const val = d.prices[v.Key];
-        return (
-          typeof val === "string" &&
-          (val.includes("/") || /^A\d{3,4}/.test(val.trim()))
-        );
+        return typeof val === "string" && parseSeriesCodes(val).hasAnySeries;
       });
     },
     [service.device_prices]
@@ -343,12 +393,31 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                           : "border-panel-border/60 border-r-panel-border bg-panel group-hover:bg-panel-raised"
                       }`}
                     >
-                      {row.DeviceModel}
+                      {(() => {
+                        const parsed = parseDeviceModel(row.DeviceModel);
+                        return parsed.seriesCodes.length > 0 ? (
+                          <span className="font-medium text-foreground">
+                            {parsed.name}
+                            {parsed.seriesCodes.map((code) => (
+                              <span
+                                key={code}
+                                className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.6875rem] sm:text-xs font-medium text-neutral-200 shadow-sm align-middle ml-1.5 my-0.5"
+                              >
+                                {code}
+                              </span>
+                            ))}
+                          </span>
+                        ) : (
+                          row.DeviceModel.replace(/[\uFFFD\u00bf\u00ef]+/g, "–")
+                        );
+                      })()}
                     </td>
                     {variants.map((v) => {
                       const val = row.prices[v.Key];
                       const isSeries = isSeriesCol(v);
                       const isText = v.Type === "text" || typeof val === "string";
+                      const strVal = typeof val === "string" ? val.trim() : "";
+                      const seriesInfo = strVal ? parseSeriesCodes(strVal) : null;
 
                       return (
                         <td
@@ -361,20 +430,22 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                         >
                           {val == null || val === "" || val === 0 ? (
                             <span className="text-text-muted select-none">–</span>
-                          ) : isSeries && typeof val === "string" ? (
+                          ) : seriesInfo && seriesInfo.hasAnySeries ? (
                             <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 py-0.5">
-                              {val
-                                .split(/[/,]/)
-                                .map((c) => c.trim())
-                                .filter(Boolean)
-                                .map((code) => (
+                              {seriesInfo.tokens.map((token) =>
+                                isAppleSeriesCode(token) ? (
                                   <span
-                                    key={code}
+                                    key={token}
                                     className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.7rem] sm:text-xs font-medium text-neutral-200 shadow-sm"
                                   >
-                                    {code}
+                                    {token}
                                   </span>
-                                ))}
+                                ) : (
+                                  <span key={token} className="text-foreground/90 font-medium">
+                                    {token}
+                                  </span>
+                                )
+                              )}
                             </div>
                           ) : isText ? (
                             <span className="text-foreground/90 font-medium">
