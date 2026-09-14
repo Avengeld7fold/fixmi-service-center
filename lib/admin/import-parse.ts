@@ -40,6 +40,10 @@ export interface ImportPreview {
   targetNote?: string;
 }
 
+export interface ImportOptions {
+  checkDuplicates?: boolean;
+}
+
 export interface ImportResult {
   merged: Category[] | null; // null bila ada error
   preview: ImportPreview;
@@ -180,8 +184,10 @@ export async function parseImportFile(
   buffer: Buffer,
   filename: string,
   existing: Category[],
-  target?: ImportTarget
+  target?: ImportTarget,
+  options?: ImportOptions
 ): Promise<ImportResult> {
+  const checkDuplicates = options?.checkDuplicates ?? true;
   const errors: ImportError[] = [];
   const warnings: string[] = [];
 
@@ -255,8 +261,15 @@ export async function parseImportFile(
       const key = slugify(raw);
       if (!key) continue;
       if (variantCols.some((v) => v.variant.Key === key)) {
-        errors.push({ row: 1, message: `Kolom varian duplikat: "${raw}".` });
-        continue;
+        if (checkDuplicates) {
+          errors.push({ row: 1, message: `Kolom varian duplikat: "${raw}".` });
+          continue;
+        } else {
+          warnings.push(`Header kolom ${c + 1}: Kolom varian "${raw}" duplikat — data digabungkan ke varian yang sama.`);
+          const existingCol = variantCols.find((v) => v.variant.Key === key)!;
+          variantCols.push({ col: c, variant: existingCol.variant });
+          continue;
+        }
       }
       variantCols.push({ col: c, variant: { Key: key, Label: raw.toUpperCase(), Note: "" } });
     }
@@ -293,11 +306,21 @@ export async function parseImportFile(
       }
     }
 
+    // Pastikan varian unik untuk ServiceType
+    const uniqueVariants: Variant[] = [];
+    const seenVarKeys = new Set<string>();
+    for (const vc of variantCols) {
+      if (!seenVarKeys.has(vc.variant.Key)) {
+        seenVarKeys.add(vc.variant.Key);
+        uniqueVariants.push(vc.variant);
+      }
+    }
+
     // Kumpulkan baris model + deteksi harga-dalam-ribuan (dua tahap).
     const service: BuildingService = {
       Name: targetServiceName,
       Slug: targetServiceSlug,
-      variants: variantCols.map((v) => v.variant),
+      variants: uniqueVariants,
       rows: new Map(),
     };
     let maxPrice = 0;
@@ -313,9 +336,16 @@ export async function parseImportFile(
         continue;
       }
       const modelKey = model.toLowerCase();
-      if (service.rows.has(modelKey)) {
-        errors.push({ row: rowNum, message: `Model duplikat: "${model}".` });
-        continue;
+      const isDuplicate = service.rows.has(modelKey);
+      if (isDuplicate) {
+        if (checkDuplicates) {
+          errors.push({ row: rowNum, message: `Model duplikat: "${model}".` });
+          continue;
+        } else {
+          warnings.push(
+            `Baris ${rowNum}: Model duplikat "${model}" terdeteksi — data harga diperbarui/ditimpa dari baris ini.`
+          );
+        }
       }
 
       const prices: Record<string, number | string | null> = {};
@@ -330,7 +360,17 @@ export async function parseImportFile(
           if (typeof parsed === "number" && parsed > maxPrice) maxPrice = parsed;
         }
       }
-      service.rows.set(modelKey, { DeviceModel: model, prices });
+
+      if (isDuplicate) {
+        const existingRow = service.rows.get(modelKey)!;
+        for (const [vKey, vVal] of Object.entries(prices)) {
+          if (vVal !== null) {
+            existingRow.prices[vKey] = vVal;
+          }
+        }
+      } else {
+        service.rows.set(modelKey, { DeviceModel: model, prices });
+      }
     }
 
     if (errors.length > 0) return { merged: null, preview: emptyPreview() };
@@ -453,11 +493,17 @@ export async function parseImportFile(
 
       const dupKey = `${category.Slug}|${svcSlug}|${rawModel.toLowerCase()}|${variantKey}`;
       if (seenPriceKeys.has(dupKey)) {
-        errors.push({
-          row: rowNum,
-          message: `Duplikat: harga untuk ${rawModel} / ${rawVariant} (${category.Name} / ${service.Name}) sudah ada di baris sebelumnya.`,
-        });
-        continue;
+        if (checkDuplicates) {
+          errors.push({
+            row: rowNum,
+            message: `Duplikat: harga untuk ${rawModel} / ${rawVariant} (${category.Name} / ${service.Name}) sudah ada di baris sebelumnya.`,
+          });
+          continue;
+        } else {
+          warnings.push(
+            `Baris ${rowNum}: Duplikat harga ${rawModel} / ${rawVariant} (${category.Name} / ${service.Name}) terdeteksi — harga diperbarui dari baris ini.`
+          );
+        }
       }
       seenPriceKeys.add(dupKey);
 

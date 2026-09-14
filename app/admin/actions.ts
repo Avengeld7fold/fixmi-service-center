@@ -157,13 +157,16 @@ export async function importPreviewAction(formData: FormData): Promise<ImportPre
   if (targetCategory && !targetService)
     return { preview: null, payload: null, error: "Pilih jenis service tujuan import." };
 
+  // Opsi pengecekan duplikat: default true, false bila toggle dinonaktifkan ("false")
+  const checkDuplicates = formData.get("checkDuplicates") !== "false";
+
   try {
     const existing = await getPricelist();
     const buffer = Buffer.from(await file.arrayBuffer());
     const target = targetCategory
       ? { categorySlug: targetCategory, serviceSlug: targetService }
       : undefined;
-    const { merged, preview } = await parseImportFile(buffer, file.name, existing, target);
+    const { merged, preview } = await parseImportFile(buffer, file.name, existing, target, { checkDuplicates });
     return {
       preview,
       payload: merged ? JSON.stringify(merged) : null,

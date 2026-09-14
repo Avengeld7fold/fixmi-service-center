@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ArrowRight,
   RefreshCw,
+  CopyCheck,
 } from "lucide-react";
 import {
   importApplyAction,
@@ -43,6 +44,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
   const [appliedMessage, setAppliedMessage] = useState<string>("");
   const [applyError, setApplyError] = useState<string>("");
   const [selectedCategorySlugs, setSelectedCategorySlugs] = useState<Set<string>>(new Set());
+  const [checkDuplicates, setCheckDuplicates] = useState(true);
 
   const activeCat = categories.find((c) => c.Slug === targetCat);
   const targetIncomplete = targetCat !== "" && targetSvc === "";
@@ -125,6 +127,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
     formData.set("file", file);
     formData.set("targetCategory", targetCat);
     formData.set("targetService", targetSvc);
+    formData.set("checkDuplicates", String(checkDuplicates));
 
     setChecking(true);
     setApplyError("");
@@ -295,6 +298,72 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                     Semua baris model di file akan langsung dimasukkan ke layanan yang Anda pilih.
                   </p>
                 )}
+              </div>
+
+              {/* Opsi Auto Duplicate Checker */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 bg-white/[0.02] p-3.5 sm:p-4 rounded-xl border border-white/[0.06]">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+                      checkDuplicates
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                        : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                    }`}
+                  >
+                    <CopyCheck className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label
+                        htmlFor="toggle-duplicate-checker"
+                        className="text-xs sm:text-sm font-semibold text-white cursor-pointer select-none"
+                      >
+                        Pemeriksaan Duplikat Otomatis
+                      </label>
+                      <span
+                        className={`text-[0.625rem] font-mono px-2 py-0.5 rounded-full font-semibold border ${
+                          checkDuplicates
+                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                            : "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                        }`}
+                      >
+                        {checkDuplicates ? "Aktif (Ketat)" : "Nonaktif (Izinkan Duplikat)"}
+                      </span>
+                    </div>
+                    <p className="text-[0.6875rem] sm:text-xs text-neutral-400 mt-0.5 leading-relaxed">
+                      {checkDuplicates
+                        ? "Impor ditolak jika terdeteksi nama model atau baris harga ganda di dalam file."
+                        : "Data duplikat tetap diizinkan masuk (baris terakhir akan menimpa/memperbarui data sebelumnya)."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
+                  <span className="text-xs text-neutral-400 hidden sm:inline">
+                    {checkDuplicates ? "Cek aktif" : "Cek mati"}
+                  </span>
+                  <button
+                    type="button"
+                    id="toggle-duplicate-checker"
+                    role="switch"
+                    aria-checked={checkDuplicates}
+                    aria-label="Toggle auto duplicate checker"
+                    onClick={() => {
+                      setCheckDuplicates((prev) => !prev);
+                      setState(initialState);
+                      setApplyError("");
+                    }}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#121212] ${
+                      checkDuplicates ? "bg-primary" : "bg-white/20"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                        checkDuplicates ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               {/* Drag & Drop File Zone */}
