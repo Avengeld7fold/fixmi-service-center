@@ -55,3 +55,24 @@ next-env.d.ts
 
 # Scratch / testing artifacts
 scratch/
+
+# AI Agent configurations & skills (local development only)
+.agents/
+.claude/
+.codex/
+.commandcode/
+.impeccable/
+AGENTS.md
+agents.md
+DESIGN.md
+PRODUCT.md
+PROJECT-REFERENCE.md
+PRD-pricelist-fixmi.md
+prd.md
+skills.md
+skills-lock.json
+
+# Dead code & dev-only scripts
+proxy.ts
+scripts/
+
