@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { cache } from "react";
 
 export interface GalleryImage {
   id: number | string;
@@ -16,7 +17,7 @@ const GALLERY_FILE = path.join(process.cwd(), "data", "gallery.json");
  * Membaca data galeri dari file data/gallery.json di server.
  * Mengembalikan array kosong jika belum ada foto yang diupload dari backend.
  */
-export async function getGalleryImages(): Promise<GalleryImage[]> {
+export const getGalleryImages = cache(async function getGalleryImages(): Promise<GalleryImage[]> {
   try {
     const raw = await fs.readFile(GALLERY_FILE, "utf-8");
     const parsed: GalleryImage[] = JSON.parse(raw);
@@ -32,7 +33,7 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
   }
 
   return [];
-}
+});
 
 /**
  * Menyimpan data galeri ke file data/gallery.json (digunakan saat upload dari backend).

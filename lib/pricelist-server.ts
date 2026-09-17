@@ -1,5 +1,6 @@
 import { copyFile, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
+import { cache } from "react";
 import type { Category, ServiceType, Variant, DevicePrice } from "./data";
 import { SKELETON_PRICELIST } from "./pricelist-skeleton";
 
@@ -86,7 +87,7 @@ function assert(condition: unknown, message: string): asserts condition {
  * Mendapatkan tanggal terakhir data pricelist diedit di backend/filesystem.
  * Format: "Update [Bulan] [Tahun]" (contoh: "Update Agustus 2026").
  */
-export async function getPricelistLastUpdated(): Promise<string> {
+export const getPricelistLastUpdated = cache(async function getPricelistLastUpdated(): Promise<string> {
   try {
     let s;
     try {
@@ -104,7 +105,7 @@ export async function getPricelistLastUpdated(): Promise<string> {
     const month = MONTH_NAMES_ID[now.getMonth()] ?? "Januari";
     return `Update ${month} ${now.getFullYear()}`;
   }
-}
+});
 
 /**
  * Baca & validasi pricelist dari filesystem.
@@ -116,7 +117,7 @@ export async function getPricelistLastUpdated(): Promise<string> {
  * JIKA file data/pricelist.json DITEMUKAN (atau berhasil di-seed dari template):
  * Akordeon dan tabel harga dirender murni dari isi service_types yang terdaftar di file.
  */
-export async function getPricelist(): Promise<Category[]> {
+export const getPricelist = cache(async function getPricelist(): Promise<Category[]> {
   try {
     const raw = await ensurePricelistFile();
     if (!raw.trim()) {
@@ -187,4 +188,4 @@ export async function getPricelist(): Promise<Category[]> {
     console.warn("Notice: data/pricelist.json not found or unreadable, using SKELETON_PRICELIST fallback.", error);
     return SKELETON_PRICELIST;
   }
-}
+});

@@ -60,6 +60,15 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
   // Jangan bocorkan versi framework ke penyerang.
   poweredByHeader: false,
+  reactStrictMode: true,
+
+  compiler: {
+    removeConsole: !isDev ? { exclude: ["error", "warn"] } : false,
+  },
+
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
 
   images: {
     formats: ["image/avif", "image/webp"],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -50,6 +50,24 @@ export default function Footer() {
   const pathname = usePathname();
   const { dict, locale, getLocalizedPath } = useI18n();
   const [active, setActive] = useState<StoreKey>("head");
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = mapContainerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setMapLoaded(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   if (pathname.startsWith("/admin") || pathname === "/contact" || pathname === "/en/contact") return null;
 
@@ -293,16 +311,40 @@ export default function Footer() {
               </dl>
             </div>
 
-            {/* Map */}
-            <div className="flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#161616] shadow-2xl">
-              <iframe
-                key={active}
-                src={`https://www.google.com/maps?q=${q}&z=15&output=embed`}
-                className="block h-[20rem] w-full border-0 lg:h-auto lg:flex-1 lg:min-h-[26rem]"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={`${isEn ? "Location map for" : "Peta lokasi"} ${s.name}`}
-              />
+            {/* Map (Viewport Deferred via IntersectionObserver) */}
+            <div
+              ref={mapContainerRef}
+              className="flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#161616] shadow-2xl"
+            >
+              {mapLoaded ? (
+                <iframe
+                  key={active}
+                  src={`https://www.google.com/maps?q=${q}&z=15&output=embed`}
+                  className="block h-[20rem] w-full border-0 lg:h-auto lg:flex-1 lg:min-h-[26rem]"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`${isEn ? "Location map for" : "Peta lokasi"} ${s.name}`}
+                />
+              ) : (
+                <div className="flex h-[20rem] w-full flex-col items-center justify-center gap-2 bg-[#18181b]/50 lg:h-auto lg:flex-1 lg:min-h-[26rem]">
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-primary/70 animate-pulse"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-xs font-mono text-neutral-400">Loading Map...</span>
+                </div>
+              )}
               <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-white/[0.08] bg-[#161616]/95 px-4 py-3.5 backdrop-blur-md">
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="truncate text-sm font-medium text-[#f5f5f5]">{s.name}</span>

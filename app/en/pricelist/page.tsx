@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import PricelistPage from "../../pricelist/page";
 
-export const dynamic = "force-dynamic";
+// ISR: HTML di-generate secara statis dan di-revalidate tiap 1 jam, atau instan via revalidatePath() dari admin.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "iPhone, iPad, MacBook & Android Repair Price List — FIXMI Service Center",

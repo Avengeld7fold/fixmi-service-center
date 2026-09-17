@@ -3,8 +3,8 @@ import PricelistExplorer from "@/components/pricelist/PricelistExplorer";
 import { getPricelist, getPricelistLastUpdated } from "@/lib/pricelist-server";
 import type { Category } from "@/lib/data";
 
-// Dibaca dari filesystem tiap request → perubahan data admin tampil tanpa rebuild (§7.2).
-export const dynamic = "force-dynamic";
+// ISR: HTML di-generate secara statis dan di-revalidate tiap 1 jam, atau instan via revalidatePath() dari admin.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Daftar Harga Service iPhone, iPad, MacBook & Android — FIXMI Service Center",

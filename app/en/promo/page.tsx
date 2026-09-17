@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import PromoPage from "../../promo/page";
 
-export const dynamic = "force-dynamic";
+// ISR: HTML di-generate secara statis dan di-revalidate tiap 1 jam, atau instan via revalidatePath() dari admin.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Special Offers & Promos — FIXMI Service Center",

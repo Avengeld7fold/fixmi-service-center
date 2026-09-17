@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { Star, ArrowUpRight, CheckCircle2, MessageSquarePlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
-import { GooglePlaceData } from "@/app/api/reviews/route";
+import { GooglePlaceData, FALLBACK_REVIEWS } from "@/app/api/reviews/route";
 
 type SortOption = "relevant" | "newest";
 
@@ -54,7 +54,7 @@ function ReviewAvatar({ url, name }: { url?: string; name: string }) {
 
 export default function CustomerReviewsSection() {
   const { dict } = useI18n();
-  const [data, setData] = useState<GooglePlaceData | null>(null);
+  const [data, setData] = useState<GooglePlaceData>(FALLBACK_REVIEWS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
@@ -65,6 +65,7 @@ export default function CustomerReviewsSection() {
   const dragStartXRef = useRef(0);
   const dragOffsetRef = useRef(0);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   // Responsive visible count tracking
   useEffect(() => {
@@ -76,20 +77,38 @@ export default function CustomerReviewsSection() {
     return () => window.removeEventListener("resize", updateVisible);
   }, []);
 
+  // Viewport-deferred fetch: Initial render langsung memakai FALLBACK_REVIEWS (Zero CLS).
+  // Live API hanya di-fetch ketika section mendekati viewport (600px).
   useEffect(() => {
     let isMounted = true;
-    async function fetchReviews() {
-      try {
-        const res = await fetch("/api/reviews");
-        if (!res.ok) throw new Error("Failed to fetch reviews");
-        const json: GooglePlaceData = await res.json();
-        if (isMounted) setData(json);
-      } catch (err) {
-        console.error("Error loading reviews client:", err);
-      }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          observer.disconnect();
+          fetch("/api/reviews")
+            .then((res) => {
+              if (!res.ok) throw new Error("Failed to fetch reviews");
+              return res.json();
+            })
+            .then((json: GooglePlaceData) => {
+              if (isMounted) setData(json);
+            })
+            .catch((err) => {
+              console.warn("Error loading reviews client:", err);
+            });
+        }
+      },
+      { rootMargin: "600px 0px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
     }
-    fetchReviews();
-    return () => { isMounted = false; };
+
+    return () => {
+      isMounted = false;
+      observer.disconnect();
+    };
   }, []);
 
   const rawReviews = data?.reviews || [];
@@ -162,7 +181,10 @@ export default function CustomerReviewsSection() {
   };
 
   return (
-    <section className="relative w-full bg-[#121212] text-white py-12 sm:py-16 lg:py-20 overflow-hidden select-none border-t border-white/[0.06]">
+    <section
+      ref={sectionRef}
+      className="relative w-full bg-[#121212] text-white py-12 sm:py-16 lg:py-20 overflow-hidden select-none border-t border-white/[0.06]"
+    >
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/[0.03] rounded-full blur-[140px] pointer-events-none transition-opacity duration-700" />
 

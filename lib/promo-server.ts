@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { cache } from "react";
 
 export interface PromoImageItem {
   id: number | string;
@@ -18,7 +19,7 @@ const PROMO_FILE = path.join(process.cwd(), "data", "promo.json");
  * Membaca daftar gambar promo dari data/promo.json di server.
  * Mengembalikan array kosong jika belum ada promo yang diunggah.
  */
-export async function getPromoItems(): Promise<PromoImageItem[]> {
+export const getPromoItems = cache(async function getPromoItems(): Promise<PromoImageItem[]> {
   try {
     const raw = await fs.readFile(PROMO_FILE, "utf-8");
     const parsed: PromoImageItem[] = JSON.parse(raw);
@@ -34,7 +35,7 @@ export async function getPromoItems(): Promise<PromoImageItem[]> {
   }
 
   return [];
-}
+});
 
 /**
  * Menyimpan daftar gambar promo ke data/promo.json (untuk sinkronisasi upload backend).

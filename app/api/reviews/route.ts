@@ -21,7 +21,7 @@ export interface GooglePlaceData {
 }
 
 // Fallback data otentik sesuai bahasa asli yang diketik reviewer
-const FALLBACK_REVIEWS: GooglePlaceData = {
+export const FALLBACK_REVIEWS: GooglePlaceData = {
   name: "FIXMI SERVICE CENTER",
   rating: 4.8,
   totalRatings: 404,
@@ -185,10 +185,20 @@ export async function GET() {
         reviews: finalReviews.length > 0 ? finalReviews : FALLBACK_REVIEWS.reviews,
         isLive: true,
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=43200",
+        },
+      }
     );
   } catch (err) {
     console.error("Error fetching Google Place reviews:", err);
-    return NextResponse.json(FALLBACK_REVIEWS, { status: 200 });
+    return NextResponse.json(FALLBACK_REVIEWS, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=43200",
+      },
+    });
   }
 }
