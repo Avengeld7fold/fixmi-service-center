@@ -7,12 +7,11 @@ import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
 import { whatsappUrl } from "@/lib/constants";
 
-// ponytail: removed unused WorkshopPhoto interface — TS infers from the array literal
 const WORKSHOP_PHOTO_ASSETS = [
   { id: "live-bench", number: "01", image: "/images/teknisi-1.webp" },
   { id: "speed-assembly", number: "02", image: "/images/lounge.webp" },
-  { id: "microscope", number: "03", image: "https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?q=80&w=1200&auto=format&fit=crop" },
-  { id: "quality-check", number: "04", image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1200&auto=format&fit=crop" },
+  { id: "microscope", number: "03", image: "/images/reballing-1.webp" },
+  { id: "quality-check", number: "04", image: "/images/qa-1.webp" },
 ] as const;
 
 const TOTAL = WORKSHOP_PHOTO_ASSETS.length;
