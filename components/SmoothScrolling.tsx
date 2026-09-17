@@ -59,12 +59,17 @@ export default function SmoothScrolling({ children }: SmoothScrollingProps) {
     // ber-class h-full (tinggi terkunci = viewport) sehingga observer itu buta
     // saat konten memanjang (akordeon pricelist expand, dll).
     // Pantau <body> (yang ikut tinggi konten) dan refresh limit Lenis.
+    let rafId: number | null = null;
     const ro = new ResizeObserver(() => {
-      lenisRef.current?.lenis?.resize();
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        lenisRef.current?.lenis?.resize();
+      });
     });
     ro.observe(document.body);
 
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       lenis?.off("scroll", ScrollTrigger.update);
       ro.disconnect();
     };

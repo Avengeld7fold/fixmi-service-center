@@ -137,7 +137,7 @@ function DiagnosticLoader({ progress }: { progress: number }) {
   const { dict } = useI18n();
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-background z-20">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-transparent z-20">
       <div className="mb-2 text-xs uppercase tracking-widest text-primary font-bold animate-pulse">
         {dict.common.loading.toUpperCase()}
       </div>

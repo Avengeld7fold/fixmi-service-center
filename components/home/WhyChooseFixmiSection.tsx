@@ -150,8 +150,7 @@ export default function WhyChooseFixmiSection() {
                     src={photo.image}
                     alt={photo.title}
                     fill
-                    priority={idx === 0}
-                    loading={idx === 0 ? undefined : "lazy"}
+                    loading="lazy"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover object-center brightness-[0.88] contrast-[1.04]"
                   />

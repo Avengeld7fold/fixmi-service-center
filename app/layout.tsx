@@ -12,11 +12,13 @@ const bayon = Bayon({
   variable: "--font-bayon",
   weight: "400",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const instrumentSans = Instrument_Sans({
@@ -49,6 +51,7 @@ const neueMontreal = localFont({
     },
   ],
   variable: "--font-neue-montreal",
+  display: "swap",
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fixmibali.com";

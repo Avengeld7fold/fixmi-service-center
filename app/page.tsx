@@ -1,7 +1,12 @@
 "use client";
 
-import Hero3D from "@/components/Hero3D";
+import dynamic from "next/dynamic";
 import WaveDividerSection from "@/components/home/WaveDividerSection";
+
+// ponytail: code-split Three.js & R3F (841KB) — loads asynchronously without blocking initial HTML & LCP text
+const Hero3D = dynamic(() => import("@/components/Hero3D"), {
+  ssr: false,
+});
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";

@@ -969,8 +969,7 @@ export default function ExplodedPhoneSection() {
                         src={layer.file}
                         alt={layer.name}
                         fill
-                        priority={index === 0}
-                        loading={index === 0 ? undefined : "eager"}
+                        loading="lazy"
                         sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
                         className="object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.9)]"
                       />
@@ -995,7 +994,7 @@ export default function ExplodedPhoneSection() {
                     alt="iPhone Booting & Quality Test"
                     fill
                     unoptimized
-                    priority
+                    loading="lazy"
                     sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
                     className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
                   />
@@ -1289,7 +1288,7 @@ export default function ExplodedPhoneSection() {
                   fill
                   sizes="(max-width: 768px) 220px, 290px"
                   className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)] transition-transform duration-300 hover:scale-105"
-                  priority
+                  loading="lazy"
                 />
               </div>
 

@@ -21,8 +21,8 @@ const CRITICAL_ASSETS = [
 ];
 
 export default function LoadingGate({ children }: { children: React.ReactNode }) {
-  const { progress } = useAssetPreloader(CRITICAL_ASSETS, {
-    waitForFonts: true,
+  const { progress } = useAssetPreloader(DISABLE_LOADER_IN_DEV ? [] : CRITICAL_ASSETS, {
+    waitForFonts: !DISABLE_LOADER_IN_DEV,
     waitForWindowLoad: false,
   });
   const [revealed, setRevealed] = useState(DISABLE_LOADER_IN_DEV);

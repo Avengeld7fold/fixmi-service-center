@@ -62,6 +62,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",
@@ -81,6 +82,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: SECURITY_HEADERS },
+      {
+        // Aset statis gambar & font di public: cache jangka panjang (1 tahun)
+        source: "/images/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
       {
         // Area admin: jangan di-cache proxy/CDN, jangan diindeks mesin pencari.
         source: "/admin/:path*",
