@@ -43,6 +43,8 @@ function ReviewAvatar({ url, name }: { url?: string; name: string }) {
       <img
         src={url}
         alt={name}
+        loading="lazy"
+        decoding="async"
         referrerPolicy="no-referrer"
         draggable={false}
         className="w-full h-full object-cover pointer-events-none"

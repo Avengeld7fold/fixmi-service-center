@@ -25,6 +25,7 @@ const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
   subsets: ["latin"],
   display: "swap",
+  preload: false,
 });
 
 const neueMontreal = localFont({

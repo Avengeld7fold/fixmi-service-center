@@ -7,7 +7,7 @@ import WaveDividerSection from "@/components/home/WaveDividerSection";
 const Hero3D = dynamic(() => import("@/components/Hero3D"), {
   ssr: false,
 });
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, useEffect, type CSSProperties, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useI18n } from "@/lib/i18n/context";
@@ -65,6 +65,25 @@ export default function Home() {
   const rightTitle2Ref = useRef<HTMLHeadingElement>(null);
   const captionRef = useRef<HTMLParagraphElement>(null);
 
+  // Non-blocking idle deferral: allows React hydration & hero typography entrance
+  // to complete with zero main-thread contention before compiling Three.js & WebGL shaders
+  const [load3D, setLoad3D] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    type WindowWithIdle = Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const win = window as WindowWithIdle;
+    if (win.requestIdleCallback) {
+      const handle = win.requestIdleCallback(() => setLoad3D(true), { timeout: 1200 });
+      return () => win.cancelIdleCallback?.(handle);
+    }
+    const timer = setTimeout(() => setLoad3D(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
   useGSAP(() => {
     if (!leftTitleRef.current || !rightTitle1Ref.current || !rightTitle2Ref.current || !captionRef.current) return;
 
@@ -102,7 +121,7 @@ export default function Home() {
 
         {/* WebGL Canvas backdrop — extends behind navbar & wave divider */}
         <div className="absolute inset-x-0 -top-[4.5rem] -bottom-20 sm:-bottom-28 md:-bottom-36 lg:-bottom-44 z-0">
-          <Hero3D />
+          {load3D ? <Hero3D /> : null}
         </div>
 
         {/* Content overlay — pointer-events-none lets mouse interact with Canvas */}
