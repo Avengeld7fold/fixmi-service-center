@@ -13,7 +13,7 @@ import { useGSAP } from "@gsap/react";
 import { useI18n } from "@/lib/i18n/context";
 import { whatsappUrl, SOCIAL_LINKS } from "@/lib/constants";
 
-const heroTitleStyle = (lineHeight: number, hidden = false): CSSProperties => ({
+const heroTitleStyle = (lineHeight: number): CSSProperties => ({
   fontFamily: "var(--font-bayon), sans-serif",
   fontWeight: 400,
   lineHeight,
@@ -21,7 +21,6 @@ const heroTitleStyle = (lineHeight: number, hidden = false): CSSProperties => ({
   color: "var(--fixmi-primary)",
   textTransform: "uppercase",
   margin: 0,
-  ...(hidden && { opacity: 0 }),
 });
 
 const ICON_SIZE = "w-[1.125rem] h-[1.125rem]";
@@ -87,21 +86,21 @@ export default function Home() {
   useGSAP(() => {
     if (!leftTitleRef.current || !rightTitle1Ref.current || !rightTitle2Ref.current || !captionRef.current) return;
 
-    const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.8 } });
+    const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.4 } });
 
     tl.fromTo(leftTitleRef.current.querySelectorAll(".line-anim"),
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, stagger: 0.25 }
+      { opacity: 1, y: 0, stagger: 0.2 }
     )
     .fromTo([rightTitle1Ref.current, rightTitle2Ref.current],
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, stagger: 0.25 },
-      "-=1.3"
+      { opacity: 1, y: 0, stagger: 0.2 },
+      "-=1.0"
     )
     .fromTo(captionRef.current,
       { opacity: 0, y: 10 },
       { opacity: 1, y: 0 },
-      "-=1.3"
+      "-=1.0"
     );
   });
 
@@ -136,10 +135,10 @@ export default function Home() {
                 className="font-bayon text-[clamp(2.25rem,9.5vw,3.125rem)] md:text-[clamp(3.25rem,4.5vw,4.25rem)] lg:text-[clamp(4.5rem,5vw,5.75rem)] xl:text-[clamp(5.75rem,5.5vw,6.75rem)] leading-none"
                 style={heroTitleStyle(0.9)}
               >
-                <span className="block line-anim" style={{ opacity: 0 }}>
+                <span className="block line-anim">
                   {locale === "en" ? "DEVICE" : "HP KAMU"}
                 </span>
-                <span className="block line-anim" style={{ opacity: 0 }}>
+                <span className="block line-anim">
                   {locale === "en" ? "BROKEN?" : "RUSAK?"}
                 </span>
               </h1>
@@ -158,7 +157,6 @@ export default function Home() {
                   fontWeight: 500,
                   color: "var(--fixmi-text-secondary)",
                   textTransform: "uppercase",
-                  opacity: 0,
                 }}
               >
                 {dict.hero.subtitlePrefix}{" "}
@@ -171,14 +169,14 @@ export default function Home() {
               <h2
                 ref={rightTitle1Ref}
                 className="font-bayon text-[clamp(2.25rem,9.5vw,3.125rem)] md:text-[clamp(3.25rem,4.5vw,4.25rem)] lg:text-[clamp(4.5rem,5vw,5.75rem)] xl:text-[clamp(5.75rem,5.5vw,6.75rem)] leading-none"
-                style={heroTitleStyle(0.85, true)}
+                style={heroTitleStyle(0.85)}
               >
                 {dict.hero.titleSolusinya1}
               </h2>
               <h2
                 ref={rightTitle2Ref}
                 className="font-bayon text-[clamp(2.25rem,9.5vw,3.125rem)] md:text-[clamp(3.25rem,4.5vw,4.25rem)] lg:text-[clamp(4.5rem,5vw,5.75rem)] xl:text-[clamp(5.75rem,5.5vw,6.75rem)] leading-none"
-                style={heroTitleStyle(0.85, true)}
+                style={heroTitleStyle(0.85)}
               >
                 {dict.hero.titleSolusinya2}
               </h2>

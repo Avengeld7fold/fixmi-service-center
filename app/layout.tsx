@@ -67,8 +67,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "FIXMI — Pusat Service iPhone, iPad, MacBook & Android di Bali",
-    template: "%s | FIXMI Service Center",
+    default: "Fixmi Service Center - Service Gadget",
+    template: "%s | Fixmi Service Center",
   },
   description:
     "Pusat perbaikan perangkat pintar terpercaya di Bali sejak Agustus 2014. Spesialis ganti LCD, baterai, kamera, dan mikrosolder motherboard iPhone, iPad, MacBook & Android. Pengerjaan presisi, transparan, bergaransi resmi. 3 Gerai di Kedonganan, Jimbaran, dan Denpasar.",
@@ -105,8 +105,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "id_ID",
     url: SITE_URL,
-    siteName: "FIXMI Service Center",
-    title: "FIXMI — Pusat Service iPhone, iPad, MacBook & Android di Bali",
+    siteName: "Fixmi Service Center",
+    title: "Fixmi Service Center - Service Gadget",
     description:
       "Pusat perbaikan gadget & lab mikrosolder terpercaya di Bali sejak 2014. Spesialis ganti LCD, baterai, kamera, dan perbaikan motherboard bergaransi resmi. 3 Gerai di Kedonganan, Jimbaran, dan Denpasar.",
     images: [
@@ -120,7 +120,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "FIXMI — Pusat Service iPhone, iPad, MacBook & Android di Bali",
+    title: "Fixmi Service Center - Service Gadget",
     description:
       "Pusat perbaikan gadget terpercaya di Bali sejak 2014. Spesialis mikrosolder logic board, ganti LCD, baterai & sparepart pilihan bergaransi resmi.",
     images: ["/images/faq-portrait.jpg"],
