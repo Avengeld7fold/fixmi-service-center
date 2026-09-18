@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Receipt, Sparkles, Image as ImageIcon, ExternalLink, LogOut, Download } from "lucide-react";
-import { logoutAction } from "@/app/admin/actions";
+import { Receipt, Sparkles, Image as ImageIcon, ExternalLink, LogOut, Download, RefreshCw } from "lucide-react";
+import { logoutAction, syncFrontendCacheAction } from "@/app/admin/actions";
 import ExportModal, { type ExportCategoryOption } from "./ExportModal";
 
 interface AdminNavProps {
@@ -15,6 +15,29 @@ interface AdminNavProps {
 export default function AdminNav({ showExport = false, exportCategories = [] }: AdminNavProps) {
   const pathname = usePathname();
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+
+  const handleSyncCache = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    setSyncStatus(null);
+    try {
+      const res = await syncFrontendCacheAction();
+      if (res.ok) {
+        setSyncStatus("Tersinkron!");
+        setTimeout(() => setSyncStatus(null), 3000);
+      } else {
+        setSyncStatus("Gagal");
+        setTimeout(() => setSyncStatus(null), 3000);
+      }
+    } catch {
+      setSyncStatus("Error");
+      setTimeout(() => setSyncStatus(null), 3000);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const NAV_ITEMS = [
     {
@@ -93,6 +116,19 @@ export default function AdminNav({ showExport = false, exportCategories = [] }: 
               </a>
             );
           })()}
+
+          {/* Sync Frontend ISR Cache Button */}
+          <button
+            type="button"
+            onClick={handleSyncCache}
+            disabled={isSyncing}
+            title="Segarkan cache frontend seketika (Sync ISR)"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-neutral-300 transition-all duration-150 hover:bg-white/[0.08] hover:text-white hover:border-primary/50 cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary ${isSyncing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">{syncStatus || "Sync Cache"}</span>
+            <span className="sm:hidden">{syncStatus || "Sync"}</span>
+          </button>
 
           {/* Export Excel only if showExport is true */}
           {showExport && (

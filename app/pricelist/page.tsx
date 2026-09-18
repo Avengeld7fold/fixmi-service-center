@@ -3,8 +3,8 @@ import PricelistExplorer from "@/components/pricelist/PricelistExplorer";
 import { getPricelist, getPricelistLastUpdated } from "@/lib/pricelist-server";
 import type { Category } from "@/lib/data";
 
-// ISR: HTML di-generate secara statis dan di-revalidate tiap 1 jam, atau instan via revalidatePath() dari admin.
-export const revalidate = 3600;
+// ISR: HTML di-generate secara statis dan di-revalidate tiap 30 detik, atau instan via revalidatePath() / sync button.
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Daftar Harga Service iPhone, iPad, MacBook & Android — FIXMI Service Center",

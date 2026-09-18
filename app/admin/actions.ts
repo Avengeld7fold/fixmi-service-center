@@ -110,8 +110,29 @@ function revalidatePricelistPaths(): void {
     revalidatePath("/en/pricelist");
     revalidatePath("/pricelist/[kategori]", "page");
     revalidatePath("/en/pricelist/[kategori]", "page");
+
+    // Revalidasi eksplisit untuk setiap slug kategori konkret
+    const categories = ["iphone", "ipad", "macbook", "iwatch", "android"];
+    for (const cat of categories) {
+      revalidatePath(`/pricelist/${cat}`);
+      revalidatePath(`/en/pricelist/${cat}`);
+    }
   } catch (err) {
     console.warn("Failed to revalidate pricelist paths:", err);
+  }
+}
+
+export async function syncFrontendCacheAction(): Promise<ActionResult> {
+  if (!(await requireSession())) return { ok: false, error: "Sesi berakhir — silakan login ulang." };
+  try {
+    revalidatePricelistPaths();
+    revalidatePath("/promo");
+    revalidatePath("/en/promo");
+    revalidatePath("/gallery");
+    revalidatePath("/en/gallery");
+    return { ok: true, message: "Cache frontend berhasil disegarkan seketika!" };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Gagal menyegarkan cache." };
   }
 }
 

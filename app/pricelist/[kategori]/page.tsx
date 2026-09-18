@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import PricelistExplorer from "@/components/pricelist/PricelistExplorer";
 import { getPricelist, getPricelistLastUpdated } from "@/lib/pricelist-server";
 
-// ISR: Aktifkan generateStaticParams() untuk SSG awal, di-revalidate tiap 1 jam atau instan via revalidatePath().
-export const revalidate = 3600;
+// ISR: Aktifkan generateStaticParams() untuk SSG awal, di-revalidate tiap 30 detik atau instan via revalidatePath() / sync button.
+export const revalidate = 30;
 
 interface PageProps {
   params: Promise<{

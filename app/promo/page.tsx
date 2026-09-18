@@ -3,8 +3,8 @@ import PromoPageContent from "@/components/promo/PromoPageContent";
 import { getPromoItems } from "@/lib/promo-server";
 import { idDictionary } from "@/lib/i18n/dictionaries/id";
 
-// ISR: HTML di-generate secara statis dan di-revalidate tiap 1 jam, atau instan via revalidatePath() dari admin.
-export const revalidate = 3600;
+// ISR: HTML di-generate secara statis dan di-revalidate tiap 30 detik, atau instan via revalidatePath() / sync button.
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: idDictionary.promo.title,
