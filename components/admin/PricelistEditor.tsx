@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Plus, ChevronDown } from "lucide-react";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
 import ConfirmModal from "./ConfirmModal";
@@ -89,6 +89,8 @@ export default function PricelistEditor({
       if (storedSvcs) {
         const parsed = JSON.parse(storedSvcs);
         if (Array.isArray(parsed)) {
+          // Restore persisted editor UI state after the browser has mounted.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setOpenSvcSlugs(new Set(parsed));
         }
       } else if (window.location.hash) {
@@ -254,6 +256,8 @@ export default function PricelistEditor({
         const draftStr = sessionStorage.getItem(`fixmi_admin_draft_add_${activeSlug}`);
         if (draftStr) {
           const parsed = JSON.parse(draftStr);
+          // Restore the draft only after the browser has mounted.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           if (parsed.name) setNewName(parsed.name);
           if (parsed.nameEn) setNewNameEn(parsed.nameEn);
           if (parsed.brand) setNewBrand(parsed.brand);

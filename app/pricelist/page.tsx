@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import PricelistExplorer from "@/components/pricelist/PricelistExplorer";
-import { getPricelist, getPricelistLastUpdated } from "@/lib/pricelist-server";
-import type { Category } from "@/lib/data";
+import { getPricelistView } from "@/lib/pricelist-server";
 
 // ISR: HTML di-generate secara statis dan di-revalidate tiap 30 detik, atau instan via revalidatePath() / sync button.
 export const revalidate = 30;
@@ -30,17 +29,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PricelistPage() {
-  let categories: Category[] = [];
-  let lastUpdated = "Update Terbaru";
-  let failed = false;
-  try {
-    categories = await getPricelist();
-    lastUpdated = await getPricelistLastUpdated();
-  } catch {
-    failed = true;
-  }
+  const { categoryCards, activeCategory, lastUpdated } = await getPricelistView();
 
-  if (failed || categories.length === 0) {
+  if (!activeCategory) {
     return (
       <section className="mx-auto w-full max-w-[90rem] px-4 md:px-12 lg:px-16 py-24">
         <h1 className="font-display text-4xl font-bold text-foreground">Daftar Harga</h1>
@@ -51,5 +42,5 @@ export default async function PricelistPage() {
     );
   }
 
-  return <PricelistExplorer categories={categories} lastUpdated={lastUpdated} />;
+  return <PricelistExplorer categories={categoryCards} activeCategory={activeCategory} lastUpdated={lastUpdated} />;
 }

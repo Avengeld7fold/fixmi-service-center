@@ -26,13 +26,10 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
   const [openedSlugs, setOpenedSlugs] = useState<Set<string>>(() => new Set());
 
   const toggle = (slug: string) => {
-    setOpenSlug((prev) => {
-      const next = prev === slug ? null : slug;
-      if (next && !openedSlugs.has(next)) {
-        setOpenedSlugs((old) => new Set(old).add(next));
-      }
-      return next;
-    });
+    setOpenSlug((prev) => (prev === slug ? null : slug));
+    if (!openedSlugs.has(slug)) {
+      setOpenedSlugs((prev) => new Set(prev).add(slug));
+    }
   };
 
   // Cascade baris tabel saat panel dibuka: fade + naik dengan stagger cepat.

@@ -32,6 +32,8 @@ export default function ConfirmModal({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Client-only portal mount guard prevents document.body access during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -9,7 +9,7 @@ import { useGSAP } from "@gsap/react";
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
-import { MessageCircle, Wrench, ShieldCheck, ArrowRight } from "lucide-react";
+import { MessageCircle, ShieldCheck, ArrowRight } from "lucide-react";
 import CategoryCards from "./CategoryCards";
 import ServiceAccordion from "./ServiceAccordion";
 import BrandExplorer from "./BrandExplorer";
@@ -27,91 +27,36 @@ function prefersReducedMotion() {
 
 export default function PricelistExplorer({
   categories,
+  activeCategory,
   lastUpdated,
-  initialCategorySlug,
 }: {
-  categories: Category[];
+  categories: Pick<Category, "Name" | "Slug" | "Image">[];
+  activeCategory: Category;
   lastUpdated?: string;
-  initialCategorySlug?: string;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const { dict, getLocalizedPath } = useI18n();
   const [warrantyOpen, setWarrantyOpen] = useState(false);
 
-  // Slugs valid dari data categories
-  const slugs = categories.map((c) => c.Slug);
-
-  // Deteksi slug aktif dari:
-  // 1. props initialCategorySlug (server segment)
-  // 2. pathname (misal /pricelist/iphone atau /en/pricelist/iphone)
-  // 3. fallback ke category pertama
-  let pathSlug = "";
-  const pathParts = pathname.split("/").filter(Boolean);
-  const lastPart = pathParts[pathParts.length - 1];
-  if (lastPart && slugs.includes(lastPart)) {
-    pathSlug = lastPart;
-  }
-
-  const activeSlug =
-    (initialCategorySlug && slugs.includes(initialCategorySlug) ? initialCategorySlug : "") ||
-    pathSlug ||
-    categories[0]?.Slug ||
-    "";
+  const activeSlug = activeCategory.Slug;
 
   // Backward compatibility: jika user mengakses url lama ?device=slug, redirect mulus ke clean path tanpa butuh useSearchParams hook
   useEffect(() => {
     if (typeof window !== "undefined") {
       const sp = new URLSearchParams(window.location.search);
       const legacyParam = sp.get("device");
-      if (legacyParam && slugs.includes(legacyParam)) {
+      if (legacyParam && categories.some((category) => category.Slug === legacyParam)) {
         router.replace(getLocalizedPath(`/pricelist/${legacyParam}`), { scroll: false });
       }
     }
-  }, [slugs, router, getLocalizedPath]);
+  }, [categories, router, getLocalizedPath]);
 
-  const activeCategory = categories.find((c) => c.Slug === activeSlug) ?? categories[0];
-  const hasPricingData = Boolean(
-    activeCategory && activeCategory.service_types.length > 0
-  );
+  const hasPricingData = activeCategory.service_types.length > 0;
 
   const selectCategory = (slug: string) => {
     if (slug === activeSlug) return;
     router.push(getLocalizedPath(`/pricelist/${slug}`), { scroll: false });
   };
-
-  // Entrance header: badge → judul → subtitle (sekali).
-  const headerRef = useRef<HTMLElement>(null);
-  useGSAP(
-    () => {
-      if (prefersReducedMotion() || !headerRef.current) return;
-      const [badge, h1, p] = [
-        headerRef.current.querySelector("div"),
-        headerRef.current.querySelector("h1"),
-        headerRef.current.querySelector("p"),
-      ];
-      gsap
-        .timeline({ defaults: { ease: "power3.out" } })
-        .fromTo(badge, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5 })
-        .fromTo(h1, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.3")
-        .fromTo(p, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.45");
-    },
-    { scope: headerRef }
-  );
-
-  // Entrance kartu kategori (sekali, menyusul header).
-  const cardsRef = useRef<HTMLDivElement>(null);
-  useGSAP(
-    () => {
-      if (prefersReducedMotion() || !cardsRef.current) return;
-      gsap.fromTo(
-        cardsRef.current.querySelectorAll("button"),
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.05, ease: "power2.out", delay: 0.25 }
-      );
-    },
-    { scope: cardsRef }
-  );
 
   // CTA konversi: fade-in saat masuk viewport.
   const ctaRef = useRef<HTMLDivElement>(null);
@@ -201,7 +146,7 @@ export default function PricelistExplorer({
   return (
     <div className="mx-auto w-full max-w-[90rem] px-3 md:px-12 lg:px-16 py-16 lg:py-24">
       {/* ── Header Section — Diagnostic Personality ── */}
-      <header ref={headerRef} className="mb-14 lg:mb-20">
+      <header className="mb-14 lg:mb-20">
         {/* Diagnostic badge — dynamically rendered from backend last modified date */}
         <div className="mb-5 flex items-center gap-2.5">
           <span
@@ -233,7 +178,6 @@ export default function PricelistExplorer({
 
         <p
           className="mt-4 sm:mt-5 max-w-[56ch] text-sm sm:text-base leading-relaxed text-text-secondary"
-          style={{ fontFamily: "var(--font-neue-montreal), sans-serif" }}
         >
           {dict.pricelist.description}
         </p>
@@ -255,7 +199,7 @@ export default function PricelistExplorer({
       </header>
 
       {/* Kartu kategori */}
-      <div ref={cardsRef} className="mb-14 lg:mb-20">
+      <div className="mb-14 lg:mb-20">
         <CategoryCards
           categories={categories}
           activeSlug={activeSlug}

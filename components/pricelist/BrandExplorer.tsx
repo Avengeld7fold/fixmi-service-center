@@ -21,6 +21,8 @@ interface BrandExplorerProps {
 export default function BrandExplorer({ services, categoryName, brandIcons }: BrandExplorerProps) {
   const [openBrand, setOpenBrand] = useState<string | null>(null);
   const [openSeries, setOpenSeries] = useState<string | null>(null);
+  const [openedBrands, setOpenedBrands] = useState<Set<string>>(() => new Set());
+  const [openedSeries, setOpenedSeries] = useState<Set<string>>(() => new Set());
 
   // Kelompokkan: Map<Brand, Map<Series, ServiceType[]>> — memoized untuk performa tinggi.
   const brands = useMemo(() => {
@@ -38,7 +40,13 @@ export default function BrandExplorer({ services, categoryName, brandIcons }: Br
 
   const toggleBrand = (brand: string) => {
     setOpenBrand((prev) => (prev === brand ? null : brand));
+    setOpenedBrands((prev) => new Set(prev).add(brand));
     setOpenSeries(null); // ganti merk = tutup series lama
+  };
+
+  const toggleSeries = (seriesKey: string) => {
+    setOpenSeries((prev) => (prev === seriesKey ? null : seriesKey));
+    setOpenedSeries((prev) => new Set(prev).add(seriesKey));
   };
 
   return (
@@ -102,7 +110,7 @@ export default function BrandExplorer({ services, categoryName, brandIcons }: Br
                 {/* Mobile: indentasi tipis (px-1.5) agar tabel di level terdalam
                     tetap lebar hampir selebar layar (pola fixmibali). */}
                 <div className="space-y-2 border-t border-panel-border px-1.5 py-2 lg:px-5 lg:py-4">
-                  {[...seriesMap.entries()].map(([series, svcList]) => {
+                  {openedBrands.has(brand) && [...seriesMap.entries()].map(([series, svcList]) => {
                     const seriesKey = `${brand}::${series}`;
                     const seriesOpen = openSeries === seriesKey;
                     // Merk tanpa series (Realme, Oppo, dll — pola fixmibali):
@@ -127,9 +135,7 @@ export default function BrandExplorer({ services, categoryName, brandIcons }: Br
                             SAMA dengan level merk & service agar konsisten. ── */}
                         <button
                           type="button"
-                          onClick={() =>
-                            setOpenSeries((prev) => (prev === seriesKey ? null : seriesKey))
-                          }
+                          onClick={() => toggleSeries(seriesKey)}
                           aria-expanded={seriesOpen}
                           className="group flex min-h-[3.5rem] lg:min-h-[4.5rem] w-full items-center gap-3 lg:gap-4 px-3.5 lg:px-5 text-left outline-none transition-colors hover:bg-panel-raised focus-visible:bg-panel-raised"
                         >
@@ -159,12 +165,13 @@ export default function BrandExplorer({ services, categoryName, brandIcons }: Br
                           <div className="overflow-hidden">
                             {/* ── Level 3: jenis service (ikon ↳ ala fixmibali) ── */}
                             <div className="border-t border-panel-border p-1.5 lg:p-3">
-                              <ServiceAccordion
-                                key={seriesKey}
-                                services={svcList}
-                                categoryName={categoryName}
-                                sub
-                              />
+                              {openedSeries.has(seriesKey) && (
+                                <ServiceAccordion
+                                  services={svcList}
+                                  categoryName={categoryName}
+                                  sub
+                                />
+                              )}
                             </div>
                           </div>
                         </div>

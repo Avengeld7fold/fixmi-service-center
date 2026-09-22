@@ -8,14 +8,11 @@ import {
   Upload,
   Plus,
   Trash2,
-  Tag,
   ExternalLink,
   CheckCircle2,
   AlertCircle,
   X,
   Eye,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { uploadGalleryAction, deleteGalleryAction } from "@/app/admin/actions";
 import type { GalleryImage } from "@/lib/gallery-server";

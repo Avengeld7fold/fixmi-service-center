@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MoveLeft, MoveRight, Search, X, MessageCircle } from "lucide-react";
-import { formatThousands, type ServiceType } from "@/lib/data";
+import type { ServiceType } from "@/lib/data";
 import { whatsappUrl } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
 import {
@@ -10,6 +10,8 @@ import {
   getLocalizedVariantLabel,
   getLocalizedVariantNote,
 } from "@/lib/i18n/service-translation";
+
+const priceFormatter = new Intl.NumberFormat("id-ID");
 
 export interface SmartTextSegment {
   type: "text" | "badge";
@@ -160,6 +162,10 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return service.device_prices;
+    if (service.variants.some((v) =>
+      v.Label.toLowerCase().includes(q) ||
+      (v.Note && v.Note.toLowerCase().includes(q))
+    )) return service.device_prices;
     return service.device_prices.filter((d) => {
       if (d.DeviceModel.toLowerCase().includes(q)) return true;
       if (
@@ -169,30 +175,23 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
       ) {
         return true;
       }
-      return service.variants.some(
-        (v) =>
-          v.Label.toLowerCase().includes(q) ||
-          (v.Note && v.Note.toLowerCase().includes(q))
-      );
+      return false;
     });
   }, [query, service.device_prices, service.variants]);
 
   const variants = service.variants;
 
-  const isSeriesCol = useCallback(
-    (v: { Key: string; Label: string; Type?: string }) => {
-      return service.device_prices.some((d) => {
-        const val = d.prices[v.Key];
-        return typeof val === "string" && /\bA\d{4}[A-Z]?\b/i.test(val);
-      });
-    },
-    [service.device_prices]
-  );
+  const seriesColumns = useMemo(() => new Set(
+    variants.filter((v) => service.device_prices.some((d) => {
+      const val = d.prices[v.Key];
+      return typeof val === "string" && /\bA\d{4}[A-Z]?\b/i.test(val);
+    })).map((v) => v.Key)
+  ), [variants, service.device_prices]);
 
   const tableMinWidth = useMemo(() => {
     let remSum = 11.5;
     for (const v of variants) {
-      if (isSeriesCol(v)) {
+      if (seriesColumns.has(v.Key)) {
         remSum += 13.5;
       } else if (v.Type === "text") {
         remSum += 8.5;
@@ -201,7 +200,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
       }
     }
     return `max(100%, ${remSum}rem)`;
-  }, [variants, isSeriesCol]);
+  }, [variants, seriesColumns]);
 
   return (
     <div className="pt-4">
@@ -283,7 +282,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                 <col
                   key={v.Key}
                   className={
-                    isSeriesCol(v)
+                    seriesColumns.has(v.Key)
                       ? "w-[13.5rem] lg:w-[16rem]"
                       : v.Type === "text"
                       ? "w-[8.5rem] lg:w-[10.5rem]"
@@ -345,7 +344,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                 <col
                   key={v.Key}
                   className={
-                    isSeriesCol(v)
+                    seriesColumns.has(v.Key)
                       ? "w-[13.5rem] lg:w-[16rem]"
                       : v.Type === "text"
                       ? "w-[8.5rem] lg:w-[10.5rem]"
@@ -408,7 +407,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                     </td>
                     {variants.map((v) => {
                       const val = row.prices[v.Key];
-                      const isSeries = isSeriesCol(v);
+                      const isSeries = seriesColumns.has(v.Key);
                       const isText = v.Type === "text" || typeof val === "string";
 
                       return (
@@ -428,7 +427,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                             <>
                               <span className="mr-1.5 text-primary font-bold font-instrument">Rp.</span>
                               <span className="text-primary font-bold font-instrument">
-                                {formatThousands(val as number)}
+                                {priceFormatter.format(val as number)}
                               </span>
                             </>
                           )}

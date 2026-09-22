@@ -235,6 +235,15 @@ p {
   }
 }
 
+/* Konten harga tetap terlihat sejak HTML pertama tampil; hanya posisi yang bergerak. */
+.pricelist-enter {
+  animation: pricelist-enter 0.55s ease-out backwards;
+}
+@keyframes pricelist-enter {
+  from { transform: translateY(0.75rem); }
+  to { transform: translateY(0); }
+}
+
 /* ============================
    Footer motion — readout refresh saat ganti toko (bukan entrance dekoratif).
    Crossfade opacity murni: konten baru "menyala" halus, TANPA translateY-up
@@ -262,6 +271,7 @@ input[type="search"]::-webkit-search-results-decoration {
 
 /* Reduced Motion implementation */
 @media (prefers-reduced-motion: reduce) {
+  .pricelist-enter { animation: none; }
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

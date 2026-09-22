@@ -308,7 +308,6 @@ export async function uploadPromoAction(formData: FormData): Promise<ActionResul
     if (file && file.size > 0) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const ext = path.extname(file.name) || ".jpg";
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase();
       const filename = `promo-${Date.now()}-${sanitizedName}`;
       const uploadDir = path.join(process.cwd(), "public", "images", "promo");
@@ -332,6 +331,7 @@ export async function uploadPromoAction(formData: FormData): Promise<ActionResul
     });
 
     revalidatePath("/promo");
+    revalidatePath("/en/promo");
     revalidatePath("/admin/promo");
     return { ok: true, message: "Banner promo berhasil ditambahkan.", promo: created };
   } catch (e) {
@@ -345,6 +345,7 @@ export async function deletePromoAction(id: string): Promise<ActionResult> {
     const ok = await deletePromoItem(id);
     if (!ok) return { ok: false, error: "Promo tidak ditemukan." };
     revalidatePath("/promo");
+    revalidatePath("/en/promo");
     revalidatePath("/admin/promo");
     return { ok: true, message: "Promo berhasil dihapus." };
   } catch (e) {
@@ -391,6 +392,7 @@ export async function uploadGalleryAction(formData: FormData): Promise<ActionRes
     });
 
     revalidatePath("/gallery");
+    revalidatePath("/en/gallery");
     revalidatePath("/admin/gallery");
     return { ok: true, message: "Foto dokumentasi servis berhasil ditambahkan ke galeri.", galleryItem: created };
   } catch (e) {
@@ -404,10 +406,10 @@ export async function deleteGalleryAction(id: string): Promise<ActionResult> {
     const ok = await deleteGalleryImage(id);
     if (!ok) return { ok: false, error: "Foto galeri tidak ditemukan." };
     revalidatePath("/gallery");
+    revalidatePath("/en/gallery");
     revalidatePath("/admin/gallery");
     return { ok: true, message: "Foto galeri berhasil dihapus." };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Gagal menghapus foto galeri." };
   }
 }
-

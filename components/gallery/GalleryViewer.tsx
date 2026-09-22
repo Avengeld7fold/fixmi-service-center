@@ -39,9 +39,13 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
     if (selectedIndex === null) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "Escape") setSelectedIndex(null);
+      if (e.key === "ArrowLeft") {
+        setSelectedIndex((prev) => (prev === null ? null : prev > 0 ? prev - 1 : images.length - 1));
+      }
+      if (e.key === "ArrowRight") {
+        setSelectedIndex((prev) => (prev === null ? null : prev < images.length - 1 ? prev + 1 : 0));
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -51,7 +55,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [selectedIndex]);
+  }, [images.length, selectedIndex]);
 
   // Ultra-Clean Snug Banner (adopted from Pricelist empty card pattern, without WhatsApp CTA)
   if (!images || images.length === 0) {
@@ -104,6 +108,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
           >
             {/* Dynamic Natural Ratio Image */}
             <div className="relative w-full overflow-hidden bg-neutral-900/60">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={item.Image}
                 alt={item.altText || item.Title || `Dokumentasi Servis FIXMI ${index + 1}`}
@@ -170,6 +175,7 @@ export default function GalleryViewer({ images }: GalleryViewerProps) {
             className="relative flex flex-col items-center max-w-5xl max-h-[90vh] w-full select-none"
           >
             <div className="relative flex items-center justify-center max-h-[78vh] w-auto max-w-full overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selectedImage.Image}
                 alt={selectedImage.altText || selectedImage.Title || (isEn ? "FIXMI Repair Documentation" : "Dokumentasi Servis FIXMI")}

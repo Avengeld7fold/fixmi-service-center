@@ -28,12 +28,16 @@ export default function IconPickerModal({
   const isAndroid = categorySlug === "android";
 
   useEffect(() => {
+    // Client-only portal mount guard prevents document.body access during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   // Reset search saat modal dibuka
   useEffect(() => {
     if (isOpen) {
+      // Reset transient search state whenever a new modal session opens.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearch("");
     }
   }, [isOpen]);

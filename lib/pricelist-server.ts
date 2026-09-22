@@ -1,40 +1,31 @@
-import { copyFile, readFile, stat } from "node:fs/promises";
+import { copyFile, link, readFile, stat, unlink } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { cache } from "react";
 import type { Category, ServiceType, Variant, DevicePrice } from "./data";
 import { SKELETON_PRICELIST } from "./pricelist-skeleton";
 
 // ============================================================
-// Resolusi Title & Icon per jenis service (dikelola di kode, §4.3)
+// Ikon fallback per jenis service (dikelola di kode, §4.3)
 // ============================================================
 
-const SERVICE_META: Record<string, { title: string; icon: string }> = {
-  "lcd-display": { title: "LCD", icon: "smartphone" },
-  battery: { title: "Battery", icon: "battery" },
-  "charger-port": { title: "Charger", icon: "plug" },
-  camera: { title: "Kamera", icon: "camera" },
-  "face-id-sensor": { title: "Face ID", icon: "scan-face" },
-  "housing-backglass": { title: "Housing & Backglass", icon: "layers" },
+const SERVICE_ICONS: Record<string, string> = {
+  "lcd-display": "smartphone",
+  battery: "battery",
+  "charger-port": "plug",
+  camera: "camera",
+  "face-id-sensor": "scan-face",
+  "housing-backglass": "layers",
 };
 
-export function resolveServiceMeta(
-  serviceSlug: string,
-  serviceName: string,
-  categoryName: string,
-  branded = false
-): { title: string; icon: string } {
+function resolveServiceIcon(serviceSlug: string): string {
   // Service bertingkat memakai slug "brand-series--service"; META dicari
   // dengan bagian setelah "--" (mis. "samsung-galaxy-s-series--lcd-display"
   // → "lcd-display").
   const baseSlug = serviceSlug.includes("--")
     ? serviceSlug.split("--").pop()!
     : serviceSlug;
-  const meta = SERVICE_META[baseSlug];
-  return {
-    // Teks murni persis sesuai nama layanan (tanpa pemaksaan kata "Harga" / nama kategori)
-    title: serviceName,
-    icon: meta?.icon ?? "wrench",
-  };
+  return SERVICE_ICONS[baseSlug] ?? "wrench";
 }
 
 // ============================================================
@@ -54,14 +45,23 @@ const TEMPLATE_PATH = join(process.cwd(), "data", "pricelist.template.json");
 async function ensurePricelistFile(): Promise<string> {
   try {
     return await readFile(PRICELIST_PATH, "utf8");
-  } catch {
-    try {
-      await copyFile(TEMPLATE_PATH, PRICELIST_PATH);
-      return await readFile(PRICELIST_PATH, "utf8");
-    } catch {
-      return "";
-    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
+
+  const tempPath = `${PRICELIST_PATH}.${process.pid}.${randomUUID()}.tmp`;
+  try {
+    await copyFile(TEMPLATE_PATH, tempPath);
+    try {
+      await link(tempPath, PRICELIST_PATH);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+  } finally {
+    await unlink(tempPath).catch(() => {});
+  }
+
+  return readFile(PRICELIST_PATH, "utf8");
 }
 
 const MONTH_NAMES_ID = [
@@ -143,8 +143,7 @@ export const getPricelist = cache(async function getPricelist(): Promise<Categor
         const brand = typeof s.Brand === "string" && s.Brand.trim() ? s.Brand.trim() : undefined;
         const series = typeof s.Series === "string" && s.Series.trim() ? s.Series.trim() : undefined;
         const nameEn = typeof s.Name_en === "string" && s.Name_en.trim() ? s.Name_en.trim() : undefined;
-        const { title, icon: fallbackIcon } = resolveServiceMeta(s.Slug, s.Name, c.Name as string, !!brand);
-        const icon = typeof s.icon === "string" && s.icon.trim() ? s.icon.trim() : fallbackIcon;
+        const icon = typeof s.icon === "string" && s.icon.trim() ? s.icon.trim() : resolveServiceIcon(s.Slug);
         return {
           Name: s.Name,
           ...(nameEn ? { Name_en: nameEn } : {}),
@@ -189,3 +188,14 @@ export const getPricelist = cache(async function getPricelist(): Promise<Categor
     return SKELETON_PRICELIST;
   }
 });
+
+export async function getPricelistView(categorySlug?: string) {
+  const categories = await getPricelist();
+  const lastUpdated = await getPricelistLastUpdated();
+
+  return {
+    categoryCards: categories.map(({ Name, Slug, Image }) => ({ Name, Slug, Image })),
+    activeCategory: categories.find((category) => category.Slug === categorySlug) ?? categories[0],
+    lastUpdated,
+  };
+}

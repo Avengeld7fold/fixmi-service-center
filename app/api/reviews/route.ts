@@ -20,6 +20,19 @@ export interface GooglePlaceData {
   isLive: boolean;
 }
 
+interface GooglePlaceReview {
+  author_name?: string;
+  author_url?: string;
+  profile_photo_url?: string;
+  rating?: number;
+  relative_time_description?: string;
+  text?: string;
+  time?: number;
+  translated?: boolean;
+  language?: string;
+  original_language?: string;
+}
+
 // Fallback data otentik sesuai bahasa asli yang diketik reviewer
 export const FALLBACK_REVIEWS: GooglePlaceData = {
   name: "FIXMI SERVICE CENTER",
@@ -143,7 +156,7 @@ export async function GET() {
     ];
 
     // Simpan teks ulasan asli tanpa terjemahan mesin (translated === false)
-    const originalMap = new Map<string, any>();
+    const originalMap = new Map<string, GooglePlaceReview>();
 
     for (const rev of allRawReviews) {
       const key = `${rev.author_name}-${rev.time}`;
@@ -155,7 +168,7 @@ export async function GET() {
       } else {
         const existing = originalMap.get(key);
         // Prioritaskan teks asli yang bukan terjemahan
-        if (isOriginal && existing.translated) {
+        if (isOriginal && existing?.translated) {
           originalMap.set(key, rev);
         }
       }

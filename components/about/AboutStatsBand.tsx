@@ -150,7 +150,7 @@ export default function AboutStatsBand() {
               >
                 {/* Tech spec index */}
                 <div className="flex items-center gap-1.5 mb-2 sm:mb-3 font-mono text-[0.6875rem] text-white/25 transition-colors duration-300 group-hover:text-primary/70 select-none">
-                  <span>// 0{idx + 1}</span>
+                  <span>{"//"} 0{idx + 1}</span>
                 </div>
 
                 {/* Stat number */}

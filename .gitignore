@@ -72,7 +72,5 @@ prd.md
 skills.md
 skills-lock.json
 
-# Dead code & dev-only scripts
-proxy.ts
+# Dev-only scripts
 scripts/
-

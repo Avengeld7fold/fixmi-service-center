@@ -40,9 +40,13 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
     if (selectedIndex === null) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "Escape") setSelectedIndex(null);
+      if (e.key === "ArrowLeft") {
+        setSelectedIndex((prev) => (prev === null ? null : prev > 0 ? prev - 1 : promos.length - 1));
+      }
+      if (e.key === "ArrowRight") {
+        setSelectedIndex((prev) => (prev === null ? null : prev < promos.length - 1 ? prev + 1 : 0));
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -52,7 +56,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [selectedIndex]);
+  }, [promos.length, selectedIndex]);
 
   // Ultra-Clean Snug Banner (adopted from Pricelist empty card pattern)
   if (!promos || promos.length === 0) {
@@ -127,6 +131,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
           >
             {/* Promo Card Image */}
             <div className="relative w-full overflow-hidden bg-neutral-900/80">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={item.Image}
                 alt={item.altText || item.Title || `Promo FIXMI ${index + 1}`}
@@ -216,6 +221,7 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
             className="relative flex flex-col items-center max-w-5xl max-h-[90vh] w-full select-none"
           >
             <div className="relative flex items-center justify-center max-h-[78vh] w-auto max-w-full overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selectedPromo.Image}
                 alt={selectedPromo.altText || selectedPromo.Title || (isEn ? "FIXMI Promo Banner" : "Banner Promo FIXMI")}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Dictionary, Locale } from "./types";
 import { getDictionary } from "./getDictionary";
@@ -32,7 +32,7 @@ export function I18nProvider({
 
   const dict = useMemo(() => getDictionary(currentLocale), [currentLocale]);
 
-  const getLocalizedPath = (targetPath: string, targetLocale: Locale = currentLocale): string => {
+  const getLocalizedPath = useCallback((targetPath: string, targetLocale: Locale = currentLocale): string => {
     // Normalize path by removing existing /en prefix
     let cleanPath = targetPath.startsWith("/en")
       ? targetPath.replace(/^\/en(\/|$)/, "/")
@@ -44,9 +44,9 @@ export function I18nProvider({
       return cleanPath === "/" ? "/en" : `/en${cleanPath}`;
     }
     return cleanPath;
-  };
+  }, [currentLocale]);
 
-  const switchLocale = (target: Locale) => {
+  const switchLocale = useCallback((target: Locale) => {
     if (target === currentLocale) return;
 
     let cleanPath = pathname.startsWith("/en")
@@ -67,7 +67,7 @@ export function I18nProvider({
     }
 
     router.push(targetUrl, { scroll: false });
-  };
+  }, [currentLocale, pathname, router]);
 
   const value = useMemo(
     () => ({
@@ -76,7 +76,7 @@ export function I18nProvider({
       switchLocale,
       getLocalizedPath,
     }),
-    [currentLocale, dict, pathname]
+    [currentLocale, dict, getLocalizedPath, switchLocale]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

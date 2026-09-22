@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SmoothScrolling from "@/components/SmoothScrolling";
 import LoadingGate from "@/components/loader/LoadingGate";
+import HtmlLanguage from "@/components/HtmlLanguage";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -216,8 +217,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="id"
+    <HtmlLanguage
       className={`${geistMono.variable} ${neueMontreal.variable} ${bayon.variable} ${instrumentSans.variable} antialiased`}
     >
       <head>
@@ -237,6 +237,6 @@ export default function RootLayout({
           </I18nProvider>
         </LoadingGate>
       </body>
-    </html>
+    </HtmlLanguage>
   );
 }

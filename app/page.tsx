@@ -152,7 +152,7 @@ export default function Home() {
             if (event.pointerType === "mouse") activate3D();
           }}
         >
-          <div className={`absolute inset-x-0 top-[4.5rem] bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-44 flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
+          <div className={`absolute inset-x-0 top-[4.5rem] bottom-20 sm:bottom-28 md:top-0 md:bottom-auto md:h-screen flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
             <Image src="/images/iphone-broken.webp" alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, 80vw" loading="eager" fetchPriority="high" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
           </div>
           {load3D ? <Hero3D active={heroVisible} onReady={handleHeroReady} /> : null}

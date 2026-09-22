@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import { Plus, Trash2, Search, X, ArrowDown, ArrowUp } from "lucide-react";
+import { Trash2, Search, X, ArrowDown, ArrowUp } from "lucide-react";
 import { formatThousands, parseThousands, type DevicePrice, type ServiceType } from "@/lib/data";
 import ConfirmModal from "./ConfirmModal";
 

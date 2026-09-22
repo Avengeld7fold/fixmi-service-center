@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PricelistExplorer from "@/components/pricelist/PricelistExplorer";
-import { getPricelist, getPricelistLastUpdated } from "@/lib/pricelist-server";
+import { getPricelist, getPricelistView } from "@/lib/pricelist-server";
 
 // ISR: Aktifkan generateStaticParams() untuk SSG awal, di-revalidate tiap 30 detik atau instan via revalidatePath() / sync button.
 export const revalidate = 30;
@@ -53,14 +53,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CategoryPricelistPage({ params }: PageProps) {
   const { kategori } = await params;
-  const categories = await getPricelist();
-  const lastUpdated = await getPricelistLastUpdated();
+  const { categoryCards, activeCategory, lastUpdated } = await getPricelistView(kategori.toLowerCase());
 
   return (
     <PricelistExplorer
-      categories={categories}
+      categories={categoryCards}
+      activeCategory={activeCategory}
       lastUpdated={lastUpdated}
-      initialCategorySlug={kategori.toLowerCase()}
     />
   );
 }

@@ -23,12 +23,16 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
   const [selectedSvc, setSelectedSvc] = useState<string>("");
 
   useEffect(() => {
+    // Client-only portal mount guard prevents document.body access during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   // Set default selected category saat categories tersedia
   useEffect(() => {
     if (categories.length > 0 && !selectedCat) {
+      // Keep the first available category selected when server data arrives.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCat(categories[0].Slug);
     }
   }, [categories, selectedCat]);
@@ -37,6 +41,8 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
   useEffect(() => {
     const cat = categories.find((c) => c.Slug === selectedCat);
     if (cat && cat.services.length > 0) {
+      // Keep the service selection valid for the selected category.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSvc(cat.services[0].Slug);
     } else {
       setSelectedSvc("");

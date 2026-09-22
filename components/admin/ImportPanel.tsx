@@ -11,8 +11,6 @@ import {
   X,
   FileCheck,
   CheckCircle2,
-  AlertCircle,
-  ArrowRight,
   RefreshCw,
   CopyCheck,
 } from "lucide-react";
@@ -52,6 +50,8 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
   // Set seluruh kategori terdeteksi terpilih secara default saat preview baru tersedia
   useEffect(() => {
     if (state.preview && state.preview.categories.length > 0) {
+      // Preview data is an external action result; mirror its default selection.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCategorySlugs(new Set(state.preview.categories.map((c) => c.slug)));
     } else {
       setSelectedCategorySlugs(new Set());

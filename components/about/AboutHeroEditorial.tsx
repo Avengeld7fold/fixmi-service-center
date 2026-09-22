@@ -163,7 +163,7 @@ export default function AboutHeroEditorial() {
           ref={tooltipRef}
           className="fixed top-0 left-0 z-50 pointer-events-none transition-opacity duration-200"
           style={{
-            transform: `translate3d(${targetXRef.current}px, ${targetYRef.current}px, 0)`,
+            transform: "translate3d(0px, 0px, 0)",
           }}
         >
           <div className="w-56 sm:w-64 rounded-xl border border-white/20 bg-black/90 backdrop-blur-xl p-2 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">

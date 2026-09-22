@@ -67,6 +67,8 @@ export default function Navbar() {
     link: l.href,
   }));
 
+  // Route changes close the animated mobile menu after client navigation.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
 
   useEffect(() => {
