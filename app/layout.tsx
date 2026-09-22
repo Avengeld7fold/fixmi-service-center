@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SmoothScrolling from "@/components/SmoothScrolling";
 import LoadingGate from "@/components/loader/LoadingGate";
 import HtmlLanguage from "@/components/HtmlLanguage";
+import ImageProtection from "@/components/ImageProtection";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -227,6 +228,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground" suppressHydrationWarning>
+        <ImageProtection />
         <LoadingGate>
           <I18nProvider>
             <SmoothScrolling>

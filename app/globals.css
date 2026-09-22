@@ -120,6 +120,16 @@ body {
   overflow-x: hidden;
 }
 
+/* Gambar situs bukan sumber interaksi: cegah drag desktop dan callout
+   simpan/salin saat long-press di browser berbasis WebKit. */
+img,
+picture {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* ============================
    Typography calibration (Impeccable rules)
    ============================ */

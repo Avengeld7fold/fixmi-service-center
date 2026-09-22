@@ -9,6 +9,7 @@ import ConfirmModal from "./ConfirmModal";
 import IconPickerModal from "./IconPickerModal";
 import ServiceIcon from "@/components/pricelist/ServiceIcon";
 import { brandImage, slugify, type Category, type ServiceType } from "@/lib/data";
+import { moveBrandServices } from "@/lib/pricelist-order";
 
 // Posisi UI yang bertahan melewati remount. Editor di-remount lewat
 // key={version} setiap save/import/restore — tanpa ini admin selalu
@@ -546,6 +547,112 @@ export default function PricelistEditor({
     },
   });
 
+  const [draggingBrand, setDraggingBrand] = useState<string | null>(null);
+  const [overBrand, setOverBrand] = useState<string | null>(null);
+  const brandDragRef = useRef<string | null>(null);
+  const brandOverRef = useRef<string | null>(null);
+  const brandHoldRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const brandScrollFrameRef = useRef<number | null>(null);
+  const brandDragActiveRef = useRef(false);
+  const brandStartRef = useRef({ x: 0, y: 0 });
+  const brandPointerRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => () => {
+    if (brandHoldRef.current) clearTimeout(brandHoldRef.current);
+    if (brandScrollFrameRef.current !== null) cancelAnimationFrame(brandScrollFrameRef.current);
+  }, []);
+
+  const moveBrand = (fromBrand: string, toBrand: string) => {
+    if (fromBrand === toBrand) return;
+    setDraft((prev) => prev.map((cat) => cat.Slug === activeSlug
+      ? { ...cat, service_types: moveBrandServices(cat.service_types, fromBrand, toBrand) }
+      : cat
+    ));
+    setMessage(null);
+  };
+
+  const resetBrandDrag = () => {
+    if (brandHoldRef.current) clearTimeout(brandHoldRef.current);
+    if (brandScrollFrameRef.current !== null) cancelAnimationFrame(brandScrollFrameRef.current);
+    brandHoldRef.current = null;
+    brandScrollFrameRef.current = null;
+    brandDragRef.current = null;
+    brandOverRef.current = null;
+    brandDragActiveRef.current = false;
+    setDraggingBrand(null);
+    setOverBrand(null);
+  };
+
+  const updateBrandOver = (brand: string, x: number, y: number) => {
+    const target = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-brand-name]");
+    const targetBrand = target?.dataset.brandName ?? null;
+    if (targetBrand !== brandOverRef.current) {
+      brandOverRef.current = targetBrand;
+      setOverBrand(targetBrand === brand ? null : targetBrand);
+    }
+  };
+
+  const scrollBrandWhileHeld = (brand: string) => {
+    const { x, y } = brandPointerRef.current;
+    const step = y < 90 ? -14 : y > window.innerHeight - 90 ? 14 : 0;
+    if (!brandDragActiveRef.current || !step) {
+      brandScrollFrameRef.current = null;
+      return;
+    }
+    window.scrollBy(0, step);
+    updateBrandOver(brand, x, y);
+    brandScrollFrameRef.current = requestAnimationFrame(() => scrollBrandWhileHeld(brand));
+  };
+
+  const createBrandDragProps = (brand: string) => ({
+    onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+      if (event.button !== 0) return;
+      if ((event.target as HTMLElement).closest("[data-brand-action]")) return;
+      brandDragRef.current = brand;
+      brandStartRef.current = { x: event.clientX, y: event.clientY };
+      event.currentTarget.setPointerCapture(event.pointerId);
+      brandHoldRef.current = setTimeout(() => {
+        brandDragActiveRef.current = true;
+        setDraggingBrand(brand);
+        navigator.vibrate?.(25);
+      }, 160);
+    },
+    onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
+      if (brandDragRef.current !== brand) return;
+      if (!brandDragActiveRef.current) {
+        const dx = Math.abs(event.clientX - brandStartRef.current.x);
+        const dy = Math.abs(event.clientY - brandStartRef.current.y);
+        if (dx > 6 || dy > 6) {
+          if (brandHoldRef.current) clearTimeout(brandHoldRef.current);
+          brandHoldRef.current = null;
+          brandDragRef.current = null;
+        }
+        return;
+      }
+
+      brandPointerRef.current = { x: event.clientX, y: event.clientY };
+      updateBrandOver(brand, event.clientX, event.clientY);
+      if (brandScrollFrameRef.current === null && (event.clientY < 90 || event.clientY > window.innerHeight - 90)) {
+        brandScrollFrameRef.current = requestAnimationFrame(() => scrollBrandWhileHeld(brand));
+      }
+    },
+    onPointerUp: (event: React.PointerEvent<HTMLElement>) => {
+      const wasDrag = brandDragActiveRef.current;
+      const fromBrand = brandDragRef.current;
+      if (wasDrag) {
+        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-brand-name]");
+        const targetBrand = target?.dataset.brandName ?? brandOverRef.current;
+        if (targetBrand && targetBrand !== brand) moveBrand(brand, targetBrand);
+      } else if (fromBrand === brand) {
+        setOpenBrand((prev) => (prev === brand ? null : brand));
+        setOpenSeries(null);
+      }
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+      resetBrandDrag();
+    },
+    onPointerCancel: resetBrandDrag,
+  });
+
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -928,20 +1035,27 @@ export default function PricelistEditor({
                   return (
                     <div
                       key={brand}
-                      className="overflow-hidden rounded-[12px] border border-panel-border bg-panel"
+                      data-brand-name={brand}
+                      className={`overflow-hidden rounded-[12px] border bg-panel transition-colors ${
+                        overBrand === brand && draggingBrand !== brand
+                          ? "border-primary ring-2 ring-primary/40"
+                          : draggingBrand === brand ? "border-primary/70 opacity-80" : "border-panel-border"
+                      }`}
                     >
                       {/* ── Level merk ── */}
                       <button
                         type="button"
-                        onClick={() => {
-                          setOpenBrand((prev) => (prev === brand ? null : brand));
-                          setOpenSeries(null);
-                        }}
+                        {...createBrandDragProps(brand)}
                         aria-expanded={brandOpen}
-                        className="flex w-full items-center gap-4 px-5 py-4 text-left outline-none transition-colors hover:bg-panel-raised focus-visible:bg-panel-raised"
+                        aria-label={`${brand}. Tahan lalu geser untuk mengubah urutan, atau ketuk untuk membuka.`}
+                        className={`flex w-full min-w-0 touch-none select-none cursor-grab active:cursor-grabbing items-center gap-2 px-3 py-4 text-left outline-none transition-colors focus-visible:bg-panel-raised sm:gap-4 sm:px-5 ${
+                          draggingBrand === brand ? "bg-panel-raised" : "hover:bg-panel-raised"
+                        }`}
                       >
                         {/* ── Tombol Ganti Ikon Merk ── */}
                         <span
+                          data-brand-action
+                          onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => {
                             e.stopPropagation();
                             const current =
@@ -972,8 +1086,8 @@ export default function PricelistEditor({
                             brand.charAt(0)
                           )}
                         </span>
-                        <span className="flex-1">
-                          <span className="block text-base font-semibold text-foreground">{brand}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-base font-semibold text-foreground">{brand}</span>
                           <span className="block text-xs text-text-muted">
                             {namedSeries > 0
                               ? `${namedSeries} series · ${svcCount} jenis service`

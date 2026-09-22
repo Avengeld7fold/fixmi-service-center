@@ -135,13 +135,22 @@ interface TexturesState {
 interface MagicShaderPlaneProps {
   textures: TexturesState;
   active: boolean;
+  mobile: boolean;
   onReady: () => void;
 }
 
-function MagicShaderPlane({ textures, active, onReady }: MagicShaderPlaneProps) {
+function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlaneProps) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
   const gl = useThree((state) => state.gl);
   const size = useThree((state) => state.size);
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    if (!mobile || !active) return;
+    invalidate();
+    const interval = window.setInterval(invalidate, 1000 / 30);
+    return () => window.clearInterval(interval);
+  }, [active, invalidate, mobile]);
 
   const prefersReduced =
     typeof window !== "undefined" &&
@@ -153,23 +162,21 @@ function MagicShaderPlane({ textures, active, onReady }: MagicShaderPlaneProps) 
   // Ref for the main 3D Mesh to enable Idle Floating
   const meshRef = useRef<THREE.Mesh>(null);
 
-  // Simulasi fluida (mask reveal) — resolusi 0.1× layar, parameter DEFAULTS
-  // Lando di semua perangkat.
+  // Desktop memakai simulasi penuh; mobile menurunkan jumlah pass GPU.
   const simRef = useRef<FluidSim | null>(null);
 
   useEffect(() => {
-    // Parameter DEFAULTS (persis landonorris.com) untuk SEMUA perangkat.
-    // PENTING: FluidSim di-feed ukuran DRAWING BUFFER (device pixels =
-    // CSS × dpr), BUKAN ukuran CSS. Lando memakai buffer 750px di mobile
-    // (375 CSS × dpr 2) → fboSize 75 → brush 18/75 = 0.24 lebar. Kalau
-    // di-feed CSS 375, fboSize 37.5 → brush 0.48 (2× terlalu besar).
-    const sim = new FluidSim(gl, gl.domElement.width, gl.domElement.height, {});
+    // Ukuran simulasi memakai drawing buffer; cursor mobile diperkecil
+    // sebanding dengan DPR 1 agar lebar sapuan tetap terkendali.
+    const sim = new FluidSim(gl, gl.domElement.width, gl.domElement.height, mobile
+      ? { iterations_poisson: 2, BFECC: false, cursor_size: 9 }
+      : {});
     simRef.current = sim;
     return () => {
       sim.dispose();
       simRef.current = null;
     };
-  }, [gl]);
+  }, [gl, mobile]);
 
   useEffect(() => {
     simRef.current?.resize(gl.domElement.width, gl.domElement.height);
@@ -450,7 +457,7 @@ class WebGLBoundary extends React.Component<
   }
 }
 
-export default function Hero3D({ active, onReady }: { active: boolean; onReady: () => void }) {
+export default function Hero3D({ active, mobile, onReady }: { active: boolean; mobile: boolean; onReady: () => void }) {
   const [textures, setTextures] = useState<TexturesState | null>(null);
 
   useEffect(() => {
@@ -516,11 +523,11 @@ export default function Hero3D({ active, onReady }: { active: boolean; onReady: 
             // geometri), MSAA tidak memberi efek visual apa pun tetapi membebani
             // GPU tua secara signifikan. powerPreference meminta GPU diskrit bila ada.
             gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-            dpr={[1, 1.25]}
-            frameloop={active ? "always" : "never"}
+            dpr={mobile ? 1 : [1, 1.25]}
+            frameloop={mobile ? "demand" : active ? "always" : "never"}
             className="w-full h-full touch-pan-y"
           >
-            <MagicShaderPlane textures={textures} active={active} onReady={onReady} />
+            <MagicShaderPlane textures={textures} active={active} mobile={mobile} onReady={onReady} />
           </Canvas>
         </WebGLBoundary>
       )}

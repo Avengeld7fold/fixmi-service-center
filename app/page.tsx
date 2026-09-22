@@ -66,25 +66,34 @@ export default function Home() {
   const captionRef = useRef<HTMLParagraphElement>(null);
 
   const [load3D, setLoad3D] = useState(false);
+  const [mobile3D, setMobile3D] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const load3DTimerRef = useRef<number | null>(null);
   const handleHeroReady = useCallback(() => setHeroReady(true), []);
 
-  const activate3D = useCallback(() => {
+  const activate3D = useCallback((input: "mouse" | "touch") => {
     if (load3D || load3DTimerRef.current !== null) return;
 
     const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    if (
-      window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)").matches ||
-      nav.connection?.saveData ||
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || nav.connection?.saveData) return;
+    if (input === "touch") {
+      if ((nav.deviceMemory !== undefined && nav.deviceMemory <= 1) ||
+        (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 2)) return;
+    } else if (window.matchMedia("(pointer: coarse)").matches ||
       (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
-      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
-    ) return;
+      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)) {
+      return;
+    }
 
     load3DTimerRef.current = window.setTimeout(() => {
       load3DTimerRef.current = null;
+      const hero = heroRef.current;
+      if (!hero) return;
+      const bounds = hero.getBoundingClientRect();
+      if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
+      setMobile3D(input === "touch");
       setLoad3D(true);
     }, 650);
   }, [load3D]);
@@ -145,17 +154,20 @@ export default function Home() {
           <div className="w-[36rem] sm:w-[50rem] h-[28rem] sm:h-[38rem] rounded-full bg-primary/[0.07] blur-[100px] sm:blur-[140px]" />
         </div>
 
-        {/* Keep the phone as the initial visual; WebGL is an opt-in desktop enhancement. */}
+        {/* Keep the phone as the initial visual; WebGL loads only after interaction. */}
         <div
           className="absolute inset-x-0 -top-[4.5rem] -bottom-20 sm:-bottom-28 md:-bottom-36 lg:-bottom-44 z-0"
           onPointerMove={(event) => {
-            if (event.pointerType === "mouse") activate3D();
+            if (event.pointerType === "mouse") activate3D("mouse");
+          }}
+          onPointerDown={(event) => {
+            if (event.pointerType === "touch") activate3D("touch");
           }}
         >
-          <div className={`absolute inset-x-0 top-[4.5rem] bottom-20 sm:bottom-28 md:top-0 md:bottom-auto md:h-screen flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
+          <div className={`absolute inset-x-0 top-0 h-dvh -translate-y-[2dvh] md:h-screen md:translate-y-0 flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
             <Image src="/images/iphone-broken.webp" alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, 80vw" loading="eager" fetchPriority="high" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
           </div>
-          {load3D ? <Hero3D active={heroVisible} onReady={handleHeroReady} /> : null}
+          {load3D ? <Hero3D active={heroVisible} mobile={mobile3D} onReady={handleHeroReady} /> : null}
         </div>
 
         {/* Content overlay — pointer-events-none lets mouse interact with Canvas */}
