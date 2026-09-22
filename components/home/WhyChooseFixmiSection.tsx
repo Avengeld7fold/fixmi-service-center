@@ -48,6 +48,7 @@ export default function WhyChooseFixmiSection() {
     title: dict.whyUs.workshopSlides[idx]?.title || "Workshop Station",
     subtitle: dict.whyUs.workshopSlides[idx]?.subtitle || "",
   }));
+  const activePhoto = workshopPhotos[currentIdx];
 
   const nextSlide = useCallback(() => setCurrentIdx((p) => (p + 1) % TOTAL), []);
   const prevSlide = useCallback(() => setCurrentIdx((p) => (p - 1 + TOTAL) % TOTAL), []);
@@ -159,17 +160,14 @@ export default function WhyChooseFixmiSection() {
             <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/[0.12] bg-[#121216] shadow-[0_20px_50px_rgba(0,0,0,0.85)] sm:shadow-[0_30px_70px_rgba(0,0,0,0.85)] aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11] min-h-[260px] sm:min-h-[340px]">
 
               {/* Photo Slides */}
-              {workshopPhotos.map((photo, idx) => (
+              {activePhoto ? (
                 <div
-                  key={photo.id}
-                  className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                    currentIdx === idx ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-105 pointer-events-none"
-                  }`}
-                  style={{ transitionProperty: "opacity, transform" }}
+                  key={activePhoto.id}
+                  className="absolute inset-0 z-10 h-full w-full animate-in fade-in duration-700"
                 >
                   <Image
-                    src={photo.image}
-                    alt={photo.title}
+                    src={activePhoto.image}
+                    alt={activePhoto.title}
                     fill
                     loading="lazy"
                     sizes="(max-width: 1024px) 100vw, 50vw"
@@ -177,7 +175,7 @@ export default function WhyChooseFixmiSection() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
                 </div>
-              ))}
+              ) : null}
 
               {/* Top Slide Badge */}
               <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-20">

@@ -69,7 +69,25 @@ export default function Home() {
   const [heroVisible, setHeroVisible] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const load3DTimerRef = useRef<number | null>(null);
   const handleHeroReady = useCallback(() => setHeroReady(true), []);
+
+  const activate3D = useCallback(() => {
+    if (load3D || load3DTimerRef.current !== null) return;
+
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    if (
+      window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)").matches ||
+      nav.connection?.saveData ||
+      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
+    ) return;
+
+    load3DTimerRef.current = window.setTimeout(() => {
+      load3DTimerRef.current = null;
+      setLoad3D(true);
+    }, 650);
+  }, [load3D]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -87,31 +105,9 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    if (
-      load3D || !heroVisible ||
-      window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)").matches ||
-      nav.connection?.saveData ||
-      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
-      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
-    ) return;
-
-    type WindowWithIdle = Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    const win = window as WindowWithIdle;
-    let idleHandle: number | undefined;
-    const timer = window.setTimeout(() => {
-      if (win.requestIdleCallback) idleHandle = win.requestIdleCallback(() => setLoad3D(true), { timeout: 2000 });
-      else setLoad3D(true);
-    }, 2000);
-    return () => {
-      window.clearTimeout(timer);
-      if (idleHandle !== undefined) win.cancelIdleCallback?.(idleHandle);
-    };
-  }, [heroVisible, load3D]);
+  useEffect(() => () => {
+    if (load3DTimerRef.current !== null) window.clearTimeout(load3DTimerRef.current);
+  }, []);
 
   useGSAP(() => {
     if (!leftTitleRef.current || !rightTitle1Ref.current || !rightTitle2Ref.current || !captionRef.current) return;
@@ -149,10 +145,15 @@ export default function Home() {
           <div className="w-[36rem] sm:w-[50rem] h-[28rem] sm:h-[38rem] rounded-full bg-primary/[0.07] blur-[100px] sm:blur-[140px]" />
         </div>
 
-        {/* Keep the phone visible before WebGL is ready and on lighter devices. */}
-        <div className="absolute inset-x-0 -top-[4.5rem] -bottom-20 sm:-bottom-28 md:-bottom-36 lg:-bottom-44 z-0">
+        {/* Keep the phone as the initial visual; WebGL is an opt-in desktop enhancement. */}
+        <div
+          className="absolute inset-x-0 -top-[4.5rem] -bottom-20 sm:-bottom-28 md:-bottom-36 lg:-bottom-44 z-0"
+          onPointerMove={(event) => {
+            if (event.pointerType === "mouse") activate3D();
+          }}
+        >
           <div className={`absolute inset-x-0 top-[4.5rem] bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-44 flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
-            <Image src="/images/iphone-broken.webp" alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, 90vw" loading="eager" fetchPriority="high" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
+            <Image src="/images/iphone-broken.webp" alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, 80vw" loading="eager" fetchPriority="high" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
           </div>
           {load3D ? <Hero3D active={heroVisible} onReady={handleHeroReady} /> : null}
         </div>

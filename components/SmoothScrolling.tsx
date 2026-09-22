@@ -1,12 +1,28 @@
 "use client";
 
 import { ReactLenis, type LenisRef } from "lenis/react";
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 interface SmoothScrollingProps {
   children: ReactNode;
+}
+
+const NATIVE_SCROLL_QUERY = "(pointer: coarse), (prefers-reduced-motion: reduce)";
+
+function subscribeToNativeScroll(onChange: () => void) {
+  const mediaQuery = window.matchMedia(NATIVE_SCROLL_QUERY);
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+function getNativeScrollSnapshot() {
+  return window.matchMedia(NATIVE_SCROLL_QUERY).matches;
+}
+
+function getServerNativeScrollSnapshot() {
+  return false;
 }
 
 /**
@@ -20,6 +36,11 @@ interface SmoothScrollingProps {
 export default function SmoothScrolling({ children }: SmoothScrollingProps) {
   const lenisRef = useRef<LenisRef>(null);
   const pathname = usePathname();
+  const useNativeScroll = useSyncExternalStore(
+    subscribeToNativeScroll,
+    getNativeScrollSnapshot,
+    getServerNativeScrollSnapshot,
+  );
 
   const prevPathnameRef = useRef(pathname);
 
@@ -52,6 +73,8 @@ export default function SmoothScrolling({ children }: SmoothScrollingProps) {
   }, [pathname]);
 
   useEffect(() => {
+    if (useNativeScroll) return;
+
     const lenis = lenisRef.current?.lenis;
     lenis?.on("scroll", ScrollTrigger.update);
 
@@ -73,7 +96,10 @@ export default function SmoothScrolling({ children }: SmoothScrollingProps) {
       lenis?.off("scroll", ScrollTrigger.update);
       ro.disconnect();
     };
-  }, []);
+  }, [useNativeScroll]);
+
+  // Native touch scrolling avoids an always-running animation loop on phones.
+  if (useNativeScroll) return <>{children}</>;
 
   return (
     <ReactLenis
