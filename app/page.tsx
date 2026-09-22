@@ -1,13 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import WaveDividerSection from "@/components/home/WaveDividerSection";
 
 // ponytail: code-split Three.js & R3F (841KB) — loads asynchronously without blocking initial HTML & LCP text
 const Hero3D = dynamic(() => import("@/components/Hero3D"), {
   ssr: false,
 });
-import { useRef, useState, useEffect, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, useEffect, useCallback, type CSSProperties, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useI18n } from "@/lib/i18n/context";
@@ -64,49 +65,79 @@ export default function Home() {
   const rightTitle2Ref = useRef<HTMLHeadingElement>(null);
   const captionRef = useRef<HTMLParagraphElement>(null);
 
-  // Non-blocking idle deferral: allows React hydration & hero typography entrance
-  // to complete with zero main-thread contention before compiling Three.js & WebGL shaders
   const [load3D, setLoad3D] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
+  const [heroReady, setHeroReady] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const handleHeroReady = useCallback(() => setHeroReady(true), []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const hero = heroRef.current;
+    if (!hero) return;
+    const updateVisibility = (visible: boolean) => {
+      setHeroVisible(visible && document.visibilityState === "visible");
+    };
+    const observer = new IntersectionObserver(([entry]) => updateVisibility(entry.isIntersecting));
+    observer.observe(hero);
+    const onVisibilityChange = () => updateVisibility(hero.getBoundingClientRect().bottom > 0 && hero.getBoundingClientRect().top < window.innerHeight);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    if (
+      load3D || !heroVisible ||
+      window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)").matches ||
+      nav.connection?.saveData ||
+      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)
+    ) return;
+
     type WindowWithIdle = Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
       cancelIdleCallback?: (id: number) => void;
     };
     const win = window as WindowWithIdle;
-    if (win.requestIdleCallback) {
-      const handle = win.requestIdleCallback(() => setLoad3D(true), { timeout: 1200 });
-      return () => win.cancelIdleCallback?.(handle);
-    }
-    const timer = setTimeout(() => setLoad3D(true), 150);
-    return () => clearTimeout(timer);
-  }, []);
+    let idleHandle: number | undefined;
+    const timer = window.setTimeout(() => {
+      if (win.requestIdleCallback) idleHandle = win.requestIdleCallback(() => setLoad3D(true), { timeout: 2000 });
+      else setLoad3D(true);
+    }, 2000);
+    return () => {
+      window.clearTimeout(timer);
+      if (idleHandle !== undefined) win.cancelIdleCallback?.(idleHandle);
+    };
+  }, [heroVisible, load3D]);
 
   useGSAP(() => {
     if (!leftTitleRef.current || !rightTitle1Ref.current || !rightTitle2Ref.current || !captionRef.current) return;
 
-    const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.4 } });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.7 } });
 
     tl.fromTo(leftTitleRef.current.querySelectorAll(".line-anim"),
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, stagger: 0.2 }
+      { y: 12 },
+      { y: 0, stagger: 0.1 }
     )
     .fromTo([rightTitle1Ref.current, rightTitle2Ref.current],
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, stagger: 0.2 },
-      "-=1.0"
+      { y: 12 },
+      { y: 0, stagger: 0.1 },
+      "-=0.55"
     )
     .fromTo(captionRef.current,
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0 },
-      "-=1.0"
+      { y: 8 },
+      { y: 0 },
+      "-=0.55"
     );
   });
 
   return (
     <>
-      <section className="relative flex min-h-hero items-center justify-center">
+      <section ref={heroRef} className="relative flex min-h-hero items-center justify-center">
         {/* Background gradient orbs — desktop only */}
         <div className="pointer-events-none absolute inset-0 hidden lg:block">
           <div className="absolute left-1/4 top-1/4 h-[31.25rem] w-[31.25rem] rounded-full bg-primary/5 blur-[7.5rem]" />
@@ -118,9 +149,12 @@ export default function Home() {
           <div className="w-[36rem] sm:w-[50rem] h-[28rem] sm:h-[38rem] rounded-full bg-primary/[0.07] blur-[100px] sm:blur-[140px]" />
         </div>
 
-        {/* WebGL Canvas backdrop — extends behind navbar & wave divider */}
+        {/* Keep the phone visible before WebGL is ready and on lighter devices. */}
         <div className="absolute inset-x-0 -top-[4.5rem] -bottom-20 sm:-bottom-28 md:-bottom-36 lg:-bottom-44 z-0">
-          {load3D ? <Hero3D /> : null}
+          <div className={`absolute inset-x-0 top-[4.5rem] bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-44 flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
+            <Image src="/images/iphone-broken.webp" alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, 90vw" loading="eager" fetchPriority="high" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
+          </div>
+          {load3D ? <Hero3D active={heroVisible} onReady={handleHeroReady} /> : null}
         </div>
 
         {/* Content overlay — pointer-events-none lets mouse interact with Canvas */}

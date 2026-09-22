@@ -23,7 +23,25 @@ export default function WhyChooseFixmiSection() {
   const { dict, getLocalizedPath } = useI18n();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const swipeStartRef = useRef(0);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting && !document.hidden));
+    const onVisibilityChange = () => {
+      const rect = section.getBoundingClientRect();
+      setIsVisible(!document.hidden && rect.top < window.innerHeight && rect.bottom > 0);
+    };
+    observer.observe(section);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
 
   const workshopPhotos = WORKSHOP_PHOTO_ASSETS.map((asset, idx) => ({
     ...asset,
@@ -39,15 +57,18 @@ export default function WhyChooseFixmiSection() {
   const handleSwipeEnd = (x: number) => {
     if (swipeStartRef.current === 0) return;
     const delta = swipeStartRef.current - x;
-    if (Math.abs(delta) > 40) delta > 0 ? nextSlide() : prevSlide();
+    if (Math.abs(delta) > 40) {
+      if (delta > 0) nextSlide();
+      else prevSlide();
+    }
     swipeStartRef.current = 0;
   };
 
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || !isVisible || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = setInterval(nextSlide, AUTOPLAY_INTERVAL);
     return () => clearInterval(timer);
-  }, [isHovered, nextSlide, currentIdx]);
+  }, [isHovered, isVisible, nextSlide, currentIdx]);
 
   // ponytail: 3 pillar blocks were copy-pasted — extracted to data array
   const pillars = [
@@ -57,7 +78,7 @@ export default function WhyChooseFixmiSection() {
   ];
 
   return (
-    <section className="relative w-full bg-[#121212] text-white py-12 sm:py-16 lg:py-20 overflow-hidden select-none">
+    <section ref={sectionRef} className="relative w-full bg-[#121212] text-white py-12 sm:py-16 lg:py-20 overflow-hidden select-none">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-14 items-center">
 

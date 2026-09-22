@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { Star, ArrowUpRight, CheckCircle2, MessageSquarePlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
@@ -60,6 +60,7 @@ export default function CustomerReviewsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevant");
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
   const [isDragging, setIsDragging] = useState(false);
@@ -68,6 +69,22 @@ export default function CustomerReviewsSection() {
   const dragOffsetRef = useRef(0);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting && !document.hidden));
+    const onVisibilityChange = () => {
+      const rect = section.getBoundingClientRect();
+      setIsVisible(!document.hidden && rect.top < window.innerHeight && rect.bottom > 0);
+    };
+    observer.observe(section);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
 
   // Responsive visible count tracking
   useEffect(() => {
@@ -113,7 +130,7 @@ export default function CustomerReviewsSection() {
     };
   }, []);
 
-  const rawReviews = data?.reviews || [];
+  const rawReviews = data.reviews;
   const totalReviews = data?.totalRatings || 404;
   const ratingScore = data?.rating || 4.8;
   const mapsUrl = data?.mapsUrl || "https://maps.google.com/?cid=4655164056963224271";
@@ -128,16 +145,18 @@ export default function CustomerReviewsSection() {
   const allCardsCount = filteredReviews.length + 1;
   const maxIndex = Math.max(0, allCardsCount - visibleCount);
 
+  // Sorting changes the card order, so reset the carousel position.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setCurrentIndex(0); }, [sortBy]);
 
-  const handlePrev = () => setCurrentIndex((prev) => (prev > 0 ? prev - 1 : maxIndex));
-  const handleNext = () => setCurrentIndex((prev) => (prev < maxIndex ? prev + 1 : 0));
+  const handlePrev = useCallback(() => setCurrentIndex((prev) => (prev > 0 ? prev - 1 : maxIndex)), [maxIndex]);
+  const handleNext = useCallback(() => setCurrentIndex((prev) => (prev < maxIndex ? prev + 1 : 0)), [maxIndex]);
 
   useEffect(() => {
-    if (isPaused || isDragging || allCardsCount <= visibleCount) return;
+    if (isPaused || isDragging || !isVisible || window.matchMedia("(prefers-reduced-motion: reduce)").matches || allCardsCount <= visibleCount) return;
     const timer = setInterval(handleNext, 5500);
     return () => clearInterval(timer);
-  }, [isPaused, isDragging, allCardsCount, visibleCount, currentIndex, maxIndex]);
+  }, [isPaused, isDragging, isVisible, allCardsCount, visibleCount, handleNext]);
 
   const buildTransform = (offset: number) => {
     const divisor = visibleCount === 3 ? 3 : visibleCount === 2 ? 2 : 1;

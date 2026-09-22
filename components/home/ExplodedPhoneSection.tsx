@@ -450,14 +450,6 @@ export default function ExplodedPhoneSection() {
   const [spatialMap, setSpatialMap] = useState<Record<string, NodeSpatialInfo>>({});
   const [bootKey, setBootKey] = useState<number>(0);
 
-  // Pre-load Booting.webp (~457KB) for instant display at Step 14 without network lag
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const preloadWebP = new window.Image();
-      preloadWebP.src = "/images/services/Booting.webp";
-    }
-  }, []);
-
   // State modal popover detail saat lingkaran diklik
   const [modalCallout, setModalCallout] = useState<ServiceCallout | null>(null);
 
@@ -491,7 +483,7 @@ export default function ExplodedPhoneSection() {
 
   // Sinkronisasi state React saat timeline berjalan
   const applyProgress = (val: number) => {
-    const quantized = Math.round(val * 200) / 200;
+    const quantized = Math.round(val * 100) / 100;
     if (quantized === lastQuantizedRef.current) return;
     lastQuantizedRef.current = quantized;
 
@@ -953,7 +945,7 @@ export default function ExplodedPhoneSection() {
                     className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-[filter] duration-250 ease-out"
                     style={{
                       transformStyle: "preserve-3d",
-                      willChange: "transform, opacity, filter",
+                      willChange: isCurrentActiveLayer || layerStep === currentStep + 1 ? "transform, opacity" : "auto",
                       zIndex: index + 1,
                       filter: isRevealedLayer ? dofFilter : "none",
                     }}
@@ -988,16 +980,18 @@ export default function ExplodedPhoneSection() {
                 }}
               >
                 <div className="relative w-full h-full flex items-center justify-center">
-                  <Image
-                    key={bootKey}
-                    src="/images/services/Booting.webp"
-                    alt="iPhone Booting & Quality Test"
-                    fill
-                    unoptimized
-                    loading="lazy"
-                    sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                    className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
-                  />
+                  {currentStep >= 11 && (
+                    <Image
+                      key={bootKey}
+                      src="/images/services/Booting.webp"
+                      alt="iPhone Booting & Quality Test"
+                      fill
+                      unoptimized
+                      loading="lazy"
+                      sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
+                      className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
+                    />
+                  )}
                 </div>
               </div>
 

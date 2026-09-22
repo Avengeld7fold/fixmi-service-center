@@ -5,7 +5,6 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { gsap } from "gsap";
 import { FluidSim } from "./hero/FluidSim";
-import { useI18n } from "@/lib/i18n/context";
 
 // Vertex shader
 const vertexShader = `
@@ -133,32 +132,13 @@ interface TexturesState {
   aspect: number;
 }
 
-function DiagnosticLoader({ progress }: { progress: number }) {
-  const { dict } = useI18n();
-
-  return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono select-none pointer-events-none bg-transparent z-20">
-      <div className="mb-2 text-xs uppercase tracking-widest text-primary font-bold animate-pulse">
-        {dict.common.loading.toUpperCase()}
-      </div>
-      <div className="w-52 sm:w-60 h-1 bg-surface-alt border border-border rounded-full overflow-hidden">
-        <div
-          className="h-full bg-primary transition-all duration-150 ease-out shadow-[0_0_8px_var(--fixmi-primary)]"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-      <div className="mt-2 text-[0.6875rem] text-text-muted font-mono tabular-nums">
-        {Math.round(progress)}%
-      </div>
-    </div>
-  );
-}
-
 interface MagicShaderPlaneProps {
   textures: TexturesState;
+  active: boolean;
+  onReady: () => void;
 }
 
-function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
+function MagicShaderPlane({ textures, active, onReady }: MagicShaderPlaneProps) {
   const { width: viewportWidth, height: viewportHeight } = useThree((state) => state.viewport);
   const gl = useThree((state) => state.gl);
   const size = useThree((state) => state.size);
@@ -168,6 +148,7 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const readyRef = useRef(false);
   
   // Ref for the main 3D Mesh to enable Idle Floating
   const meshRef = useRef<THREE.Mesh>(null);
@@ -200,6 +181,7 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
   // ½ siklus vertikal, amplitudo 75%/50% NDC), jeda napas 3 dtk antar sapuan.
   const idle = useRef({ moving: true, progress: { x: 0, y: 0 } });
   const idleTl = useRef<gsap.core.Timeline | null>(null);
+  const activeRef = useRef(active);
   useEffect(() => {
     if (prefersReduced) return;
     const st = idle.current;
@@ -214,7 +196,7 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     const goIdle = () => {
       st.moving = false;
       tl.seek(0);
-      tl.play();
+      if (activeRef.current) tl.play();
     };
     const onMove = () => {
       st.moving = true;
@@ -235,6 +217,12 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    activeRef.current = active;
+    if (active && !idle.current.moving) idleTl.current?.play();
+    else if (!active) idleTl.current?.pause();
+  }, [active]);
 
   // ── Input seluruh halaman, SEMUA perangkat (pola Lando: mousemove +
   // touchstart/touchmove di document, bukan canvas) — kursor/jari di area
@@ -299,8 +287,8 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Initialize uniforms using useRef (exactly as in 2b2932b for 100% stable rendering, with aspect ratio)
-  const uniforms = useRef({
+  // State initializer keeps the uniform object stable while making it safe to pass during render.
+  const [uniforms] = useState(() => ({
     uTextureBroken: { value: textures.broken },
     uTextureFixed: { value: textures.fixed },
     uDepthMap: { value: textures.depth },
@@ -317,10 +305,14 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
     uThreshold: { value: 0.1 },
     uRadius: { value: 3.0 },
     uPhoneShiftY: { value: 0.0 },
-  });
+  }));
 
   useFrame((state) => {
     if (!materialRef.current) return;
+    if (!readyRef.current) {
+      readyRef.current = true;
+      requestAnimationFrame(onReady);
+    }
 
     // Uniform KONSTAN (tekstur, radius, threshold, textureAspect) hanya perlu
     // ditulis ulang tiap frame di DEV agar kebal Fast Refresh. Di produksi
@@ -433,7 +425,7 @@ function MagicShaderPlane({ textures }: MagicShaderPlaneProps) {
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        uniforms={uniforms.current}
+        uniforms={uniforms}
         transparent={true}
       />
     </mesh>
@@ -458,27 +450,20 @@ class WebGLBoundary extends React.Component<
   }
 }
 
-export default function Hero3D() {
+export default function Hero3D({ active, onReady }: { active: boolean; onReady: () => void }) {
   const [textures, setTextures] = useState<TexturesState | null>(null);
-  const [progress, setProgress] = useState<number>(0);
-
-  // DPR mengikuti perilaku Lando terukur: layar sentuh kecil memakai DPR
-  // penuh (canvas mereka 2.0× di 375px — piksel total tetap kecil), layar
-  // lebar di-cap 1.25 (beban fragmen turun ~60% di retina).
-  const isCoarse =
-    typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
   useEffect(() => {
     const manager = new THREE.LoadingManager();
     const loader = new THREE.TextureLoader(manager);
 
+    // The loader assigns these handles after the LoadingManager is configured.
+    // eslint-disable-next-line prefer-const
     let brokenTex: THREE.Texture;
+    // eslint-disable-next-line prefer-const
     let fixedTex: THREE.Texture;
+    // eslint-disable-next-line prefer-const
     let depthTex: THREE.Texture;
-
-    manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-      setProgress((itemsLoaded / itemsTotal) * 100);
-    };
 
     manager.onLoad = () => {
       // Ensure textures use linear filtering for smooth rendering
@@ -523,9 +508,7 @@ export default function Hero3D() {
     <div 
       className="w-full h-full relative overflow-hidden select-none touch-pan-y"
     >
-      {!textures ? (
-        <DiagnosticLoader progress={progress} />
-      ) : (
+      {textures && (
         <WebGLBoundary>
           <Canvas
             camera={{ position: [0, 0, 1], fov: 90 }}
@@ -533,10 +516,11 @@ export default function Hero3D() {
             // geometri), MSAA tidak memberi efek visual apa pun tetapi membebani
             // GPU tua secara signifikan. powerPreference meminta GPU diskrit bila ada.
             gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-            dpr={isCoarse ? [1, 2] : [1, 1.25]}
+            dpr={[1, 1.25]}
+            frameloop={active ? "always" : "never"}
             className="w-full h-full touch-pan-y"
           >
-            <MagicShaderPlane textures={textures} />
+            <MagicShaderPlane textures={textures} active={active} onReady={onReady} />
           </Canvas>
         </WebGLBoundary>
       )}
