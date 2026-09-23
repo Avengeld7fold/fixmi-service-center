@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, memo } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
@@ -16,29 +16,26 @@ if (typeof window !== "undefined") {
 
 // ── Urutan 13 Layer dari angka tertinggi (13) ke angka terkecil (1) ──
 interface LayerDefinition {
-  step: number;        // Step 1 s/d 13
-  fileNumber: number;  // 13 down to 1
   file: string;
   name: string;
-  subName: string;
   calloutId?: string;
   isOffside?: boolean;
 }
 
 const ALL_13_LAYERS: LayerDefinition[] = [
-  { step: 1,  fileNumber: 13, file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", subName: "Kaca Belakang & Cover", calloutId: "backglass" },
-  { step: 2,  fileNumber: 12, file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", subName: "Modul Induksi Nirkabel", calloutId: "backglass", isOffside: true },
-  { step: 3,  fileNumber: 11, file: "/images/services/Housing.webp", name: "Titanium Housing Chassis", subName: "Rangka & Sasis Bodi" },
-  { step: 4,  fileNumber: 10, file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", subName: "Konektor Fleksibel Cas", calloutId: "flex-charger", isOffside: true },
-  { step: 5,  fileNumber: 9,  file: "/images/services/Loud-Speaker.webp", name: "Bottom Loudspeaker Module", subName: "Modul Speaker Bawah", calloutId: "speaker-housing" },
-  { step: 6,  fileNumber: 8,  file: "/images/services/Taptic-Engine.webp", name: "Taptic Engine Haptic Vibration", subName: "Motor Getar Presisi", isOffside: true },
-  { step: 7,  fileNumber: 7,  file: "/images/services/Flex-Power.webp", name: "Power Button & Volume Flex Cable", subName: "Fleksibel Tombol Power & Volume", calloutId: "motherboard" },
-  { step: 8,  fileNumber: 6,  file: "/images/services/Logicboard.webp", name: "Logic Board Main PCB", subName: "Papan Sirkuit Utama & Chipset", calloutId: "motherboard" },
-  { step: 9,  fileNumber: 5,  file: "/images/services/Back-Camera.webp", name: "Rear Triple Camera Module", subName: "Sistem Lensa Kamera Belakang", calloutId: "camera" },
-  { step: 10, fileNumber: 4,  file: "/images/services/Front-Camera.webp", name: "TrueDepth Front Camera & Face ID", subName: "Kamera Depan & Sensor Biometrik", calloutId: "camera" },
-  { step: 11, fileNumber: 3,  file: "/images/services/Ear-Speaker.webp", name: "Ear Speaker & Sensor Assembly", subName: "Speaker Atas & Sensor Telinga", calloutId: "speaker-housing" },
-  { step: 12, fileNumber: 2,  file: "/images/services/Battery.webp", name: "High-Capacity Li-Ion Battery", subName: "Baterai Utama & Modul BMS", calloutId: "battery" },
-  { step: 13, fileNumber: 1,  file: "/images/services/LCD.webp", name: "Super Retina OLED Display & Glass", subName: "Layar Sentuh & Panel Depan", calloutId: "screen" },
+  { file: "/images/services/Backglass.webp", name: "Back Glass & Rear Panel", calloutId: "backglass" },
+  { file: "/images/services/NFC.webp", name: "NFC & Wireless Charging Coil", calloutId: "backglass", isOffside: true },
+  { file: "/images/services/Housing.webp", name: "Titanium Housing Chassis" },
+  { file: "/images/services/Flex-Charger.webp", name: "Flex Charger & Microphone Port", calloutId: "flex-charger", isOffside: true },
+  { file: "/images/services/Loud-Speaker.webp", name: "Bottom Loudspeaker Module", calloutId: "speaker-housing" },
+  { file: "/images/services/Taptic-Engine.webp", name: "Taptic Engine Haptic Vibration", isOffside: true },
+  { file: "/images/services/Flex-Power.webp", name: "Power Button & Volume Flex Cable", calloutId: "motherboard" },
+  { file: "/images/services/Logicboard.webp", name: "Logic Board Main PCB", calloutId: "motherboard" },
+  { file: "/images/services/Back-Camera.webp", name: "Rear Triple Camera Module", calloutId: "camera" },
+  { file: "/images/services/Front-Camera.webp", name: "TrueDepth Front Camera & Face ID", calloutId: "camera" },
+  { file: "/images/services/Ear-Speaker.webp", name: "Ear Speaker & Sensor Assembly", calloutId: "speaker-housing" },
+  { file: "/images/services/Battery.webp", name: "High-Capacity Li-Ion Battery", calloutId: "battery" },
+  { file: "/images/services/LCD.webp", name: "Super Retina OLED Display & Glass", calloutId: "screen" },
 ];
 
 // ── 6 Layanan Callout Lingkaran dengan Rentang Scroll Perjalanan ──
@@ -59,7 +56,6 @@ interface ServiceCallout {
   code: string;
   side: "left" | "right";
   layerRange: string;
-  minStep: number;
   revealStart: number;
   revealEnd: number;
   circleImage: string;
@@ -81,7 +77,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "CHASSIS // BACKGLASS & NFC",
     side: "left",
     layerRange: "Layer 1 & 2 (Backglass & NFC)",
-    minStep: 1,
     revealStart: 0.00,
     revealEnd: 0.16,
     circleImage: "/images/services/Backglass.webp",
@@ -128,7 +123,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "CONNECTIVITY // CHARGING",
     side: "left",
     layerRange: "Layer 4 (Flex-Charger)",
-    minStep: 4,
     revealStart: 0.16,
     revealEnd: 0.28,
     circleImage: "/images/services/Flex-Charger.webp",
@@ -166,7 +160,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "AUDIO // DUAL-SPEAKER",
     side: "left",
     layerRange: "Layer 5 & 11 (Audio Speakers)",
-    minStep: 5,
     revealStart: 0.30,
     revealEnd: 0.85,
     circleImage: "/images/services/Loud-Speaker.webp",
@@ -213,7 +206,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "OPTICS // DUAL-CAM",
     side: "right",
     layerRange: "Layer 9 & 10 (Dual-Camera)",
-    minStep: 9,
     revealStart: 0.58,
     revealEnd: 0.74,
     circleImage: "/images/services/Back-Camera.webp",
@@ -260,7 +252,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "MOTHERBOARD // 7 & 6",
     side: "right",
     layerRange: "Layer 7 & 6",
-    minStep: 7,
     revealStart: 0.44,
     revealEnd: 0.60,
     circleImage: "/images/services/Logicboard.webp",
@@ -290,7 +281,6 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
     code: "POWER // BATTERY",
     side: "right",
     layerRange: "Layer 12 (Battery)",
-    minStep: 12,
     revealStart: 0.80,
     revealEnd: 0.94,
     circleImage: "/images/services/Battery.webp",
@@ -319,6 +309,21 @@ const SERVICE_CALLOUTS: ServiceCallout[] = [
 const LEFT_CALLOUTS = SERVICE_CALLOUTS.filter((p) => p.side === "left");
 const RIGHT_CALLOUTS = SERVICE_CALLOUTS.filter((p) => p.side === "right");
 const STEP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
+const DESKTOP_LAYOUT_QUERY = "(min-width: 1024px)";
+
+function subscribeToDesktopLayout(onChange: () => void) {
+  const mediaQuery = window.matchMedia(DESKTOP_LAYOUT_QUERY);
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+function getDesktopLayoutSnapshot() {
+  return window.matchMedia(DESKTOP_LAYOUT_QUERY).matches;
+}
+
+function getServerDesktopLayoutSnapshot() {
+  return false;
+}
 
 interface NodeSpatialInfo {
   finalCircleX: number;
@@ -375,22 +380,22 @@ const InspectionCircleNode = memo(function InspectionCircleNode({
   isActive,
   isRevealed,
   isEn,
-  onClick,
-  onMouseEnter,
+  onActivate,
+  onOpen,
 }: {
   callout: ServiceCallout;
   isActive: boolean;
   isRevealed: boolean;
   isEn: boolean;
-  onClick: () => void;
-  onMouseEnter?: () => void;
+  onActivate: (callout: ServiceCallout) => void;
+  onOpen: (callout: ServiceCallout) => void;
 }) {
   const displayName = isEn ? callout.nameEn : callout.name;
 
   return (
     <div
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
+      onClick={() => onOpen(callout)}
+      onMouseEnter={() => onActivate(callout)}
       className="flex flex-col items-center gap-2.5 group cursor-pointer select-none active:scale-[0.97] transition-transform duration-200 ease-out"
     >
       {/* Minimalist Hardware Node */}
@@ -433,6 +438,11 @@ export default function ExplodedPhoneSection() {
   const { dict, locale, getLocalizedPath } = useI18n();
   const isEn = locale === "en";
   const lenis = useLenis();
+  const isDesktopLayout = useSyncExternalStore(
+    subscribeToDesktopLayout,
+    getDesktopLayoutSnapshot,
+    getServerDesktopLayoutSnapshot,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const stageGridRef = useRef<HTMLDivElement>(null);
@@ -442,6 +452,7 @@ export default function ExplodedPhoneSection() {
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
   const lastQuantizedRef = useRef<number>(-1);
   const prevStepRef = useRef<number>(1);
+  const bootPreloadRef = useRef<HTMLImageElement | null>(null);
 
   const [activeCalloutId, setActiveCalloutId] = useState<string>("backglass");
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -452,6 +463,46 @@ export default function ExplodedPhoneSection() {
 
   // State modal popover detail saat lingkaran diklik
   const [modalCallout, setModalCallout] = useState<ServiceCallout | null>(null);
+
+  const activateCallout = useCallback((callout: ServiceCallout) => {
+    setActiveCalloutId(callout.id);
+  }, []);
+
+  const openCallout = useCallback((callout: ServiceCallout) => {
+    setActiveCalloutId(callout.id);
+    setModalCallout(callout);
+  }, []);
+
+  // Fetch the animated boot asset shortly before this section is visible, but
+  // do not mount it yet. A hidden animated image would still decode all 81
+  // frames while the user scrolls through steps 11-13.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const preload = () => {
+      if (bootPreloadRef.current) return;
+      const image = new window.Image();
+      image.src = "/images/services/Booting.webp";
+      bootPreloadRef.current = image;
+    };
+
+    if (!("IntersectionObserver" in window)) {
+      preload();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        preload();
+        observer.disconnect();
+      },
+      { rootMargin: "400px 0px" },
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // Close modal on Escape key press and lock background scroll
   useEffect(() => {
@@ -483,7 +534,10 @@ export default function ExplodedPhoneSection() {
 
   // Sinkronisasi state React saat timeline berjalan
   const applyProgress = (val: number) => {
-    const quantized = Math.round(val * 100) / 100;
+    // Layer transforms stay continuous in GSAP. React only drives labels,
+    // hotspots, and callouts, whose CSS transitions interpolate these updates.
+    const precision = isDesktopLayout ? 100 : 25;
+    const quantized = Math.round(val * precision) / precision;
     if (quantized === lastQuantizedRef.current) return;
     lastQuantizedRef.current = quantized;
 
@@ -502,12 +556,14 @@ export default function ExplodedPhoneSection() {
       setBootKey((k) => k + 1);
     }
     prevStepRef.current = activeStep;
-    setCurrentStep(activeStep);
-    setIsAssembled(quantized >= 0.85);
+    setCurrentStep((current) => current === activeStep ? current : activeStep);
+    const assembled = quantized >= 0.85;
+    setIsAssembled((current) => current === assembled ? current : assembled);
 
     const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
-    if (currentLayerDef && currentLayerDef.calloutId) {
-      setActiveCalloutId(currentLayerDef.calloutId);
+    const nextCalloutId = currentLayerDef?.calloutId;
+    if (nextCalloutId) {
+      setActiveCalloutId((current) => current === nextCalloutId ? current : nextCalloutId);
     }
   };
 
@@ -573,7 +629,10 @@ export default function ExplodedPhoneSection() {
           end: "+=2200",
           pin: stageRef.current,
           pinSpacing: true,
-          scrub: 0.8,
+          // Lenis smooths fine-pointer input. Native touch already supplies
+          // momentum, so both layouts should map the timeline directly to the
+          // current scroll position without an extra animation tail.
+          scrub: true,
           anticipatePin: 1,
         },
       });
@@ -606,11 +665,13 @@ export default function ExplodedPhoneSection() {
       timelineRef.current = tl;
       scrollTriggerRef.current = tl.scrollTrigger ?? null;
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [isDesktopLayout], revertOnUpdate: true }
   );
 
   // ── Hitung Koordinat Vektor Spasial Titik Tengah (Dot) & Posisi Akhir Lingkaran ──
   useEffect(() => {
+    if (!isDesktopLayout) return;
+
     const updateSpatialMap = () => {
       const grid = stageGridRef.current;
       const phone = layersContainerRef.current;
@@ -687,7 +748,7 @@ export default function ExplodedPhoneSection() {
       if (throttleTimer !== null) clearTimeout(throttleTimer);
       clearTimeout(t);
     };
-  }, []);
+  }, [isDesktopLayout]);
 
   // ── Hitung Progress Perjalanan Mulus (Travel Progress 0.0 -> 1.0) untuk Setiap Komponen ──
   const getCalloutTravelProgress = (callout: ServiceCallout) => {
@@ -731,8 +792,7 @@ export default function ExplodedPhoneSection() {
         <div
           className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] sm:w-[540px] lg:w-[640px] h-[520px] sm:h-[640px] lg:h-[720px]"
           style={{
-            background: "radial-gradient(circle at 50% 50%, rgba(255, 107, 0, 0.08) 0%, rgba(255, 107, 0, 0.02) 45%, transparent 70%)",
-            filter: "blur(60px)",
+            background: "radial-gradient(ellipse at 50% 52%, rgba(255, 107, 0, 0.08) 0%, rgba(255, 107, 0, 0.035) 35%, rgba(255, 107, 0, 0.012) 58%, transparent 76%)",
           }}
         />
 
@@ -788,8 +848,8 @@ export default function ExplodedPhoneSection() {
           className="relative z-20 w-full max-w-[90rem] mx-auto grid grid-cols-1 lg:grid-cols-12 items-center gap-4 lg:gap-6 my-auto"
         >
           {/* ── DYNAMIC ORGANIC SVG DASHED LEADER LINES (DESKTOP) ── */}
-          <svg
-            className="hidden lg:block absolute inset-0 w-full h-full pointer-events-none z-30"
+          {isDesktopLayout && <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-30"
             style={{ overflow: "visible" }}
           >
             {SERVICE_CALLOUTS.map((callout) => {
@@ -863,10 +923,10 @@ export default function ExplodedPhoneSection() {
                 );
               });
             })}
-          </svg>
+          </svg>}
 
           {/* ── LEFT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
-          <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
+          {isDesktopLayout && <div className="lg:col-span-3 flex flex-col gap-8 justify-around items-center min-h-[480px]">
             {LEFT_CALLOUTS.map((callout) => {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
@@ -891,20 +951,13 @@ export default function ExplodedPhoneSection() {
                     isActive={isActive}
                     isRevealed={isRevealed}
                     isEn={isEn}
-                    onMouseEnter={() => {
-                      if (isRevealed) setActiveCalloutId(callout.id);
-                    }}
-                    onClick={() => {
-                      if (isRevealed) {
-                        setActiveCalloutId(callout.id);
-                        setModalCallout(callout);
-                      }
-                    }}
+                    onActivate={activateCallout}
+                    onOpen={openCallout}
                   />
                 </div>
               );
             })}
-          </div>
+          </div>}
 
           {/* ── CENTER: SEQUENTIAL 13-LAYER IPHONE ASSEMBLY WITH DEPTH OF FIELD FOCUS ── */}
           <div className="col-span-1 lg:col-span-6 flex flex-col justify-center items-center py-2 relative">
@@ -924,37 +977,36 @@ export default function ExplodedPhoneSection() {
                 transformStyle: "preserve-3d",
               }}
             >
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-[8%] translate-y-5 rounded-[45%] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.38)_45%,transparent_74%)]"
+              />
+
               {/* 13-Layer Sequence Stack with Depth of Field (DoF) Optical Focus */}
               {ALL_13_LAYERS.map((layer, index) => {
                 const layerStep = index + 1;
                 const isCurrentActiveLayer = currentStep === layerStep;
-                const isRevealedLayer = currentStep >= layerStep;
-
-                const dofFilter = isAssembled
-                  ? "none"
-                  : isCurrentActiveLayer
-                  ? "brightness(1.14) contrast(1.06) drop-shadow(0 14px 28px rgba(0,0,0,0.85)) drop-shadow(0 0 8px rgba(255,107,0,0.3))"
-                  : "brightness(0.65) blur(0.5px)";
+                const isDimmedLayer = !isAssembled && !isCurrentActiveLayer;
+                const layerOpacity = (layer.isOffside ? assemblyFade : 1) * (isDimmedLayer ? 0.68 : 1);
 
                 return (
                   <div
-                    key={layer.fileNumber}
+                    key={layer.file}
                     ref={(el) => {
                       layerRefs.current[index] = el;
                     }}
-                    className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-[filter] duration-250 ease-out"
+                    className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
                     style={{
                       transformStyle: "preserve-3d",
                       willChange: isCurrentActiveLayer || layerStep === currentStep + 1 ? "transform, opacity" : "auto",
                       zIndex: index + 1,
-                      filter: isRevealedLayer ? dofFilter : "none",
                     }}
                   >
                     {/* Layer Graphic */}
                     <div
                       className="relative w-full h-full transition-opacity duration-200 ease-out"
                       style={{
-                        opacity: layer.isOffside ? assemblyFade : 1,
+                        opacity: layerOpacity,
                       }}
                     >
                       <Image
@@ -963,7 +1015,7 @@ export default function ExplodedPhoneSection() {
                         fill
                         loading="lazy"
                         sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                        className="object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.9)]"
+                        className="object-contain"
                       />
                     </div>
                   </div>
@@ -980,14 +1032,14 @@ export default function ExplodedPhoneSection() {
                 }}
               >
                 <div className="relative w-full h-full flex items-center justify-center">
-                  {currentStep >= 11 && (
+                  {currentStep === 14 && (
                     <Image
                       key={bootKey}
                       src="/images/services/Booting.webp"
                       alt="iPhone Booting & Quality Test"
                       fill
                       unoptimized
-                      loading="lazy"
+                      loading="eager"
                       sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
                       className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
                     />
@@ -1029,7 +1081,7 @@ export default function ExplodedPhoneSection() {
                           transform: `translate(-50%, -50%) scale(${t})`,
                           opacity: dotOpacity,
                           pointerEvents: dotOpacity > 0.4 ? "auto" : "none",
-                          willChange: "transform, opacity",
+                          willChange: t > 0 && t < 1 ? "transform, opacity" : "auto",
                         }}
                         className="group absolute flex items-center justify-center focus:outline-none cursor-pointer active:scale-90 transition-transform duration-150 ease-out"
                         aria-label={`Select component ${spotLabel}`}
@@ -1038,8 +1090,8 @@ export default function ExplodedPhoneSection() {
                         <span
                           className={`absolute w-10 h-10 rounded-full transition-[transform,background-color] duration-200 ease-out ${
                             isActive
-                              ? "bg-primary/60 scale-125 animate-ping"
-                              : "bg-white/30 animate-pulse group-hover:bg-primary/40 group-hover:scale-110"
+                              ? `bg-primary/60 scale-125 ${isDesktopLayout ? "animate-ping" : ""}`
+                              : `bg-white/30 group-hover:bg-primary/40 group-hover:scale-110 ${isDesktopLayout ? "animate-pulse" : ""}`
                           }`}
                         />
                         {/* Middle Solid White/Orange Ring */}
@@ -1086,11 +1138,11 @@ export default function ExplodedPhoneSection() {
               >
                 {/* Animated Mouse Wheel Capsule */}
                 <div className="w-5 h-8 rounded-full border border-primary/70 bg-black/60 backdrop-blur-md flex justify-center pt-1.5 shadow-[0_0_18px_rgba(255,107,0,0.4)]">
-                  <span className={`w-1 h-2 rounded-full bg-primary ${isAssembled ? "animate-pulse" : "animate-bounce"}`} />
+                  <span className={`w-1 h-2 rounded-full bg-primary ${isDesktopLayout ? (isAssembled ? "animate-pulse" : "animate-bounce") : ""}`} />
                 </div>
                 {/* Sleek Instruction Badge */}
                 <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-200 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30 whitespace-nowrap shadow-xl flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                  <span className={`w-1.5 h-1.5 rounded-full bg-primary ${isDesktopLayout ? "animate-ping" : ""}`} />
                   {currentStep === 14
                     ? isEn
                       ? "Scroll Up to Disassemble"
@@ -1106,7 +1158,7 @@ export default function ExplodedPhoneSection() {
           </div>
 
           {/* ── RIGHT CALLOUT COLUMN: CIRCULAR ZOOM NODES (DESKTOP) ── */}
-          <div className="hidden lg:flex lg:col-span-3 flex-col gap-8 justify-around items-center min-h-[480px]">
+          {isDesktopLayout && <div className="lg:col-span-3 flex flex-col gap-8 justify-around items-center min-h-[480px]">
             {RIGHT_CALLOUTS.map((callout) => {
               const isActive = activeCalloutId === callout.id;
               const t = getCalloutTravelProgress(callout);
@@ -1131,28 +1183,21 @@ export default function ExplodedPhoneSection() {
                     isActive={isActive}
                     isRevealed={isRevealed}
                     isEn={isEn}
-                    onMouseEnter={() => {
-                      if (isRevealed) setActiveCalloutId(callout.id);
-                    }}
-                    onClick={() => {
-                      if (isRevealed) {
-                        setActiveCalloutId(callout.id);
-                        setModalCallout(callout);
-                      }
-                    }}
+                    onActivate={activateCallout}
+                    onOpen={openCallout}
                   />
                 </div>
               );
             })}
-          </div>
+          </div>}
 
           {/* ── MOBILE CIRCULAR HORIZONTAL BAR ── */}
-          <div
+          {!isDesktopLayout && <div
             style={{
               opacity: assemblyFade,
               pointerEvents: assemblyFade > 0.1 ? "auto" : "none",
             }}
-            className="flex lg:hidden col-span-1 w-full justify-start sm:justify-center gap-3 overflow-x-auto py-3 px-2 scrollbar-none touch-pan-x select-none transition-opacity duration-200 ease-out"
+            className="flex lg:hidden col-span-1 w-full justify-start sm:justify-center gap-3 overflow-x-auto py-3 px-2 scrollbar-none touch-auto select-none transition-opacity duration-200 ease-out"
           >
             {SERVICE_CALLOUTS.map((callout) => {
               const t = getCalloutTravelProgress(callout);
@@ -1208,7 +1253,7 @@ export default function ExplodedPhoneSection() {
                 </button>
               );
             })}
-          </div>
+          </div>}
         </div>
 
         {/* ── FOOTER DOTS BAR ── */}
