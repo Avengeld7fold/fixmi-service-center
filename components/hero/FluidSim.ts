@@ -5,8 +5,10 @@ import * as THREE from "three";
  * dari pipeline yang dipakai landonorris.com (arsitektur mnmxmx/fluid-three,
  * shader & konfigurasi diekstrak verbatim dari bundle mereka):
  *
- *   ExternalForce (splat delta mouse) → Advection (BFECC) → Divergence
- *   → Poisson (Jacobi, 4 iterasi) → Pressure subtract → Output (|velocity|)
+ *   Desktop: Advection → ExternalForce → Divergence → Poisson
+ *   → Pressure subtract → Output (|velocity|).
+ *   Mobile: Advection → ExternalForce → Output; mask reveal tidak
+ *   membutuhkan pressure solve, sehingga draw call per frame berkurang.
  *
  * Output = tekstur mask; hero menyampling `texture2D(uFluid, vUv).r` lalu
  * `step(0.1, …)` — tepi cair tegas ala Lando. Pass viscous sengaja tidak
@@ -15,6 +17,7 @@ import * as THREE from "three";
 
 export interface FluidOptions {
   iterations_poisson: number;
+  pressure_projection: boolean;
   dissipation: number;
   mouse_force: number;
   resolution: number;
@@ -27,6 +30,7 @@ export interface FluidOptions {
 // Nilai persis dari bundle landonorris.com.
 const DEFAULTS: FluidOptions = {
   iterations_poisson: 4,
+  pressure_projection: true,
   dissipation: 0.96,
   mouse_force: 50,
   resolution: 0.1,
@@ -383,23 +387,26 @@ export class FluidSim {
     this.renderPass(this.force, this.vel1, false);
     this.diff.set(0, 0); // gaya hanya saat ada gerakan baru
 
-    // 3. Divergence: vel1 → div
-    this.divergence.material.uniforms.velocity.value = this.vel1.texture;
-    this.renderPass(this.divergence, this.div);
+    if (o.pressure_projection) {
+      // Desktop retains the pressure solve for its full fluid motion.
+      this.divergence.material.uniforms.velocity.value = this.vel1.texture;
+      this.renderPass(this.divergence, this.div);
 
-    // 4. Poisson (Jacobi ping-pong)
-    let p0 = this.pressure0;
-    let p1 = this.pressure1;
-    for (let i = 0; i < o.iterations_poisson; i++) {
-      this.poisson.material.uniforms.pressure.value = p0.texture;
-      this.renderPass(this.poisson, p1);
-      [p0, p1] = [p1, p0];
+      let p0 = this.pressure0;
+      let p1 = this.pressure1;
+      for (let i = 0; i < o.iterations_poisson; i++) {
+        this.poisson.material.uniforms.pressure.value = p0.texture;
+        this.renderPass(this.poisson, p1);
+        [p0, p1] = [p1, p0];
+      }
+
+      this.pressure.material.uniforms.pressure.value = p0.texture;
+      this.pressure.material.uniforms.velocity.value = this.vel1.texture;
+      this.renderPass(this.pressure, this.vel0);
+    } else {
+      // Mobile only needs the advected velocity as a reveal mask.
+      [this.vel0, this.vel1] = [this.vel1, this.vel0];
     }
-
-    // 5. Kurangi gradien tekanan: (vel1, p0) → vel0
-    this.pressure.material.uniforms.pressure.value = p0.texture;
-    this.pressure.material.uniforms.velocity.value = this.vel1.texture;
-    this.renderPass(this.pressure, this.vel0);
 
     // 6. Mask output: |vel0| → out
     this.output.material.uniforms.velocity.value = this.vel0.texture;

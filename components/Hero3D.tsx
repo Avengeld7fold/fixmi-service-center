@@ -147,9 +147,17 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
 
   useEffect(() => {
     if (!mobile || !active) return;
-    invalidate();
-    const interval = window.setInterval(invalidate, 1000 / 30);
-    return () => window.clearInterval(interval);
+    let frame = 0;
+    let lastFrame = 0;
+    const tick = (now: number) => {
+      if (now - lastFrame >= 1000 / 60 - 1) {
+        invalidate();
+        lastFrame = now;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
   }, [active, invalidate, mobile]);
 
   const prefersReduced =
@@ -167,9 +175,9 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
 
   useEffect(() => {
     // Ukuran simulasi memakai drawing buffer; cursor mobile diperkecil
-    // sebanding dengan DPR 1 agar lebar sapuan tetap terkendali.
+    // sebanding dengan DPR 0.85 agar lebar sapuan tetap terkendali.
     const sim = new FluidSim(gl, gl.domElement.width, gl.domElement.height, mobile
-      ? { iterations_poisson: 2, BFECC: false, cursor_size: 9 }
+      ? { pressure_projection: false, BFECC: false, cursor_size: 7, dissipation: 0.98, dt: 0.007 }
       : {});
     simRef.current = sim;
     return () => {
@@ -523,7 +531,7 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
             // geometri), MSAA tidak memberi efek visual apa pun tetapi membebani
             // GPU tua secara signifikan. powerPreference meminta GPU diskrit bila ada.
             gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-            dpr={mobile ? 1 : [1, 1.25]}
+            dpr={mobile ? 0.85 : [1, 1.25]}
             frameloop={mobile ? "demand" : active ? "always" : "never"}
             className="w-full h-full touch-pan-y"
           >
