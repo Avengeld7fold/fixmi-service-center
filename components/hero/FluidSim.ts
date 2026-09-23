@@ -7,12 +7,12 @@ import * as THREE from "three";
  *
  *   Desktop: Advection → ExternalForce → Divergence → Poisson
  *   → Pressure subtract → Output (|velocity|).
- *   Mobile: Advection → ExternalForce → Output; mask reveal tidak
- *   membutuhkan pressure solve, sehingga draw call per frame berkurang.
+ *   Mobile: pipeline yang sama dengan satu iterasi Poisson dan tanpa BFECC,
+ *   cukup untuk bentuk cair dengan draw call lebih sedikit dari desktop.
  *
- * Output = tekstur mask; hero menyampling `texture2D(uFluid, vUv).r` lalu
- * `step(0.1, …)` — tepi cair tegas ala Lando. Pass viscous sengaja tidak
- * di-port (Lando menjalankan isViscous: false).
+ * Output = tekstur mask; hero memakai step 0,1 pada desktop dan smoothstep
+ * 0,07 pada mobile agar tepi tetap cair di simulasi beresolusi rendah. Pass
+ * viscous sengaja tidak di-port (Lando menjalankan isViscous: false).
  */
 
 export interface FluidOptions {
@@ -388,7 +388,7 @@ export class FluidSim {
     this.diff.set(0, 0); // gaya hanya saat ada gerakan baru
 
     if (o.pressure_projection) {
-      // Desktop retains the pressure solve for its full fluid motion.
+      // Desktop uses four iterations; mobile uses one lightweight iteration.
       this.divergence.material.uniforms.velocity.value = this.vel1.texture;
       this.renderPass(this.divergence, this.div);
 

@@ -62,11 +62,10 @@ const fragmentShader = `
     // Check if the current pixel is inside the texture boundaries
     bool inBounds = (textureUv.x >= 0.0 && textureUv.x <= 1.0 && textureUv.y >= 0.0 && textureUv.y <= 1.0);
 
-    // 2. Read depth map value (only if within bounds to avoid wrapping artifacts).
-    // Mobile keeps the sharp DOM image underneath, so its WebGL layer only
-    // needs the repaired texture and fluid mask.
+    // 2. Read depth map value only on desktop. Mobile uses a full broken/fixed
+    // blend without parallax so both images stay perfectly aligned.
     float depthValue = 0.0;
-#ifndef MOBILE_OVERLAY
+#ifndef MOBILE_OPTIMIZED
     if (inBounds) {
       depthValue = texture2D(uDepthMap, textureUv).r;
     }
@@ -81,7 +80,7 @@ const fragmentShader = `
     float dynamicDepth = baseDepth + breathing;
 
     vec2 distortedUv = textureUv;
-#ifndef MOBILE_OVERLAY
+#ifndef MOBILE_OPTIMIZED
     vec2 mouseOffset = uMouse - vec2(0.5);
     distortedUv += mouseOffset * depthValue * dynamicDepth;
 #endif
@@ -94,16 +93,18 @@ const fragmentShader = `
     vec4 colorFixed = vec4(0.0);
     
     if (inParallaxBounds) {
-#ifndef MOBILE_OVERLAY
       colorBroken = texture2D(uTextureBroken, distortedUv);
-#endif
       colorFixed = texture2D(uTextureFixed, distortedUv);
     }
 
-    // 5. Mask fluida ala landonorris.com: |velocity| dari simulasi
-    //    Navier-Stokes, threshold 0.1 (nilai Lando) di semua perangkat.
+    // 5. Fluid mask from the simulated velocity magnitude. Desktop keeps the
+    // original hard threshold; mobile softens the edge at low simulation res.
     float fluid = texture2D(uFluid, vUv).r;
+#ifdef MOBILE_OPTIMIZED
+    float mask = smoothstep(uThreshold * 0.65, uThreshold, fluid);
+#else
     float mask = step(uThreshold, fluid);
+#endif
 
     // Clamp radial opsional di sekitar uMouse. Saat ini uRadius 3.0 di semua
     // perangkat = praktis tanpa batas (paritas Lando); uniform dipertahankan
@@ -115,21 +116,14 @@ const fragmentShader = `
     mask *= uReveal;
 
     // 6. Global Slash Visibility (Warna Tebasan)
-    // Desktop renders the complete phone. Mobile renders only the repaired
-    // portion over the sharp DOM fallback, keeping the base image crisp even
-    // though the effect canvas uses a capped DPR.
-#ifdef MOBILE_OVERLAY
-    vec4 texColor = colorFixed * mask * (inParallaxBounds ? 1.0 : 0.0);
-    float phonePresence = inParallaxBounds ? colorFixed.a * mask : 0.0;
-#else
+    // Full compositing is required on every device: rendering only the fixed
+    // texture over a DOM broken image cannot remove detached broken parts.
     vec4 texColor = mix(colorBroken, colorFixed, mask) * (inParallaxBounds ? 1.0 : 0.0);
     float phonePresence = inParallaxBounds ? mix(colorBroken.a, colorFixed.a, mask) : 0.0;
-#endif
 
-    // Add a soft trail in empty space on desktop. The mobile canvas is an
-    // overlay above the DOM image, so drawing translucent pixels outside the
-    // phone would visibly tint the page background.
-#ifdef MOBILE_OVERLAY
+    // Keep the mobile background clean; the repaired image itself provides
+    // the feedback while desktop retains its subtle trail.
+#ifdef MOBILE_OPTIMIZED
     float glowOpacity = 0.0;
 #else
     float glowOpacity = mask * 0.15 * (1.0 - phonePresence);
@@ -189,14 +183,15 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
   // Ref for the main 3D Mesh to enable Idle Floating
   const meshRef = useRef<THREE.Mesh>(null);
 
-  // Desktop memakai simulasi penuh; mobile menurunkan jumlah pass GPU.
+  // Desktop memakai simulasi penuh; mobile memakai satu pressure iteration
+  // agar bentuk tetap cair dengan jumlah pass yang jauh lebih rendah.
   const simRef = useRef<FluidSim | null>(null);
 
   useEffect(() => {
-    // Ukuran simulasi memakai drawing buffer; cursor mobile diperkecil
-    // sebanding dengan DPR 0.85 agar lebar sapuan tetap terkendali.
+    // Mobile uses fewer GPU passes. A wider cursor offsets the higher output
+    // DPR so the repaired area remains readable instead of becoming a thin line.
     const sim = new FluidSim(gl, gl.domElement.width, gl.domElement.height, mobile
-      ? { pressure_projection: false, BFECC: false, cursor_size: 7, dissipation: 0.98, dt: 0.007 }
+      ? { pressure_projection: true, iterations_poisson: 1, BFECC: false, cursor_size: 12, dissipation: 0.98, dt: 0.007 }
       : {});
     simRef.current = sim;
     return () => {
@@ -336,7 +331,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     // Nilai awal saja — uThreshold & uRadius di-override TIAP FRAME di useFrame
     // (lihat sana), supaya kebal Fast Refresh & selalu aktual. Jangan setel di
     // sini, tak akan terpakai.
-    uThreshold: { value: 0.1 },
+    uThreshold: { value: mobile ? 0.07 : 0.1 },
     uRadius: { value: 3.0 },
     uPhoneShiftY: { value: 0.0 },
   }));
@@ -358,7 +353,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
       materialRef.current.uniforms.uDepthMap.value = textures.depth;
       materialRef.current.uniforms.uTextureAspect.value = textures.aspect;
       materialRef.current.uniforms.uRadius.value = 3.0;
-      materialRef.current.uniforms.uThreshold.value = 0.1;
+      materialRef.current.uniforms.uThreshold.value = mobile ? 0.07 : 0.1;
     }
 
     const time = state.clock.getElapsedTime();
@@ -459,7 +454,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        defines={mobile ? { MOBILE_OVERLAY: 1 } : undefined}
+        defines={mobile ? { MOBILE_OPTIMIZED: 1 } : undefined}
         uniforms={uniforms}
         transparent={true}
       />
@@ -487,6 +482,14 @@ class WebGLBoundary extends React.Component<
 
 export default function Hero3D({ active, mobile, onReady }: { active: boolean; mobile: boolean; onReady: () => void }) {
   const [textures, setTextures] = useState<TexturesState | null>(null);
+  const [mobileDpr] = useState(() => {
+    if (typeof window === "undefined") return 1.5;
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const constrained =
+      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
+      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4);
+    return Math.min(window.devicePixelRatio, constrained ? 1.5 : 1.75);
+  });
 
   useEffect(() => {
     const manager = new THREE.LoadingManager();
@@ -497,7 +500,6 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
     let brokenTex: THREE.Texture;
     // eslint-disable-next-line prefer-const
     let fixedTex: THREE.Texture;
-    // eslint-disable-next-line prefer-const
     let depthTex: THREE.Texture;
 
     manager.onLoad = () => {
@@ -529,7 +531,12 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
 
     brokenTex = loader.load("/images/iphone-broken.webp");
     fixedTex = loader.load("/images/iphone-fixed.webp");
-    depthTex = loader.load("/images/iphone-depth.webp");
+    if (mobile) {
+      depthTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
+      depthTex.needsUpdate = true;
+    } else {
+      depthTex = loader.load("/images/iphone-depth.webp");
+    }
 
     // Bebaskan memori GPU saat komponen unmount (navigasi ke halaman lain)
     return () => {
@@ -537,7 +544,7 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
       fixedTex?.dispose();
       depthTex?.dispose();
     };
-  }, []);
+  }, [mobile]);
 
   return (
     <div 
@@ -551,9 +558,9 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
             // geometri), MSAA tidak memberi efek visual apa pun tetapi membebani
             // GPU tua secara signifikan. powerPreference meminta GPU diskrit bila ada.
             gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-            // Mobile's cheaper overlay shader can spend a little more on
-            // output resolution without restoring the expensive fluid passes.
-            dpr={mobile ? 1.25 : [1, 1.25]}
+            // Preserve native sharpness where practical while capping fill-rate
+            // on constrained mobile hardware. The fluid simulation remains low-res.
+            dpr={mobile ? mobileDpr : [1, 1.25]}
             frameloop={mobile ? "demand" : active ? "always" : "never"}
             className="w-full h-full touch-pan-y"
           >
