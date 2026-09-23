@@ -62,11 +62,15 @@ const fragmentShader = `
     // Check if the current pixel is inside the texture boundaries
     bool inBounds = (textureUv.x >= 0.0 && textureUv.x <= 1.0 && textureUv.y >= 0.0 && textureUv.y <= 1.0);
 
-    // 2. Read depth map value (only if within bounds to avoid wrapping artifacts)
+    // 2. Read depth map value (only if within bounds to avoid wrapping artifacts).
+    // Mobile keeps the sharp DOM image underneath, so its WebGL layer only
+    // needs the repaired texture and fluid mask.
     float depthValue = 0.0;
+#ifndef MOBILE_OVERLAY
     if (inBounds) {
       depthValue = texture2D(uDepthMap, textureUv).r;
     }
+#endif
 
     // 3. Parallax Effect with dynamic Shader Breathing (dynamic depth intensity modulates over time)
     // Toned down to make the 3D parallax effect look extremely natural, subtle, and premium
@@ -76,9 +80,11 @@ const fragmentShader = `
     float breathing = sin(uTime * 1.5) * (uPhoneAspect > uTextureAspect ? 0.0025 : 0.005);
     float dynamicDepth = baseDepth + breathing;
 
+    vec2 distortedUv = textureUv;
+#ifndef MOBILE_OVERLAY
     vec2 mouseOffset = uMouse - vec2(0.5);
-    vec2 parallaxOffset = mouseOffset * depthValue * dynamicDepth;
-    vec2 distortedUv = textureUv + parallaxOffset;
+    distortedUv += mouseOffset * depthValue * dynamicDepth;
+#endif
 
     // Re-check bounds for parallax UV
     bool inParallaxBounds = (distortedUv.x >= 0.0 && distortedUv.x <= 1.0 && distortedUv.y >= 0.0 && distortedUv.y <= 1.0);
@@ -88,7 +94,9 @@ const fragmentShader = `
     vec4 colorFixed = vec4(0.0);
     
     if (inParallaxBounds) {
+#ifndef MOBILE_OVERLAY
       colorBroken = texture2D(uTextureBroken, distortedUv);
+#endif
       colorFixed = texture2D(uTextureFixed, distortedUv);
     }
 
@@ -107,14 +115,25 @@ const fragmentShader = `
     mask *= uReveal;
 
     // 6. Global Slash Visibility (Warna Tebasan)
-    // Blend texture color of iPhone fixed & broken, multiplied by viewport boundary
+    // Desktop renders the complete phone. Mobile renders only the repaired
+    // portion over the sharp DOM fallback, keeping the base image crisp even
+    // though the effect canvas uses a capped DPR.
+#ifdef MOBILE_OVERLAY
+    vec4 texColor = colorFixed * mask * (inParallaxBounds ? 1.0 : 0.0);
+    float phonePresence = inParallaxBounds ? colorFixed.a * mask : 0.0;
+#else
     vec4 texColor = mix(colorBroken, colorFixed, mask) * (inParallaxBounds ? 1.0 : 0.0);
-
-    // Calculate phone presence based on alpha of mixed textures
     float phonePresence = inParallaxBounds ? mix(colorBroken.a, colorFixed.a, mask) : 0.0;
+#endif
 
-    // Add a soft, semi-transparent glowing trail ONLY in empty space (where phone is not present) to prevent color distortion on the phone body
+    // Add a soft trail in empty space on desktop. The mobile canvas is an
+    // overlay above the DOM image, so drawing translucent pixels outside the
+    // phone would visibly tint the page background.
+#ifdef MOBILE_OVERLAY
+    float glowOpacity = 0.0;
+#else
     float glowOpacity = mask * 0.15 * (1.0 - phonePresence);
+#endif
     vec4 finalColor = texColor + vec4(0.9, 0.95, 1.0, 1.0) * glowOpacity;
 
     // 7. Logika Alpha Discard to support background transparency (only render if image or slash is visible)
@@ -361,7 +380,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
 
     // 1. Idle Floating Physics: Sinusoidal mesh movement along the Y axis
     if (meshRef.current) {
-      meshRef.current.position.y = Math.sin(time * 1.2) * 0.03;
+      meshRef.current.position.y = mobile ? 0 : Math.sin(time * 1.2) * 0.03;
     }
 
     const sim = simRef.current;
@@ -440,6 +459,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
+        defines={mobile ? { MOBILE_OVERLAY: 1 } : undefined}
         uniforms={uniforms}
         transparent={true}
       />
@@ -531,7 +551,9 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
             // geometri), MSAA tidak memberi efek visual apa pun tetapi membebani
             // GPU tua secara signifikan. powerPreference meminta GPU diskrit bila ada.
             gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-            dpr={mobile ? 0.85 : [1, 1.25]}
+            // Mobile's cheaper overlay shader can spend a little more on
+            // output resolution without restoring the expensive fluid passes.
+            dpr={mobile ? 1.25 : [1, 1.25]}
             frameloop={mobile ? "demand" : active ? "always" : "never"}
             className="w-full h-full touch-pan-y"
           >
