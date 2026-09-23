@@ -87,6 +87,10 @@ export default function Home() {
       return;
     }
 
+    // A touch is an explicit request to interact, so start the lazy load
+    // immediately. Desktop pointer movement is easier to trigger accidentally
+    // and keeps its delay to protect initial-load performance.
+    const activationDelay = input === "touch" ? 0 : 650;
     load3DTimerRef.current = window.setTimeout(() => {
       load3DTimerRef.current = null;
       const hero = heroRef.current;
@@ -95,7 +99,7 @@ export default function Home() {
       if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
       setMobile3D(input === "touch");
       setLoad3D(true);
-    }, 650);
+    }, activationDelay);
   }, [load3D]);
 
   useEffect(() => {

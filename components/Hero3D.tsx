@@ -191,7 +191,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     // Mobile uses fewer GPU passes. A wider cursor offsets the higher output
     // DPR so the repaired area remains readable instead of becoming a thin line.
     const sim = new FluidSim(gl, gl.domElement.width, gl.domElement.height, mobile
-      ? { pressure_projection: true, iterations_poisson: 1, BFECC: false, cursor_size: 12, dissipation: 0.98, dt: 0.007 }
+      ? { pressure_projection: true, iterations_poisson: 1, BFECC: false, cursor_size: 14, dissipation: 0.98, dt: 0.014 }
       : {});
     simRef.current = sim;
     return () => {
@@ -214,11 +214,14 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
   useEffect(() => {
     if (prefersReduced) return;
     const st = idle.current;
-    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 3 });
-    tl.fromTo(st.progress, { y: 0 }, { y: 1, duration: 2.5, ease: "none" }, 0)
-      .fromTo(st.progress, { x: 0 }, { x: 1, duration: 2.5, ease: "power1.inOut" }, 0)
-      .fromTo(st.progress, { y: 1 }, { y: 0, duration: 2.5, ease: "none" }, 4)
-      .fromTo(st.progress, { x: 1 }, { x: 0, duration: 2.5, ease: "power1.inOut" }, 4);
+    const sweepDuration = mobile ? 1.6 : 2.5;
+    const returnAt = mobile ? 2.5 : 4;
+    const repeatDelay = mobile ? 2 : 3;
+    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay });
+    tl.fromTo(st.progress, { y: 0 }, { y: 1, duration: sweepDuration, ease: "none" }, 0)
+      .fromTo(st.progress, { x: 0 }, { x: 1, duration: sweepDuration, ease: "power1.inOut" }, 0)
+      .fromTo(st.progress, { y: 1 }, { y: 0, duration: sweepDuration, ease: "none" }, returnAt)
+      .fromTo(st.progress, { x: 1 }, { x: 0, duration: sweepDuration, ease: "power1.inOut" }, returnAt);
     idleTl.current = tl;
 
     let moveTimeout: ReturnType<typeof setTimeout>;
@@ -233,7 +236,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
       clearTimeout(moveTimeout);
       moveTimeout = setTimeout(goIdle, 2000);
     };
-    const initial = setTimeout(goIdle, 2500);
+    const initial = setTimeout(goIdle, mobile ? 1600 : 2500);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("touchmove", onMove);
     return () => {
@@ -297,7 +300,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Splash intro (REVEAL_DURATION 1.1 dtk ala Lando): setelah loading
+  // ── Splash intro: setelah loading
   // screen selesai, satu sapuan sintetik melintasi layar membuka reveal,
   // lalu meluruh alami oleh dissipation. ──
   const splash = useRef<{ started: number | null; pending: boolean }>({
@@ -336,7 +339,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     uPhoneShiftY: { value: 0.0 },
   }));
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!materialRef.current) return;
     if (!readyRef.current) {
       readyRef.current = true;
@@ -390,7 +393,8 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     }
     let splashActive = false;
     if (sp.started !== null) {
-      const t = (time - sp.started) / 1.1;
+      const splashDuration = mobile ? 0.75 : 1.1;
+      const t = (time - sp.started) / splashDuration;
       if (t <= 1) {
         splashActive = true;
         // easeInOutQuad melintasi layar kiri→kanan dengan lengkung sinus
@@ -408,10 +412,16 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     // perangkat (pola Lando — fluida yang meluruh sendiri yang mengatur
     // visibilitas, bukan gating hover/sentuh).
     if (pageActive.current) revealOn.current = true;
+    // Mobile has no hover warm-up, so its first intentional touch must feel
+    // immediate. The exponential factor is refresh-rate independent and reaches
+    // full visibility quickly while desktop keeps its established soft ramp.
+    const revealResponse = mobile
+      ? 1 - Math.exp(-14 * Math.min(delta, 0.05))
+      : 0.05;
     materialRef.current.uniforms.uReveal.value = THREE.MathUtils.lerp(
       materialRef.current.uniforms.uReveal.value,
       revealOn.current ? 1.0 : 0.0,
-      0.05
+      revealResponse
     );
 
     if (!splashActive) {
