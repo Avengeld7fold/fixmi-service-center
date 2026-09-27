@@ -310,6 +310,30 @@ const LEFT_CALLOUTS = SERVICE_CALLOUTS.filter((p) => p.side === "left");
 const RIGHT_CALLOUTS = SERVICE_CALLOUTS.filter((p) => p.side === "right");
 const STEP_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
 const DESKTOP_LAYOUT_QUERY = "(min-width: 1024px)";
+const ASSEMBLY_SCROLL_DISTANCE = 2200;
+const BOOT_HOLD_DISTANCE = 1400;
+const TOTAL_SCROLL_DISTANCE = ASSEMBLY_SCROLL_DISTANCE + BOOT_HOLD_DISTANCE;
+const ASSEMBLY_FRACTION = ASSEMBLY_SCROLL_DISTANCE / TOTAL_SCROLL_DISTANCE;
+const ASSEMBLY_COMPLETE_PROGRESS = 0.85;
+const BOOT_START_PROGRESS = 0.86;
+
+function semanticToTimelineProgress(progress: number) {
+  if (progress <= ASSEMBLY_COMPLETE_PROGRESS) {
+    return (progress / ASSEMBLY_COMPLETE_PROGRESS) * ASSEMBLY_FRACTION;
+  }
+  return ASSEMBLY_FRACTION +
+    ((progress - ASSEMBLY_COMPLETE_PROGRESS) / (1 - ASSEMBLY_COMPLETE_PROGRESS)) *
+      (1 - ASSEMBLY_FRACTION);
+}
+
+function timelineToSemanticProgress(progress: number) {
+  if (progress <= ASSEMBLY_FRACTION) {
+    return (progress / ASSEMBLY_FRACTION) * ASSEMBLY_COMPLETE_PROGRESS;
+  }
+  return ASSEMBLY_COMPLETE_PROGRESS +
+    ((progress - ASSEMBLY_FRACTION) / (1 - ASSEMBLY_FRACTION)) *
+      (1 - ASSEMBLY_COMPLETE_PROGRESS);
+}
 
 function subscribeToDesktopLayout(onChange: () => void) {
   const mediaQuery = window.matchMedia(DESKTOP_LAYOUT_QUERY);
@@ -434,6 +458,35 @@ const InspectionCircleNode = memo(function InspectionCircleNode({
   );
 });
 
+// Static image subtrees do not need reconciliation on every progress update.
+const PhoneLayer = memo(function PhoneLayer({ layer, index, opacity, desktop, register }: {
+  layer: LayerDefinition;
+  index: number;
+  opacity: number;
+  desktop: boolean;
+  register: (index: number, element: HTMLDivElement | null) => void;
+}) {
+  const attach = useCallback((element: HTMLDivElement | null) => register(index, element), [index, register]);
+  return (
+    <div
+      ref={attach}
+      className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
+      style={{ transformStyle: desktop ? "preserve-3d" : "flat", zIndex: index + 1 }}
+    >
+      <div className="relative w-full h-full transition-opacity duration-200 ease-out" style={{ opacity }}>
+        <Image
+          src={layer.file}
+          alt={layer.name}
+          fill
+          loading="lazy"
+          sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
+          className="object-contain"
+        />
+      </div>
+    </div>
+  );
+});
+
 export default function ExplodedPhoneSection() {
   const { dict, locale, getLocalizedPath } = useI18n();
   const isEn = locale === "en";
@@ -452,14 +505,17 @@ export default function ExplodedPhoneSection() {
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
   const lastQuantizedRef = useRef<number>(-1);
   const prevStepRef = useRef<number>(1);
-  const bootPreloadRef = useRef<HTMLImageElement | null>(null);
+  const [stageVisible, setStageVisible] = useState(true);
+  const [bootReady, setBootReady] = useState(false);
 
   const [activeCalloutId, setActiveCalloutId] = useState<string>("backglass");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [isAssembled, setIsAssembled] = useState<boolean>(false);
   const [spatialMap, setSpatialMap] = useState<Record<string, NodeSpatialInfo>>({});
-  const [bootKey, setBootKey] = useState<number>(0);
+  const registerLayer = useCallback((index: number, element: HTMLDivElement | null) => {
+    layerRefs.current[index] = element;
+  }, []);
 
   // State modal popover detail saat lingkaran diklik
   const [modalCallout, setModalCallout] = useState<ServiceCallout | null>(null);
@@ -480,16 +536,15 @@ export default function ExplodedPhoneSection() {
     const container = containerRef.current;
     if (!container) return;
 
+    const controller = new AbortController();
     const preload = () => {
-      if (bootPreloadRef.current) return;
-      const image = new window.Image();
-      image.src = "/images/services/Booting.webp";
-      bootPreloadRef.current = image;
+      // Cache the bytes without starting an animated-image decoder offscreen.
+      void fetch("/images/services/Booting.webp", { signal: controller.signal, cache: "force-cache" }).catch(() => {});
     };
 
     if (!("IntersectionObserver" in window)) {
       preload();
-      return;
+      return () => controller.abort();
     }
 
     const observer = new IntersectionObserver(
@@ -501,7 +556,16 @@ export default function ExplodedPhoneSection() {
       { rootMargin: "400px 0px" },
     );
     observer.observe(container);
-    return () => observer.disconnect();
+    const visibility = new IntersectionObserver(([entry]) => {
+      setStageVisible(entry.isIntersecting);
+      if (!entry.isIntersecting) setBootReady(false);
+    });
+    if (stageRef.current) visibility.observe(stageRef.current);
+    return () => {
+      controller.abort();
+      observer.disconnect();
+      visibility.disconnect();
+    };
   }, []);
 
   // Close modal on Escape key press and lock background scroll
@@ -526,10 +590,10 @@ export default function ExplodedPhoneSection() {
 
   // Helper untuk hitung step progress
   const getProgressForStep = (step: number) => {
-    if (step >= 14) return 1.0;
-    if (step === 13) return 0.88;
+    if (step >= 14) return 0.95;
+    if (step === 13) return (ASSEMBLY_COMPLETE_PROGRESS + BOOT_START_PROGRESS) / 2;
     if (step <= 1) return 0.0;
-    return ((step - 1) / 12) * 0.84;
+    return ((step - 0.5) / 12) * ASSEMBLY_COMPLETE_PROGRESS;
   };
 
   // Sinkronisasi state React saat timeline berjalan
@@ -537,27 +601,27 @@ export default function ExplodedPhoneSection() {
     // Layer transforms stay continuous in GSAP. React only drives labels,
     // hotspots, and callouts, whose CSS transitions interpolate these updates.
     const precision = isDesktopLayout ? 100 : 25;
-    const quantized = Math.round(val * precision) / precision;
-    if (quantized === lastQuantizedRef.current) return;
-    lastQuantizedRef.current = quantized;
-
-    setScrollProgress(quantized);
-
+    // Once assembled, callouts are hidden; hold-phase progress needs no UI renders.
+    const quantized = val >= ASSEMBLY_COMPLETE_PROGRESS ? 1 : Math.round(val * precision) / precision;
     let activeStep = 1;
-    if (quantized >= 0.90) {
+    if (val >= BOOT_START_PROGRESS) {
       activeStep = 14;
-    } else if (quantized >= 0.85) {
+    } else if (val >= 0.85) {
       activeStep = 13;
     } else {
-      activeStep = Math.min(12, Math.max(1, Math.floor((quantized / 0.85) * 12) + 1));
+      activeStep = Math.min(12, Math.max(1, Math.floor((val / 0.85) * 12) + 1));
     }
 
+    if (quantized === lastQuantizedRef.current && activeStep === prevStepRef.current) return;
+    lastQuantizedRef.current = quantized;
+    setScrollProgress(quantized);
+
     if (activeStep === 14 && prevStepRef.current !== 14) {
-      setBootKey((k) => k + 1);
+      setBootReady(false);
     }
     prevStepRef.current = activeStep;
     setCurrentStep((current) => current === activeStep ? current : activeStep);
-    const assembled = quantized >= 0.85;
+    const assembled = val >= 0.85;
     setIsAssembled((current) => current === assembled ? current : assembled);
 
     const currentLayerDef = ALL_13_LAYERS[activeStep - 1];
@@ -572,7 +636,7 @@ export default function ExplodedPhoneSection() {
     const targetProg = getProgressForStep(step);
     const st = scrollTriggerRef.current;
     if (st) {
-      const targetScroll = st.start + (st.end - st.start) * targetProg;
+      const targetScroll = st.start + (st.end - st.start) * semanticToTimelineProgress(targetProg);
       if (lenis) {
         lenis.scrollTo(targetScroll, {
           duration: 1.2,
@@ -585,7 +649,7 @@ export default function ExplodedPhoneSection() {
         });
       }
     } else {
-      timelineRef.current?.progress(targetProg);
+      timelineRef.current?.progress(semanticToTimelineProgress(targetProg));
       applyProgress(targetProg);
     }
   };
@@ -606,6 +670,7 @@ export default function ExplodedPhoneSection() {
         scale: 1,
         transformPerspective: 1400,
         transformOrigin: "center center",
+        force3D: isDesktopLayout ? "auto" : false,
       });
 
       for (let i = 1; i < layers.length; i++) {
@@ -616,6 +681,7 @@ export default function ExplodedPhoneSection() {
           scale: 1.1,
           transformPerspective: 1400,
           transformOrigin: "center center",
+          force3D: isDesktopLayout ? "auto" : false,
         });
       }
 
@@ -626,9 +692,10 @@ export default function ExplodedPhoneSection() {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: "+=2200",
+          end: `+=${TOTAL_SCROLL_DISTANCE}`,
           pin: stageRef.current,
           pinSpacing: true,
+          refreshPriority: 2,
           // Lenis smooths fine-pointer input. Native touch already supplies
           // momentum, so both layouts should map the timeline directly to the
           // current scroll position without an extra animation tail.
@@ -655,15 +722,26 @@ export default function ExplodedPhoneSection() {
 
       // Alokasikan waktu jeda setelah layer 13 (LCD) terpasang sempurna untuk fase Booting (Langkah 14)
       const physicalDuration = (layers.length - 2) * (stepDuration - overlap) + stepDuration;
-      const totalTimelineDuration = physicalDuration / 0.85;
+      const totalTimelineDuration = physicalDuration / ASSEMBLY_FRACTION;
+      // Keep the assembly speed, then reserve scroll space for the boot image.
       tl.set({}, {}, totalTimelineDuration);
 
       tl.eventCallback("onUpdate", () => {
-        applyProgress(tl.progress());
+        applyProgress(timelineToSemanticProgress(tl.progress()));
       });
 
       timelineRef.current = tl;
       scrollTriggerRef.current = tl.scrollTrigger ?? null;
+
+      // Hydration can rebuild this pin after the downstream journey mounted.
+      // Refresh all triggers in priority order after its spacer is in the DOM.
+      const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+      return () => {
+        cancelAnimationFrame(refreshFrame);
+        timelineRef.current = null;
+        scrollTriggerRef.current = null;
+        lastQuantizedRef.current = -1;
+      };
     },
     { scope: containerRef, dependencies: [isDesktopLayout], revertOnUpdate: true }
   );
@@ -772,7 +850,9 @@ export default function ExplodedPhoneSection() {
 
   // ── Fade Out Halus Garis Putus-Putus & Lingkaran Saat LCD Mulai Turun Menutup Sasis (0.78 -> 0.85) ──
   const rawFade =
-    scrollProgress <= 0.78
+    isAssembled
+      ? 0
+      : scrollProgress <= 0.78
       ? 1
       : scrollProgress >= 0.85
       ? 0
@@ -829,8 +909,8 @@ export default function ExplodedPhoneSection() {
             <span className="text-neutral-300 font-medium">
               {currentStep === 14
                 ? isEn
-                  ? "SYSTEM BOOTING & QC PASSED"
-                  : "SISTEM BOOTING & UJI FUNGSI SUKSES"
+                  ? (bootReady ? "SYSTEM BOOTING & QC PASSED" : "SYSTEM BOOTING")
+                  : (bootReady ? "SISTEM BOOTING & UJI FUNGSI SUKSES" : "SISTEM BOOTING")
                 : isAssembled
                 ? isEn
                   ? "IPHONE ASSEMBLED (CLICK TO BOOT)"
@@ -974,7 +1054,7 @@ export default function ExplodedPhoneSection() {
               }`}
               style={{
                 perspective: 1400,
-                transformStyle: "preserve-3d",
+                transformStyle: isDesktopLayout ? "preserve-3d" : "flat",
               }}
             >
               <div
@@ -990,35 +1070,14 @@ export default function ExplodedPhoneSection() {
                 const layerOpacity = (layer.isOffside ? assemblyFade : 1) * (isDimmedLayer ? 0.68 : 1);
 
                 return (
-                  <div
+                  <PhoneLayer
                     key={layer.file}
-                    ref={(el) => {
-                      layerRefs.current[index] = el;
-                    }}
-                    className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
-                    style={{
-                      transformStyle: "preserve-3d",
-                      willChange: isCurrentActiveLayer || layerStep === currentStep + 1 ? "transform, opacity" : "auto",
-                      zIndex: index + 1,
-                    }}
-                  >
-                    {/* Layer Graphic */}
-                    <div
-                      className="relative w-full h-full transition-opacity duration-200 ease-out"
-                      style={{
-                        opacity: layerOpacity,
-                      }}
-                    >
-                      <Image
-                        src={layer.file}
-                        alt={layer.name}
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
+                    layer={layer}
+                    index={index}
+                    opacity={layerOpacity}
+                    desktop={isDesktopLayout}
+                    register={registerLayer}
+                  />
                 );
               })}
 
@@ -1026,22 +1085,21 @@ export default function ExplodedPhoneSection() {
               <div
                 className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none transition-opacity duration-300 ease-out"
                 style={{
-                  opacity: currentStep === 14 ? 1 : 0,
-                  transformStyle: "preserve-3d",
+                  opacity: currentStep === 14 && bootReady ? 1 : 0,
                   zIndex: 25,
                 }}
               >
                 <div className="relative w-full h-full flex items-center justify-center">
-                  {currentStep === 14 && (
+                  {currentStep === 14 && stageVisible && (
                     <Image
-                      key={bootKey}
                       src="/images/services/Booting.webp"
                       alt="iPhone Booting & Quality Test"
                       fill
                       unoptimized
                       loading="eager"
+                      onLoad={() => setBootReady(true)}
                       sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 350px, 380px"
-                      className="object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
+                      className="object-contain lg:drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none pointer-events-none"
                     />
                   )}
                 </div>

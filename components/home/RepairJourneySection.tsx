@@ -191,6 +191,7 @@ export default function RepairJourneySection() {
               start: "top top",
               end: "+=300%",
               pin: stickyTrackRef.current,
+              refreshPriority: 1,
               scrub: 1,
               anticipatePin: 1,
               invalidateOnRefresh: true,
@@ -223,6 +224,9 @@ export default function RepairJourneySection() {
           });
 
           tl.to({}, { duration: 0.6 });
+
+          const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+          return () => cancelAnimationFrame(refreshFrame);
         }
       );
 
