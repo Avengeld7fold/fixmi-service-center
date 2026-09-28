@@ -104,6 +104,7 @@ export default function BrandExplorer({ services, categoryName, brandIcons }: Br
 
             <div
               className="grid transition-[grid-template-rows] duration-300 ease-out"
+              inert={!brandOpen}
               style={{ gridTemplateRows: brandOpen ? "1fr" : "0fr" }}
             >
               <div className="overflow-hidden">
@@ -160,6 +161,7 @@ export default function BrandExplorer({ services, categoryName, brandIcons }: Br
 
                         <div
                           className="grid transition-[grid-template-rows] duration-300 ease-out"
+                          inert={!seriesOpen}
                           style={{ gridTemplateRows: seriesOpen ? "1fr" : "0fr" }}
                         >
                           <div className="overflow-hidden">

@@ -109,6 +109,7 @@ export default function SmoothScrolling({ children }: SmoothScrollingProps) {
         lerp: 0.1,
         duration: 1.5,
         smoothWheel: true,
+        allowNestedScroll: pathname.startsWith("/pricelist") || pathname.startsWith("/en/pricelist"),
         wheelMultiplier: 1.0,
         touchMultiplier: 1.5,
         infinite: false,

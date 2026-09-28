@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { X, ShieldCheck, ArrowRight } from "lucide-react";
 import { useLenis } from "lenis/react";
 import { useI18n } from "@/lib/i18n/context";
@@ -79,30 +79,39 @@ export default function WarrantyModal({
   const { dict, locale } = useI18n();
   const isEn = locale === "en";
   const terms = isEn ? EN_TERMS : ID_TERMS;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!open) return;
+    const dialog = dialogRef.current;
+    if (!open || !dialog) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const wasStopped = lenis?.isStopped;
+    dialog.showModal();
+    closeButtonRef.current?.focus();
     lenis?.stop();
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
     return () => {
-      lenis?.start();
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", onKey);
+      dialog.close();
+      if (!wasStopped) lenis?.start();
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
-  }, [open, onClose, lenis]);
+  }, [open, lenis]);
 
   if (!open) return null;
 
   return (
-    <div
-      role="dialog"
+    <dialog
+      ref={dialogRef}
       aria-modal="true"
       aria-labelledby="warranty-title"
-      className="fixed inset-0 z-[100] flex items-end justify-center p-3 sm:items-center sm:p-6"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      className="fixed inset-0 m-0 flex h-full max-h-none w-full max-w-none items-end justify-center border-0 bg-transparent p-3 backdrop:bg-transparent sm:items-center sm:p-6"
     >
       {/* Backdrop */}
       <button
@@ -135,6 +144,7 @@ export default function WarrantyModal({
 
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label={dict.common.close}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03] text-neutral-400 transition-colors duration-150 hover:border-white/[0.2] hover:text-white active:scale-95"
@@ -218,6 +228,6 @@ export default function WarrantyModal({
           </a>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

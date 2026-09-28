@@ -32,29 +32,28 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
     }
   };
 
-  // Cascade baris tabel saat panel dibuka: fade + naik dengan stagger cepat.
+  // Animate only the initially visible rows; keep sticky cells in their native scroll context.
   const listRef = useRef<HTMLDivElement>(null);
   useGSAP(
     () => {
       if (!openSlug || !listRef.current) return;
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const rows = listRef.current.querySelectorAll(`#svc-panel-${openSlug} tbody tr`);
+      const rows = [...listRef.current.querySelectorAll(`#svc-panel-${openSlug} tbody tr`)].slice(0, 10);
       if (!rows.length) return;
       gsap.fromTo(
         rows,
-        { opacity: 0, y: 6 },
+        { opacity: 0 },
         {
           opacity: 1,
-          y: 0,
           duration: 0.28,
           stagger: 0.015,
           delay: 0.08,
           ease: "power2.out",
-          clearProps: "opacity,transform", // biar hover row tetap bersih setelahnya
+          clearProps: "opacity",
         }
       );
     },
-    { dependencies: [openSlug], scope: listRef }
+    { dependencies: [openSlug], scope: listRef, revertOnUpdate: true }
   );
 
   if (services.length === 0) return null;
@@ -113,6 +112,7 @@ export default function ServiceAccordion({ services, categoryName, sub = false }
               id={panelId}
               role="region"
               aria-labelledby={btnId}
+              inert={!open}
               className="grid transition-[grid-template-rows] duration-300 ease-out"
               style={{
                 gridTemplateRows: open ? "1fr" : "0fr",

@@ -102,12 +102,11 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
   // kanan → tampilkan hint "Geser tabel" + gradien fade tepi kanan. Otomatis
   // hilang begitu digulir sampai ujung (atau semua kolom muat).
   const scrollRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const [canRight, setCanRight] = useState(false);
   const [canLeft, setCanLeft] = useState(false);
   const rafId = useRef<number | null>(null);
 
-  const isSyncing = useRef(false);
+  const lastScrollLeft = useRef(0);
 
   const updateHint = () => {
     if (rafId.current !== null) return;
@@ -120,27 +119,10 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
     });
   };
 
-  /** Sync header horizontal position from body + update hint. */
-  const handleBodyScroll = () => {
-    if (!isSyncing.current && headerRef.current && scrollRef.current) {
-      isSyncing.current = true;
-      headerRef.current.scrollLeft = scrollRef.current.scrollLeft;
-      requestAnimationFrame(() => {
-        isSyncing.current = false;
-      });
-    }
-    updateHint();
-  };
-
-  /** Sync body horizontal position from header + update hint. */
-  const handleHeaderScroll = () => {
-    if (!isSyncing.current && headerRef.current && scrollRef.current) {
-      isSyncing.current = true;
-      scrollRef.current.scrollLeft = headerRef.current.scrollLeft;
-      requestAnimationFrame(() => {
-        isSyncing.current = false;
-      });
-    }
+  const handleScroll = () => {
+    const left = scrollRef.current?.scrollLeft ?? 0;
+    if (left === lastScrollLeft.current) return;
+    lastScrollLeft.current = left;
     updateHint();
   };
 
@@ -159,13 +141,17 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
     };
   }, []);
 
+  const variantSearchText = useMemo(() => service.variants.flatMap((v) => [
+    v.Label,
+    v.Note ?? "",
+    getLocalizedVariantLabel(v, locale),
+    getLocalizedVariantNote(v.Note, locale),
+  ]).join("\n").toLowerCase(), [service.variants, locale]);
+
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return service.device_prices;
-    if (service.variants.some((v) =>
-      v.Label.toLowerCase().includes(q) ||
-      (v.Note && v.Note.toLowerCase().includes(q))
-    )) return service.device_prices;
+    if (variantSearchText.includes(q)) return service.device_prices;
     return service.device_prices.filter((d) => {
       if (d.DeviceModel.toLowerCase().includes(q)) return true;
       if (
@@ -177,7 +163,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
       }
       return false;
     });
-  }, [query, service.device_prices, service.variants]);
+  }, [query, service.device_prices, variantSearchText]);
 
   const variants = service.variants;
 
@@ -256,21 +242,16 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
         </p>
       )}
 
-      {/* ─── Split-table layout ─────────────────────────────────────────
-           Header lives OUTSIDE the vertical scroll container so it never
-           scrolls away. This bypasses the WebKit bug where nested
-           overflow-hidden ancestors (accordion) break position:sticky;top:0.
-
-           headerRef  → overflow-x-auto, scrollLeft synced bidirectionally
-           scrollRef  → overflow-auto,   the primary vertical+horizontal scroller
-           Both tables share table-fixed, identical <colgroup>, and identical minWidth
-           so columns align with mathematical precision down to the sub-pixel. */}
+      {/* One native scroller keeps headers and prices aligned without JS synchronization. */}
       <div className="relative -mx-2 lg:mx-0">
-        {/* Header — never scrolls vertically */}
         <div
-          ref={headerRef}
-          onScroll={handleHeaderScroll}
-          className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x"
+          ref={scrollRef}
+          onScroll={handleScroll}
+          data-lenis-prevent-horizontal
+          tabIndex={0}
+          aria-label={`${getLocalizedServiceName(service, locale)} - ${categoryName}`}
+          style={{ overscrollBehaviorY: "auto" }}
+          className="max-h-[35rem] overflow-auto [overscroll-behavior-x:contain] [touch-action:pan-x_pan-y] [scrollbar-width:thin] focus-visible:outline-2 focus-visible:outline-primary"
         >
           <table
             className="w-full table-fixed border-separate border-spacing-0 text-left"
@@ -294,7 +275,8 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             <thead>
               <tr>
                 <th
-                  className={`sticky left-0 z-30 w-[11.5rem] lg:w-[14.5rem] min-w-[11.5rem] lg:min-w-[14.5rem] max-w-[11.5rem] lg:max-w-[14.5rem] border-b border-r px-3.5 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
+                  scope="col"
+                  className={`sticky top-0 left-0 z-30 w-[11.5rem] lg:w-[14.5rem] min-w-[11.5rem] lg:min-w-[14.5rem] max-w-[11.5rem] lg:max-w-[14.5rem] border-b border-r px-3.5 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
                     sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                   }`}
                 >
@@ -308,7 +290,8 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                 {variants.map((v) => (
                   <th
                     key={v.Key}
-                    className={`border-b px-3 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
+                    scope="col"
+                    className={`sticky top-0 z-20 border-b px-3 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
                       sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                     }`}
                   >
@@ -324,72 +307,8 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                 ))}
               </tr>
             </thead>
-          </table>
-        </div>
-
-        {/* Body — scrolls vertically & horizontally */}
-        <div
-          ref={scrollRef}
-          onScroll={handleBodyScroll}
-          data-lenis-prevent
-          className="max-h-[30rem] overflow-auto [overscroll-behavior:contain] touch-pan-x touch-pan-y [scrollbar-width:thin]"
-        >
-          <table
-            className="w-full table-fixed border-separate border-spacing-0 text-left"
-            style={{ minWidth: tableMinWidth }}
-          >
-            <colgroup>
-              <col className="w-[11.5rem] lg:w-[14.5rem]" />
-              {variants.map((v) => (
-                <col
-                  key={v.Key}
-                  className={
-                    seriesColumns.has(v.Key)
-                      ? "w-[13.5rem] lg:w-[16rem]"
-                      : v.Type === "text"
-                      ? "w-[8.5rem] lg:w-[10.5rem]"
-                      : "w-[8rem] lg:w-[10rem]"
-                  }
-                />
-              ))}
-            </colgroup>
             <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={variants.length + 1}
-                    className="px-4 py-8 text-center"
-                  >
-                    {query ? (
-                      <p className="text-sm text-text-muted">
-                        {isEn ? `No models matching "${query}".` : `Tidak ada model yang cocok dengan "${query}".`}
-                      </p>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center gap-3 py-2">
-                        <p className="text-sm text-text-muted">
-                          {isEn
-                            ? "Device model pricing for this service is currently being updated."
-                            : "Daftar harga model perangkat untuk layanan ini sedang diperbarui."}
-                        </p>
-                        <a
-                          href={whatsappUrl(
-                            isEn
-                              ? `Hello FIXMI, I would like to ask for an estimated repair quote for ${getLocalizedServiceName(service, "en")} (${categoryName}).`
-                              : `Halo FIXMI, saya ingin konsultasi estimasi biaya ${getLocalizedServiceName(service, "id")} (${categoryName}).`
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-4 py-2 text-xs font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white active:scale-95"
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                          <span>{isEn ? "Ask Price Quote via WhatsApp" : "Tanya Estimasi Biaya via WhatsApp"}</span>
-                        </a>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ) : (
-                rows.map((row) => (
+              {rows.map((row) => (
                   <tr
                     key={row.DeviceModel}
                     className={`group transition-colors ${
@@ -435,8 +354,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                       );
                     })}
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
@@ -449,6 +367,36 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
           } ${canRight ? "opacity-100" : "opacity-0"}`}
         />
       </div>
+      {rows.length === 0 && (
+        <div role="status" className="px-4 py-8 text-center [overflow-wrap:anywhere]">
+          {query.trim() ? (
+            <p className="text-sm text-text-muted">
+              {isEn ? `No models matching "${query}".` : `Tidak ada model yang cocok dengan "${query}".`}
+            </p>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 py-2">
+              <p className="text-sm text-text-muted">
+                {isEn
+                  ? "Device model pricing for this service is currently being updated."
+                  : "Daftar harga model perangkat untuk layanan ini sedang diperbarui."}
+              </p>
+              <a
+                href={whatsappUrl(
+                  isEn
+                    ? `Hello FIXMI, I would like to ask for an estimated repair quote for ${getLocalizedServiceName(service, "en")} (${categoryName}).`
+                    : `Halo FIXMI, saya ingin konsultasi estimasi biaya ${getLocalizedServiceName(service, "id")} (${categoryName}).`
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex max-w-full items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-4 py-2 text-xs font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-white active:scale-95"
+              >
+                <MessageCircle className="h-4 w-4 shrink-0" />
+                <span>{isEn ? "Ask Price Quote via WhatsApp" : "Tanya Estimasi Biaya via WhatsApp"}</span>
+              </a>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
