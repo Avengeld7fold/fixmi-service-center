@@ -70,37 +70,67 @@ export default function Home() {
   const [heroVisible, setHeroVisible] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
-  const load3DTimerRef = useRef<number | null>(null);
+  const cancelScheduled3DRef = useRef<(() => void) | null>(null);
   const handleHeroReady = useCallback(() => setHeroReady(true), []);
 
-  const activate3D = useCallback((input: "mouse" | "touch") => {
-    if (load3D || load3DTimerRef.current !== null) return;
-
-    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || nav.connection?.saveData) return;
-    if (input === "touch") {
-      if ((nav.deviceMemory !== undefined && nav.deviceMemory <= 1) ||
-        (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 2)) return;
-    } else if (window.matchMedia("(pointer: coarse)").matches ||
-      (nav.deviceMemory !== undefined && nav.deviceMemory <= 4) ||
-      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 4)) {
-      return;
+  const activate3D = useCallback((immediate = false) => {
+    if (load3D) return;
+    if (cancelScheduled3DRef.current) {
+      if (!immediate) return;
+      cancelScheduled3DRef.current();
+      cancelScheduled3DRef.current = null;
     }
 
-    // A touch is an explicit request to interact, so start the lazy load
-    // immediately. Desktop pointer movement is easier to trigger accidentally
-    // and keeps its delay to protect initial-load performance.
-    const activationDelay = input === "touch" ? 0 : 650;
-    load3DTimerRef.current = window.setTimeout(() => {
-      load3DTimerRef.current = null;
+    const nav = navigator as Navigator & {
+      deviceMemory?: number;
+      connection?: { effectiveType?: string; saveData?: boolean };
+    };
+    const mobile = window.matchMedia("(pointer: coarse)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const slowConnection = ["slow-2g", "2g"].includes(nav.connection?.effectiveType ?? "");
+    const constrainedDevice =
+      (nav.deviceMemory !== undefined && nav.deviceMemory <= 1) ||
+      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency <= 2);
+    if (reducedMotion || nav.connection?.saveData || slowConnection || constrainedDevice) return;
+
+    const mount = () => {
+      cancelScheduled3DRef.current = null;
       const hero = heroRef.current;
       if (!hero) return;
       const bounds = hero.getBoundingClientRect();
       if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
-      setMobile3D(input === "touch");
+      setMobile3D(mobile);
       setLoad3D(true);
-    }, activationDelay);
+    };
+
+    if (immediate) {
+      mount();
+      return;
+    }
+
+    const idleWindow = window as unknown as {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const deferMount = () => {
+      const id = window.setTimeout(mount, 3500);
+      cancelScheduled3DRef.current = () => window.clearTimeout(id);
+    };
+    if (idleWindow.requestIdleCallback && idleWindow.cancelIdleCallback) {
+      const id = idleWindow.requestIdleCallback(deferMount, { timeout: 1200 });
+      cancelScheduled3DRef.current = () => idleWindow.cancelIdleCallback?.(id);
+    } else {
+      const id = window.setTimeout(mount, 4000);
+      cancelScheduled3DRef.current = () => window.clearTimeout(id);
+    }
   }, [load3D]);
+
+  useEffect(() => {
+    const schedule = () => activate3D();
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => window.removeEventListener("load", schedule);
+  }, [activate3D]);
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -119,7 +149,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => () => {
-    if (load3DTimerRef.current !== null) window.clearTimeout(load3DTimerRef.current);
+    cancelScheduled3DRef.current?.();
   }, []);
 
   useGSAP(() => {
@@ -158,14 +188,14 @@ export default function Home() {
           <div className="w-[36rem] sm:w-[50rem] h-[28rem] sm:h-[38rem] rounded-full bg-primary/[0.07] blur-[100px] sm:blur-[140px]" />
         </div>
 
-        {/* Keep the phone as the initial visual; WebGL loads only after interaction. */}
+        {/* Keep the phone as the initial visual while WebGL loads after first paint. */}
         <div
           className="absolute inset-x-0 -top-[4.5rem] -bottom-20 sm:-bottom-28 md:-bottom-36 lg:-bottom-44 z-0"
           onPointerMove={(event) => {
-            if (event.pointerType === "mouse") activate3D("mouse");
+            if (event.pointerType === "mouse") activate3D(true);
           }}
           onPointerDown={(event) => {
-            if (event.pointerType === "touch") activate3D("touch");
+            if (event.pointerType === "touch") activate3D(true);
           }}
         >
           <div className={`absolute inset-x-0 top-0 h-dvh -translate-y-[2dvh] md:h-screen md:translate-y-0 flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>

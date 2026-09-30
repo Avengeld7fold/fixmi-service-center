@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useRef, useEffect, useState, type ReactNode } from "react";
+import React, { useRef, useEffect, useState, useCallback, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { gsap } from "gsap";
 import { FluidSim } from "./hero/FluidSim";
 
 // Vertex shader
@@ -158,21 +157,6 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
   const size = useThree((state) => state.size);
   const invalidate = useThree((state) => state.invalidate);
 
-  useEffect(() => {
-    if (!mobile || !active) return;
-    let frame = 0;
-    let lastFrame = 0;
-    const tick = (now: number) => {
-      if (now - lastFrame >= 1000 / 60 - 1) {
-        invalidate();
-        lastFrame = now;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [active, invalidate, mobile]);
-
   const prefersReduced =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -186,6 +170,36 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
   // Desktop memakai simulasi penuh; mobile memakai satu pressure iteration
   // agar bentuk tetap cair dengan jumlah pass yang jauh lebih rendah.
   const simRef = useRef<FluidSim | null>(null);
+  const activeRef = useRef(active);
+  const renderUntilRef = useRef(0);
+  const renderFrameRef = useRef(0);
+
+  const renderFor = useCallback((duration: number) => {
+    renderUntilRef.current = Math.max(renderUntilRef.current, performance.now() + duration);
+    if (renderFrameRef.current || !activeRef.current) return;
+    const tick = (now: number) => {
+      invalidate();
+      if (activeRef.current && now < renderUntilRef.current) {
+        renderFrameRef.current = requestAnimationFrame(tick);
+      } else {
+        renderFrameRef.current = 0;
+      }
+    };
+    renderFrameRef.current = requestAnimationFrame(tick);
+  }, [invalidate]);
+
+  useEffect(() => {
+    activeRef.current = active;
+    if (active) renderFor(100);
+    else if (renderFrameRef.current) {
+      cancelAnimationFrame(renderFrameRef.current);
+      renderFrameRef.current = 0;
+    }
+  }, [active, renderFor]);
+
+  useEffect(() => () => {
+    if (renderFrameRef.current) cancelAnimationFrame(renderFrameRef.current);
+  }, []);
 
   useEffect(() => {
     // Mobile uses fewer GPU passes. A wider cursor offsets the higher output
@@ -203,58 +217,6 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
   useEffect(() => {
     simRef.current?.resize(gl.domElement.width, gl.domElement.height);
   }, [size.width, size.height, gl]);
-
-  // ── Idle choreography ala landonorris.com (didekode dari bundle asli) ──
-  // Saat user diam 2 dtk (2,5 dtk pertama setelah load), kursor virtual
-  // menyapu layar mengikuti GSAP timeline cosine (2 siklus horizontal ×
-  // ½ siklus vertikal, amplitudo 75%/50% NDC), jeda napas 3 dtk antar sapuan.
-  const idle = useRef({ moving: true, progress: { x: 0, y: 0 } });
-  const idleTl = useRef<gsap.core.Timeline | null>(null);
-  const activeRef = useRef(active);
-  useEffect(() => {
-    if (prefersReduced) return;
-    const st = idle.current;
-    const sweepDuration = mobile ? 1.6 : 2.5;
-    const returnAt = mobile ? 2.5 : 4;
-    const repeatDelay = mobile ? 2 : 3;
-    const tl = gsap.timeline({ paused: true, repeat: -1, repeatDelay });
-    tl.fromTo(st.progress, { y: 0 }, { y: 1, duration: sweepDuration, ease: "none" }, 0)
-      .fromTo(st.progress, { x: 0 }, { x: 1, duration: sweepDuration, ease: "power1.inOut" }, 0)
-      .fromTo(st.progress, { y: 1 }, { y: 0, duration: sweepDuration, ease: "none" }, returnAt)
-      .fromTo(st.progress, { x: 1 }, { x: 0, duration: sweepDuration, ease: "power1.inOut" }, returnAt);
-    idleTl.current = tl;
-
-    let moveTimeout: ReturnType<typeof setTimeout>;
-    const goIdle = () => {
-      st.moving = false;
-      tl.seek(0);
-      if (activeRef.current) tl.play();
-    };
-    const onMove = () => {
-      st.moving = true;
-      tl.pause();
-      clearTimeout(moveTimeout);
-      moveTimeout = setTimeout(goIdle, 2000);
-    };
-    const initial = setTimeout(goIdle, mobile ? 1600 : 2500);
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("touchmove", onMove);
-    return () => {
-      clearTimeout(initial);
-      clearTimeout(moveTimeout);
-      tl.kill();
-      idleTl.current = null;
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("touchmove", onMove);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    activeRef.current = active;
-    if (active && !idle.current.moving) idleTl.current?.play();
-    else if (!active) idleTl.current?.pause();
-  }, [active]);
 
   // ── Input seluruh halaman, SEMUA perangkat (pola Lando: mousemove +
   // touchstart/touchmove di document, bukan canvas) — kursor/jari di area
@@ -280,6 +242,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
         -(((clientY - r.top) / r.height) * 2 - 1)
       );
       pageActive.current = true;
+      renderFor(500);
     };
     const onPointer = (e: PointerEvent) => setFrom(e.clientX, e.clientY);
     const onTouch = (e: TouchEvent) => {
@@ -297,8 +260,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
       window.removeEventListener("scroll", invalidateRect);
       window.removeEventListener("resize", invalidateRect);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [gl, renderFor]);
 
   // ── Splash intro: setelah loading
   // screen selesai, satu sapuan sintetik melintasi layar membuka reveal,
@@ -312,12 +274,12 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     if (prefersReduced) return;
     const trigger = () => {
       splash.current.pending = true;
+      renderFor(mobile ? 1100 : 1500);
     };
     if ((window as unknown as Record<string, unknown>).__fixmiLoaded) trigger();
     else window.addEventListener("fixmi:loaded", trigger, { once: true });
     return () => window.removeEventListener("fixmi:loaded", trigger);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mobile, prefersReduced, renderFor]);
 
   // State initializer keeps the uniform object stable while making it safe to pass during render.
   const [uniforms] = useState(() => ({
@@ -424,28 +386,17 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
       revealResponse
     );
 
-    if (!splashActive) {
-      if (pageActive.current && idle.current.moving) {
-        // Input seluruh halaman (mouse ATAU jari); force = diff posisi antar
-        // frame (persis Lando). Parallax lerp 0.03 = "berat mewah".
-        sim?.updatePointer(pagePointer.current.x, pagePointer.current.y);
-        mouse.lerp(
-          new THREE.Vector2(
-            pagePointer.current.x * 0.5 + 0.5,
-            pagePointer.current.y * 0.5 + 0.5
-          ),
-          0.03
-        );
-      } else if (!idle.current.moving && idleTl.current) {
-        // Idle choreography: kursor virtual menyapu layar (rumus persis
-        // Lando). Fluida tetap hidup + parallax "bernapas" dengan sapuan
-        // besar yang berkarakter, berhenti seketika saat user bergerak.
-        const p = idle.current.progress;
-        const cx = -Math.cos(p.x * Math.PI * 4) * 0.75;
-        const cy = Math.cos(p.y * Math.PI) * 0.5;
-        sim?.updatePointer(cx, cy);
-        mouse.lerp(new THREE.Vector2(cx * 0.5 + 0.5, cy * 0.5 + 0.5), 0.03);
-      }
+    if (!splashActive && pageActive.current) {
+      // Input seluruh halaman (mouse ATAU jari); force = diff posisi antar
+      // frame (persis Lando). Parallax lerp 0.03 = "berat mewah".
+      sim?.updatePointer(pagePointer.current.x, pagePointer.current.y);
+      mouse.lerp(
+        new THREE.Vector2(
+          pagePointer.current.x * 0.5 + 0.5,
+          pagePointer.current.y * 0.5 + 0.5
+        ),
+        0.03
+      );
     }
 
     if (sim) {
@@ -571,7 +522,7 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
             // Preserve native sharpness where practical while capping fill-rate
             // on constrained mobile hardware. The fluid simulation remains low-res.
             dpr={mobile ? mobileDpr : [1, 1.25]}
-            frameloop={mobile ? "demand" : active ? "always" : "never"}
+            frameloop="demand"
             className="w-full h-full touch-pan-y"
           >
             <MagicShaderPlane textures={textures} active={active} mobile={mobile} onReady={onReady} />
