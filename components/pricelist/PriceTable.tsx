@@ -175,14 +175,14 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
   ), [variants, service.device_prices]);
 
   const tableMinWidth = useMemo(() => {
-    let remSum = 11.5;
+    let remSum = 10;
     for (const v of variants) {
       if (seriesColumns.has(v.Key)) {
-        remSum += 13.5;
+        remSum += 12;
       } else if (v.Type === "text") {
-        remSum += 8.5;
+        remSum += 7.5;
       } else {
-        remSum += 8.0;
+        remSum += 7.25;
       }
     }
     return `max(100%, ${remSum}rem)`;
@@ -258,16 +258,16 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             style={{ minWidth: tableMinWidth }}
           >
             <colgroup>
-              <col className="w-[11.5rem] lg:w-[14.5rem]" />
+              <col className="w-[10rem] sm:w-[11rem] lg:w-[14.5rem]" />
               {variants.map((v) => (
                 <col
                   key={v.Key}
                   className={
                     seriesColumns.has(v.Key)
-                      ? "w-[13.5rem] lg:w-[16rem]"
+                      ? "w-[12rem] sm:w-[13.5rem] lg:w-[16rem]"
                       : v.Type === "text"
-                      ? "w-[8.5rem] lg:w-[10.5rem]"
-                      : "w-[8rem] lg:w-[10rem]"
+                      ? "w-[7.5rem] sm:w-[8.5rem] lg:w-[10.5rem]"
+                      : "w-[7.25rem] sm:w-[8rem] lg:w-[10rem]"
                   }
                 />
               ))}
@@ -276,7 +276,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
               <tr>
                 <th
                   scope="col"
-                  className={`sticky top-0 left-0 z-30 w-[11.5rem] lg:w-[14.5rem] min-w-[11.5rem] lg:min-w-[14.5rem] max-w-[11.5rem] lg:max-w-[14.5rem] border-b border-r px-3.5 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
+                  className={`sticky top-0 left-0 z-30 w-[10rem] sm:w-[11rem] lg:w-[14.5rem] min-w-[10rem] sm:min-w-[11rem] lg:min-w-[14.5rem] max-w-[10rem] sm:max-w-[11rem] lg:max-w-[14.5rem] border-b border-r px-2.5 sm:px-3 lg:px-4 pb-2.5 sm:pb-3 pt-2 text-center align-middle font-instrument ${
                     sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                   }`}
                 >
@@ -291,7 +291,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                   <th
                     key={v.Key}
                     scope="col"
-                    className={`sticky top-0 z-20 border-b px-3 lg:px-4 pb-3 pt-2 text-center align-middle font-instrument ${
+                    className={`sticky top-0 z-20 border-b px-2.5 sm:px-3 lg:px-4 pb-2.5 sm:pb-3 pt-2 text-center align-middle font-instrument ${
                       sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                     }`}
                   >
@@ -316,7 +316,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                     }`}
                   >
                     <td
-                      className={`sticky left-0 z-10 w-[11.5rem] lg:w-[14.5rem] min-w-[11.5rem] lg:min-w-[14.5rem] max-w-[11.5rem] lg:max-w-[14.5rem] border-b border-r border-l-2 border-l-transparent px-3.5 lg:px-4 py-3.5 text-xs sm:text-sm font-medium text-foreground leading-snug break-words transition-[colors,border-color] duration-200 group-hover:border-l-primary ${
+                      className={`sticky left-0 z-10 w-[10rem] sm:w-[11rem] lg:w-[14.5rem] min-w-[10rem] sm:min-w-[11rem] lg:min-w-[14.5rem] max-w-[10rem] sm:max-w-[11rem] lg:max-w-[14.5rem] border-b border-r border-l-2 border-l-transparent px-2.5 sm:px-3 lg:px-4 py-[10px] sm:py-[11px] lg:py-3.5 text-[12px] sm:text-[14px] font-medium text-foreground leading-snug break-words transition-[colors,border-color] duration-200 group-hover:border-l-primary ${
                         sub
                           ? "border-[#262626] bg-[#161616] group-hover:bg-[#1E1E1E]"
                           : "border-panel-border/60 border-r-panel-border bg-panel group-hover:bg-panel-raised"
@@ -332,7 +332,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                       return (
                         <td
                           key={v.Key}
-                          className={`border-b px-3 lg:px-4 py-3.5 text-center font-mono text-sm tabular-nums ${
+                          className={`border-b px-2.5 sm:px-3 lg:px-4 py-[10px] sm:py-[11px] lg:py-3.5 text-center font-mono text-[13px] sm:text-[14px] tabular-nums ${
                             sub ? "border-[#262626]" : "border-panel-border/60"
                           } ${isSeries ? "whitespace-normal" : "whitespace-nowrap"} ${
                             isText ? "text-foreground font-normal" : ""
@@ -344,8 +344,8 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                             <SmartCell text={String(val)} align="center" />
                           ) : (
                             <>
-                              <span className="mr-1.5 text-primary font-bold font-instrument">Rp.</span>
-                              <span className="text-primary font-bold font-instrument">
+                              <span className="mr-1 text-primary font-semibold lg:font-bold font-instrument">Rp.</span>
+                              <span className="text-primary font-semibold lg:font-bold font-instrument">
                                 {priceFormatter.format(val as number)}
                               </span>
                             </>
