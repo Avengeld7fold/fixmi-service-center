@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
 import { SOCIAL_LINKS } from "@/lib/constants";
 import { getStoreLiveStatus } from "@/lib/storeStatus";
+import { useStoreTime } from "@/lib/useStoreTime";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 type StoreKey = "head" | "branch" | "other";
@@ -51,6 +52,7 @@ export default function Footer() {
   const { dict, locale, getLocalizedPath } = useI18n();
   const [active, setActive] = useState<StoreKey>("head");
   const [mapLoaded, setMapLoaded] = useState(false);
+  const storeTime = useStoreTime();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -127,7 +129,10 @@ export default function Footer() {
   };
 
   const getBadge = (timings: { openHour: number; closeHourWeekday: number; closeHourSunday: number }) => {
-    const live = getStoreLiveStatus(timings);
+    const live = getStoreLiveStatus(timings, storeTime);
+    if (live.statusType === "pending") {
+      return { text: live.label, badgeClass: live.badgeClass, dotClass: live.dotClass };
+    }
     if (live.isHoliday) {
       return {
         text: dict.footer.openStatusHoliday,

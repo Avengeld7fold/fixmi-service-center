@@ -735,7 +735,7 @@ export default function ExplodedPhoneSection() {
 
       // Hydration can rebuild this pin after the downstream journey mounted.
       // Refresh all triggers in priority order after its spacer is in the DOM.
-      const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+      const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh(true));
       return () => {
         cancelAnimationFrame(refreshFrame);
         timelineRef.current = null;

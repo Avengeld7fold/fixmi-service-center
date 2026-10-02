@@ -21,6 +21,7 @@ const geistMono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
+  preload: false,
 });
 
 const instrumentSans = Instrument_Sans({
@@ -55,6 +56,7 @@ const neueMontreal = localFont({
   ],
   variable: "--font-neue-montreal",
   display: "swap",
+  preload: false,
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fixmibali.com";

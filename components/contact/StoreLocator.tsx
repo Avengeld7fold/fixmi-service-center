@@ -5,6 +5,7 @@ import { Clock, MapPin, Phone, ArrowRight } from "lucide-react";
 import StoreMap from "./StoreMap";
 import { STORES, mapDirectionsUrl, mapSearchUrl } from "@/lib/stores";
 import { getStoreLiveStatus } from "@/lib/storeStatus";
+import { useStoreTime } from "@/lib/useStoreTime";
 import { useI18n } from "@/lib/i18n/context";
 
 /** 0819-9933-6722 / +62 899-1099-999 → tel:+62... */
@@ -14,6 +15,7 @@ const telHref = (phone: string) =>
 export default function StoreLocator() {
   const { dict } = useI18n();
   const [active, setActive] = useState(STORES[0].key);
+  const storeTime = useStoreTime();
 
   const localizedStores = [
     {
@@ -48,7 +50,7 @@ export default function StoreLocator() {
     openHour: store.openHour,
     closeHourWeekday: store.closeHourWeekday,
     closeHourSunday: store.closeHourSunday,
-  });
+  }, storeTime);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_1.15fr] lg:gap-10">
@@ -60,7 +62,7 @@ export default function StoreLocator() {
             openHour: s.openHour,
             closeHourWeekday: s.closeHourWeekday,
             closeHourSunday: s.closeHourSunday,
-          });
+          }, storeTime);
 
           return (
             <div
@@ -102,7 +104,7 @@ export default function StoreLocator() {
                       >
                         <span className={`h-1.5 w-1.5 rounded-full ${live.dotClass}`} />
                         <span>
-                          {dict.locale === "en"
+                          {live.statusType === "pending" ? live.label : dict.locale === "en"
                             ? live.isOpen
                               ? dict.footer.openStatusOpen
                               : dict.footer.openStatusClosed
@@ -183,7 +185,7 @@ export default function StoreLocator() {
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${activeLive.dotClass}`} />
                 <span>
-                  {dict.locale === "en"
+                  {activeLive.statusType === "pending" ? activeLive.label : dict.locale === "en"
                     ? activeLive.isOpen
                       ? dict.footer.openStatusOpen
                       : dict.footer.openStatusClosed
@@ -219,4 +221,3 @@ export default function StoreLocator() {
     </div>
   );
 }
-

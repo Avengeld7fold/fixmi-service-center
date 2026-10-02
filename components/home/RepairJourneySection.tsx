@@ -225,7 +225,7 @@ export default function RepairJourneySection() {
 
           tl.to({}, { duration: 0.6 });
 
-          const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh());
+          const refreshFrame = requestAnimationFrame(() => ScrollTrigger.refresh(true));
           return () => cancelAnimationFrame(refreshFrame);
         }
       );

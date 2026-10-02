@@ -1,7 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Image from "next/image";
+import hero640 from "@/components/hero/assets/iphone-broken-640.webp";
+import hero960 from "@/components/hero/assets/iphone-broken-960.webp";
+import hero1280 from "@/components/hero/assets/iphone-broken-1280.webp";
+import hero2000 from "@/components/hero/assets/iphone-broken-2000.webp";
 import WaveDividerSection from "@/components/home/WaveDividerSection";
 
 // ponytail: code-split Three.js & R3F (841KB) — loads asynchronously without blocking initial HTML & LCP text
@@ -199,7 +202,9 @@ export default function Home() {
           }}
         >
           <div className={`absolute inset-x-0 top-0 h-dvh -translate-y-[2dvh] md:h-screen md:translate-y-0 flex items-center justify-center transition-opacity duration-300 ${heroReady ? "opacity-0" : "opacity-100"}`}>
-            <Image src="/images/iphone-broken.webp" alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, 80vw" loading="eager" fetchPriority="high" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
+            {/* Pre-encoded, hashed variants keep the LCP off the runtime image optimizer. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={hero2000.src} srcSet={`${hero640.src} 640w, ${hero960.src} 960w, ${hero1280.src} 1280w, ${hero2000.src} 2000w`} alt="" aria-hidden="true" width={2000} height={1500} sizes="(max-width: 767px) 100vw, min(100vw, 133.333vh)" loading="eager" fetchPriority="high" decoding="async" className="h-auto w-full max-w-full object-contain md:h-full md:w-auto" />
           </div>
           {load3D ? <Hero3D active={heroVisible} mobile={mobile3D} onReady={handleHeroReady} /> : null}
         </div>

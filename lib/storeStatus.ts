@@ -11,7 +11,7 @@ export interface StoreHoursConfig {
   closeHourSunday: number;
 }
 
-export type StoreStatusType = "open" | "closing_soon" | "closed" | "holiday";
+export type StoreStatusType = "open" | "closing_soon" | "closed" | "holiday" | "pending";
 
 export interface StoreLiveStatus {
   isOpen: boolean;
@@ -47,13 +47,11 @@ const BALI_HOLIDAYS: Record<string, string> = {
 };
 
 /**
- * Menghitung waktu WITA (Bali UTC+8) saat ini secara akurat.
+ * Shift to WITA calendar fields, read with UTC getters regardless of host timezone.
  */
 export function getWitaDate(customDate?: Date): Date {
   const date = customDate || new Date();
-  // Hitung offset UTC dan tambahkan 8 jam untuk WITA
-  const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-  return new Date(utc + 3600000 * 8);
+  return new Date(date.getTime() + 3600000 * 8);
 }
 
 /**
@@ -61,18 +59,26 @@ export function getWitaDate(customDate?: Date): Date {
  */
 export function getStoreLiveStatus(
   config: StoreHoursConfig = { openHour: 9, closeHourWeekday: 21, closeHourSunday: 0 },
-  customDate?: Date
+  customDate?: Date | null
 ): StoreLiveStatus {
+  if (customDate === null) {
+    return {
+      isOpen: false, isHoliday: false, statusType: "pending",
+      label: "--", detail: "", witaTimeFormatted: "",
+      badgeClass: "text-neutral-400 bg-neutral-800/60 border-white/[0.08]",
+      dotClass: "bg-neutral-500",
+    };
+  }
   const wita = getWitaDate(customDate);
-  const year = wita.getFullYear();
-  const month = String(wita.getMonth() + 1).padStart(2, "0");
-  const day = String(wita.getDate()).padStart(2, "0");
+  const year = wita.getUTCFullYear();
+  const month = String(wita.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(wita.getUTCDate()).padStart(2, "0");
   const dateKey = `${year}-${month}-${day}`;
 
-  const hours = wita.getHours();
-  const minutes = wita.getMinutes();
+  const hours = wita.getUTCHours();
+  const minutes = wita.getUTCMinutes();
   const currentDecimalHour = hours + minutes / 60;
-  const isSunday = wita.getDay() === 0;
+  const isSunday = wita.getUTCDay() === 0;
   const closeHour = isSunday ? config.closeHourSunday : config.closeHourWeekday;
   const openHour = config.openHour;
 
