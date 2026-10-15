@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { Star, ArrowUpRight, CheckCircle2, MessageSquarePlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
-import { GooglePlaceData, FALLBACK_REVIEWS } from "@/app/api/reviews/route";
+import { FALLBACK_REVIEWS, type GooglePlaceData } from "@/lib/reviews";
 
 type SortOption = "relevant" | "newest";
 

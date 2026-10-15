@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Bayon, Instrument_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,23 +9,25 @@ import ImageProtection from "@/components/ImageProtection";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
-const bayon = Bayon({
+const bayon = localFont({
+  src: "../public/fonts/bayon/Bayon-Regular.ttf",
   variable: "--font-bayon",
   weight: "400",
-  subsets: ["latin"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "../public/fonts/geist-mono/GeistMono-Regular.ttf",
   variable: "--font-mono",
-  subsets: ["latin"],
+  weight: "400",
   display: "swap",
   preload: false,
 });
 
-const instrumentSans = Instrument_Sans({
+const instrumentSans = localFont({
+  src: "../public/fonts/instrument-sans/InstrumentSans-Regular.ttf",
   variable: "--font-instrument-sans",
-  subsets: ["latin"],
+  weight: "400",
   display: "swap",
   preload: false,
 });
