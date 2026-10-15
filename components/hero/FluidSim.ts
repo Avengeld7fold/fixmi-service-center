@@ -369,22 +369,24 @@ export class FluidSim {
     this.renderPass(this.advection, this.vel1);
 
     // 2. Splat gaya kursor (additive ke vel1) — rumus persis bundle Lando.
-    const forceX = (this.diff.x / 2) * o.mouse_force;
-    const forceY = (this.diff.y / 2) * o.mouse_force;
-    const cursorX = o.cursor_size * this.cellScale.x;
-    const cursorY = o.cursor_size * this.cellScale.y;
-    const centerX = Math.min(
-      Math.max(this.coords.x, -1 + cursorX + this.cellScale.x * 2),
-      1 - cursorX - this.cellScale.x * 2
-    );
-    const centerY = Math.min(
-      Math.max(this.coords.y, -1 + cursorY + this.cellScale.y * 2),
-      1 - cursorY - this.cellScale.y * 2
-    );
-    const fu = this.force.material.uniforms;
-    fu.force.value.set(forceX, forceY);
-    fu.center.value.set(centerX, centerY);
-    this.renderPass(this.force, this.vel1, false);
+    if (this.diff.lengthSq() > 0) {
+      const forceX = (this.diff.x / 2) * o.mouse_force;
+      const forceY = (this.diff.y / 2) * o.mouse_force;
+      const cursorX = o.cursor_size * this.cellScale.x;
+      const cursorY = o.cursor_size * this.cellScale.y;
+      const centerX = Math.min(
+        Math.max(this.coords.x, -1 + cursorX + this.cellScale.x * 2),
+        1 - cursorX - this.cellScale.x * 2
+      );
+      const centerY = Math.min(
+        Math.max(this.coords.y, -1 + cursorY + this.cellScale.y * 2),
+        1 - cursorY - this.cellScale.y * 2
+      );
+      const fu = this.force.material.uniforms;
+      fu.force.value.set(forceX, forceY);
+      fu.center.value.set(centerX, centerY);
+      this.renderPass(this.force, this.vel1, false);
+    }
     this.diff.set(0, 0); // gaya hanya saat ada gerakan baru
 
     if (o.pressure_projection) {

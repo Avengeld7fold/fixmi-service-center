@@ -66,7 +66,7 @@ export default function SmoothScrolling({ children }: SmoothScrollingProps) {
     // Beri jeda 50ms agar DOM rute baru selesai di-mount sebelum me-recalc limit & trigger
     const timer = setTimeout(() => {
       lenisRef.current?.lenis?.resize();
-      ScrollTrigger.refresh(true);
+      ScrollTrigger.refresh();
     }, 50);
 
     return () => clearTimeout(timer);

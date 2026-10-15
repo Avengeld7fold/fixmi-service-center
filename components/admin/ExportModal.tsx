@@ -92,6 +92,8 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
       url += `?${query}`;
     }
 
+    // Native navigation is required so Content-Disposition triggers the file download.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.href = url;
     onClose();
   };

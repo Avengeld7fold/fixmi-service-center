@@ -4,6 +4,18 @@ import React, { useRef, useEffect, useState, useCallback, type ReactNode } from 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { FluidSim } from "./hero/FluidSim";
+import mobileBrokenTexture from "./hero/assets/iphone-broken-1280.webp";
+import mobileFixedTexture from "./hero/assets/iphone-fixed-1280.webp";
+
+const DESKTOP_FLUID_DISSIPATION = 0.96;
+const MOBILE_FLUID_DISSIPATION = 0.98;
+const FLUID_SETTLED_RATIO = 0.03;
+const FLUID_SETTLE_SAFETY_MS = 200;
+
+function fluidSettleDuration(dissipation: number) {
+  const frames = Math.ceil(Math.log(FLUID_SETTLED_RATIO) / Math.log(dissipation));
+  return Math.ceil((frames / 60) * 1000) + FLUID_SETTLE_SAFETY_MS;
+}
 
 // Vertex shader
 const vertexShader = `
@@ -87,17 +99,9 @@ const fragmentShader = `
     // Re-check bounds for parallax UV
     bool inParallaxBounds = (distortedUv.x >= 0.0 && distortedUv.x <= 1.0 && distortedUv.y >= 0.0 && distortedUv.y <= 1.0);
 
-    // 4. Sample broken and fixed textures using parallax-displaced UVs
-    vec4 colorBroken = vec4(0.0);
-    vec4 colorFixed = vec4(0.0);
-    
-    if (inParallaxBounds) {
-      colorBroken = texture2D(uTextureBroken, distortedUv);
-      colorFixed = texture2D(uTextureFixed, distortedUv);
-    }
-
-    // 5. Fluid mask from the simulated velocity magnitude. Desktop keeps the
-    // original hard threshold; mobile softens the edge at low simulation res.
+    // 4. Resolve the low-resolution fluid mask before sampling the phone.
+    // Most pixels are outside the moving stroke, so they never need the second
+    // high-resolution texture lookup.
     float fluid = texture2D(uFluid, vUv).r;
 #ifdef MOBILE_OPTIMIZED
     float mask = smoothstep(uThreshold * 0.65, uThreshold, fluid);
@@ -110,9 +114,18 @@ const fragmentShader = `
     // sebagai tuas desain bila kelak ingin brush terkendali lagi.
     vec2 md = (vUv - uMouse) * vec2(uViewportAspect, 1.0);
     mask *= 1.0 - smoothstep(uRadius * 0.65, uRadius, length(md));
-
-    // Combine with uReveal for hover state visibility control
     mask *= uReveal;
+
+    // 5. Sample the fixed texture only where the fluid can reveal it.
+    vec4 colorBroken = vec4(0.0);
+    vec4 colorFixed = vec4(0.0);
+
+    if (inParallaxBounds) {
+      colorBroken = texture2D(uTextureBroken, distortedUv);
+      colorFixed = mask > 0.0
+        ? texture2D(uTextureFixed, distortedUv)
+        : colorBroken;
+    }
 
     // 6. Global Slash Visibility (Warna Tebasan)
     // Full compositing is required on every device: rendering only the fixed
@@ -173,6 +186,8 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
   const activeRef = useRef(active);
   const renderUntilRef = useRef(0);
   const renderFrameRef = useRef(0);
+  const fluidDissipation = mobile ? MOBILE_FLUID_DISSIPATION : DESKTOP_FLUID_DISSIPATION;
+  const fluidSettleMs = fluidSettleDuration(fluidDissipation);
 
   const renderFor = useCallback((duration: number) => {
     renderUntilRef.current = Math.max(renderUntilRef.current, performance.now() + duration);
@@ -205,14 +220,14 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
     // Mobile uses fewer GPU passes. A wider cursor offsets the higher output
     // DPR so the repaired area remains readable instead of becoming a thin line.
     const sim = new FluidSim(gl, gl.domElement.width, gl.domElement.height, mobile
-      ? { pressure_projection: true, iterations_poisson: 1, BFECC: false, cursor_size: 14, dissipation: 0.98, dt: 0.014 }
-      : {});
+      ? { pressure_projection: true, iterations_poisson: 1, BFECC: false, cursor_size: 14, dissipation: fluidDissipation, dt: 0.014 }
+      : { dissipation: fluidDissipation });
     simRef.current = sim;
     return () => {
       sim.dispose();
       simRef.current = null;
     };
-  }, [gl, mobile]);
+  }, [fluidDissipation, gl, mobile]);
 
   useEffect(() => {
     simRef.current?.resize(gl.domElement.width, gl.domElement.height);
@@ -242,7 +257,9 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
         -(((clientY - r.top) / r.height) * 2 - 1)
       );
       pageActive.current = true;
-      renderFor(500);
+      // Keep advancing after input stops so the remaining velocity can advect
+      // and dissipate naturally instead of freezing mid-stroke.
+      renderFor(fluidSettleMs);
     };
     const onPointer = (e: PointerEvent) => setFrom(e.clientX, e.clientY);
     const onTouch = (e: TouchEvent) => {
@@ -260,7 +277,7 @@ function MagicShaderPlane({ textures, active, mobile, onReady }: MagicShaderPlan
       window.removeEventListener("scroll", invalidateRect);
       window.removeEventListener("resize", invalidateRect);
     };
-  }, [gl, renderFor]);
+  }, [fluidSettleMs, gl, renderFor]);
 
   // ── Splash intro: setelah loading
   // screen selesai, satu sapuan sintetik melintasi layar membuka reveal,
@@ -490,8 +507,10 @@ export default function Hero3D({ active, mobile, onReady }: { active: boolean; m
       });
     };
 
-    brokenTex = loader.load("/images/iphone-broken.webp");
-    fixedTex = loader.load("/images/iphone-fixed.webp");
+    // Mobile never displays the phone wider than this source at the capped DPR.
+    // Smaller textures preserve canvas sharpness while cutting upload memory.
+    brokenTex = loader.load(mobile ? mobileBrokenTexture.src : "/images/iphone-broken.webp");
+    fixedTex = loader.load(mobile ? mobileFixedTexture.src : "/images/iphone-fixed.webp");
     if (mobile) {
       depthTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
       depthTex.needsUpdate = true;
