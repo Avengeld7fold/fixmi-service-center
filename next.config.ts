@@ -67,6 +67,9 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
+    // cPanel membatasi jumlah child process; build tetap stabil dengan satu worker.
+    cpus: 1,
+    staticGenerationMaxConcurrency: 1,
     optimizePackageImports: ["lucide-react"],
   },
 
