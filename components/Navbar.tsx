@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLenis } from "lenis/react";
-import type Lenis from "lenis";
 import StaggeredMenu from "./StaggeredMenu";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useI18n } from "@/lib/i18n/context";
@@ -49,20 +48,21 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBookNowHovered, setIsBookNowHovered] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(true);
-  const [isNavPinned, setIsNavPinned] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const lastScrollY = useRef(0);
   const navVisibleRef = useRef(true);
-  const navPinnedRef = useRef(false);
-  const revealFrameRef = useRef<number | null>(null);
+  const directionRef = useRef(0);
+  const travelRef = useRef(0);
   const hasScrolledRef = useRef(false);
   const pathname = usePathname();
   const router = useRouter();
   const lenis = useLenis();
   const { dict, getLocalizedPath } = useI18n();
 
-  const updateNavigationForScroll = useCallback((scrollY: number, direction = 0) => {
-    const currentY = Math.max(scrollY, 0);
+  const updateNavigationForScroll = useCallback((scrollY: number) => {
+    // Clamp rubber-band overscroll; use actual position, never wheel intent.
+    const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const currentY = Math.min(Math.max(scrollY, 0), maxY);
     const delta = currentY - lastScrollY.current;
     lastScrollY.current = currentY;
 
@@ -78,58 +78,23 @@ export default function Navbar() {
       setIsNavVisible(visible);
     };
 
-    const setNavigationPinned = (pinned: boolean) => {
-      if (navPinnedRef.current === pinned) return;
-      navPinnedRef.current = pinned;
-      setIsNavPinned(pinned);
-    };
-
-    const revealNavigation = () => {
-      if (navPinnedRef.current) {
-        setNavigationVisibility(true);
-        return;
-      }
-
-      setNavigationPinned(true);
-      setNavigationVisibility(false);
-      if (revealFrameRef.current !== null) cancelAnimationFrame(revealFrameRef.current);
-      revealFrameRef.current = requestAnimationFrame(() => {
-        revealFrameRef.current = null;
-        setNavigationVisibility(true);
-      });
-    };
-
-    const hideNavigation = () => {
-      if (revealFrameRef.current !== null) cancelAnimationFrame(revealFrameRef.current);
-      revealFrameRef.current = null;
-      setNavigationPinned(false);
-      setNavigationVisibility(false);
-    };
-
-    if (currentY <= 1) {
-      setNavigationPinned(false);
+    if (currentY <= 8) {
+      directionRef.current = 0;
+      travelRef.current = 0;
       setNavigationVisibility(true);
       return;
     }
-
-    if (direction === 1 || (direction === 0 && delta > 0)) {
-      hideNavigation();
-      return;
-    }
-
-    if (direction === -1 || (direction === 0 && delta < 0)) {
-      revealNavigation();
+    if (delta === 0) return;
+    const direction = Math.sign(delta);
+    travelRef.current = direction === directionRef.current
+      ? travelRef.current + Math.abs(delta)
+      : Math.abs(delta);
+    directionRef.current = direction;
+    // Small reversal noise must not toggle visibility; slow upward gestures accumulate.
+    if (travelRef.current >= (direction < 0 ? 6 : 12)) {
+      setNavigationVisibility(direction < 0);
     }
   }, []);
-
-  // Lenis uses virtual scrolling on desktop, while mobile/tablet use native scrolling.
-  // Listening to both paths keeps the navigation behavior consistent at every breakpoint.
-  const handleLenisScroll = useCallback(
-    (instance: Lenis) => updateNavigationForScroll(instance.scroll, instance.direction),
-    [updateNavigationForScroll],
-  );
-
-  useLenis(handleLenisScroll, [handleLenisScroll]);
 
   const navLinks = [
     { href: getLocalizedPath("/"), label: dict.nav.home },
@@ -151,15 +116,10 @@ export default function Navbar() {
     updateNavigationForScroll(lastScrollY.current);
 
     const handleNativeScroll = () => updateNavigationForScroll(window.scrollY);
-    const handleWheel = (event: WheelEvent) =>
-      updateNavigationForScroll(lastScrollY.current + event.deltaY, Math.sign(event.deltaY));
     window.addEventListener("scroll", handleNativeScroll, { passive: true });
-    window.addEventListener("wheel", handleWheel, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleNativeScroll);
-      window.removeEventListener("wheel", handleWheel);
-      if (revealFrameRef.current !== null) cancelAnimationFrame(revealFrameRef.current);
     };
   }, [updateNavigationForScroll]);
 
@@ -184,19 +144,16 @@ export default function Navbar() {
   return (
     <header className="relative z-50 h-[4.5rem] w-full">
       <div
-        className={`z-50 w-full border-b transition-[transform,opacity,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-          isNavPinned ? "fixed inset-x-0 top-0" : "relative"
-        } ${
-          isNavPinned && !isNavVisible ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+        className={`fixed inset-x-0 top-0 z-50 w-full border-b transition-[transform,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+          !isNavVisible && !isMobileMenuOpen ? "pointer-events-none" : ""
         }`}
         style={{
+          transform: isNavVisible || isMobileMenuOpen ? "none" : "translateY(-100%)",
           background: isHome && !hasScrolled ? "transparent" : "rgba(18, 18, 18, 0.96)",
           borderColor: hasScrolled ? "rgba(255, 255, 255, 0.1)" : "transparent",
         }}
         onFocusCapture={() => {
           navVisibleRef.current = true;
-          navPinnedRef.current = true;
-          setIsNavPinned(true);
           setIsNavVisible(true);
         }}
       >
@@ -322,8 +279,6 @@ export default function Navbar() {
             closeOnClickAway={true}
             onMenuOpen={() => {
               navVisibleRef.current = true;
-              navPinnedRef.current = true;
-              setIsNavPinned(true);
               setIsNavVisible(true);
               setIsMobileMenuOpen(true);
             }}
