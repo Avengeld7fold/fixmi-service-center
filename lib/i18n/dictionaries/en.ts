@@ -312,7 +312,7 @@ export const enDictionary: Dictionary = {
     timelineHeading2: "JOURNEY",
     timeline: [
       {
-        year: "2024 – now",
+        year: "2023 – now",
         role: "INTEGRATED ECOSYSTEM: SERVICE, ACADEMY & B2B",
         company: "FIXMI SERVICE CENTER",
         description:

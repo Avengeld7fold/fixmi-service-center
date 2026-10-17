@@ -312,7 +312,7 @@ export const idDictionary: Dictionary = {
     timelineHeading2: "KAMI",
     timeline: [
       {
-        year: "2024 – now",
+        year: "2023 – now",
         role: "EKOSISTEM TERPADU: SERVICE, ACADEMY & B2B",
         company: "FIXMI SERVICE CENTER",
         description:
