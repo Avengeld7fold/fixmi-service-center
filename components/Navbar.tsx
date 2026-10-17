@@ -16,7 +16,6 @@ const SOCIAL_ITEMS = [
   { label: "TikTok", link: SOCIAL_LINKS.tiktok },
 ];
 
-const NAV_HIDE_OFFSET = 96;
 const NAV_REVEAL_DELTA = 12;
 
 // ponytail: shared inline style objects — previously duplicated across elements
@@ -51,6 +50,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBookNowHovered, setIsBookNowHovered] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(true);
+  const [isNavPinned, setIsNavPinned] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const lastScrollY = useRef(0);
   const revealAnchorY = useRef(0);
@@ -78,20 +78,23 @@ export default function Navbar() {
       setIsNavVisible(visible);
     };
 
-    if (currentY <= NAV_HIDE_OFFSET) {
+    if (currentY <= 1) {
       revealAnchorY.current = currentY;
+      setIsNavPinned(false);
       setNavigationVisibility(true);
       return;
     }
 
     if (delta > 0) {
       revealAnchorY.current = currentY;
+      setIsNavPinned(false);
       setNavigationVisibility(false);
       return;
     }
 
     if (delta < 0 && revealAnchorY.current - currentY >= NAV_REVEAL_DELTA) {
       revealAnchorY.current = currentY;
+      setIsNavPinned(true);
       setNavigationVisibility(true);
     }
   }, []);
@@ -156,8 +159,10 @@ export default function Navbar() {
   return (
     <header className="relative z-50 h-[4.5rem] w-full">
       <div
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-[transform,opacity,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-          isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        className={`z-50 w-full border-b transition-[transform,opacity,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+          isNavPinned ? "fixed inset-x-0 top-0" : "relative"
+        } ${
+          isNavPinned && !isNavVisible ? "-translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         }`}
         style={{
           background: isHome && !hasScrolled ? "transparent" : "rgba(18, 18, 18, 0.96)",
@@ -165,6 +170,7 @@ export default function Navbar() {
         }}
         onFocusCapture={() => {
           navVisibleRef.current = true;
+          setIsNavPinned(true);
           setIsNavVisible(true);
         }}
       >
@@ -290,6 +296,7 @@ export default function Navbar() {
             closeOnClickAway={true}
             onMenuOpen={() => {
               navVisibleRef.current = true;
+              setIsNavPinned(true);
               setIsNavVisible(true);
               setIsMobileMenuOpen(true);
             }}
