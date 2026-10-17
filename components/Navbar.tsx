@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,6 +15,9 @@ const SOCIAL_ITEMS = [
   { label: "WhatsApp", link: whatsappUrl() },
   { label: "TikTok", link: SOCIAL_LINKS.tiktok },
 ];
+
+const NAV_HIDE_OFFSET = 96;
+const NAV_REVEAL_DELTA = 12;
 
 // ponytail: shared inline style objects — previously duplicated across elements
 const NAV_FONT_STYLE = {
@@ -47,10 +50,55 @@ const CornerFillet = ({ side, visible }: { side: "left" | "right"; visible: bool
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isBookNowHovered, setIsBookNowHovered] = useState(false);
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const lastScrollY = useRef(0);
+  const revealAnchorY = useRef(0);
+  const navVisibleRef = useRef(true);
+  const hasScrolledRef = useRef(false);
   const pathname = usePathname();
   const router = useRouter();
   const lenis = useLenis();
   const { dict, getLocalizedPath } = useI18n();
+
+  const updateNavigationForScroll = useCallback((scrollY: number) => {
+    const currentY = Math.max(scrollY, 0);
+    const delta = currentY - lastScrollY.current;
+    lastScrollY.current = currentY;
+
+    const scrolled = currentY > 8;
+    if (hasScrolledRef.current !== scrolled) {
+      hasScrolledRef.current = scrolled;
+      setHasScrolled(scrolled);
+    }
+
+    const setNavigationVisibility = (visible: boolean) => {
+      if (navVisibleRef.current === visible) return;
+      navVisibleRef.current = visible;
+      setIsNavVisible(visible);
+    };
+
+    if (currentY <= NAV_HIDE_OFFSET) {
+      revealAnchorY.current = currentY;
+      setNavigationVisibility(true);
+      return;
+    }
+
+    if (delta > 0) {
+      revealAnchorY.current = currentY;
+      setNavigationVisibility(false);
+      return;
+    }
+
+    if (delta < 0 && revealAnchorY.current - currentY >= NAV_REVEAL_DELTA) {
+      revealAnchorY.current = currentY;
+      setNavigationVisibility(true);
+    }
+  }, []);
+
+  // Lenis uses virtual scrolling on desktop, while mobile/tablet use native scrolling.
+  // Listening to both paths keeps the navigation behavior consistent at every breakpoint.
+  useLenis((instance) => updateNavigationForScroll(instance.scroll), [updateNavigationForScroll]);
 
   const navLinks = [
     { href: getLocalizedPath("/"), label: dict.nav.home },
@@ -67,9 +115,25 @@ export default function Navbar() {
     link: l.href,
   }));
 
-  // Route changes close the animated mobile menu after client navigation.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
+  useEffect(() => {
+    lastScrollY.current = Math.max(window.scrollY, 0);
+    revealAnchorY.current = lastScrollY.current;
+    updateNavigationForScroll(lastScrollY.current);
+
+    const handleNativeScroll = () => updateNavigationForScroll(window.scrollY);
+    const handleWheel = (event: WheelEvent) => {
+      // Lenis may keep the page's native scroll position unchanged while easing.
+      // Wheel intent makes the navbar react immediately, then Lenis supplies the exact value.
+      updateNavigationForScroll(lastScrollY.current + event.deltaY);
+    };
+    window.addEventListener("scroll", handleNativeScroll, { passive: true });
+    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleNativeScroll);
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [updateNavigationForScroll]);
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -90,27 +154,37 @@ export default function Navbar() {
   const isHome = pathname === "/" || pathname === "/en";
 
   return (
-    <header
-      className="relative z-50 w-full"
-      style={{ background: isHome ? "transparent" : "var(--fixmi-bg-primary)" }}
-    >
-      {/* Orange reveal strip */}
+    <header className="relative z-50 h-[4.5rem] w-full">
       <div
-        className="absolute top-0 left-0 right-0 pointer-events-none h-2 transition-[transform,opacity] duration-200 ease-out origin-top"
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-[transform,opacity,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+          isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        }`}
         style={{
-          background: "var(--fixmi-primary)",
-          borderBottomLeftRadius: "0.5rem",
-          borderBottomRightRadius: "0.5rem",
-          transform: isBookNowHovered ? "scaleY(1)" : "scaleY(0)",
-          opacity: isBookNowHovered ? 1 : 0,
-          zIndex: 5,
+          background: isHome && !hasScrolled ? "transparent" : "rgba(18, 18, 18, 0.96)",
+          borderColor: hasScrolled ? "rgba(255, 255, 255, 0.1)" : "transparent",
         }}
-      />
-
-      <nav
-        className="relative z-10 flex items-center justify-between w-full px-3 sm:px-4 md:px-12 lg:px-16"
-        style={{ maxWidth: "90rem", marginLeft: "auto", marginRight: "auto", height: "4.5rem" }}
+        onFocusCapture={() => {
+          navVisibleRef.current = true;
+          setIsNavVisible(true);
+        }}
       >
+        {/* Orange reveal strip */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none h-2 transition-[transform,opacity] duration-200 ease-out origin-top motion-reduce:transition-none"
+          style={{
+            background: "var(--fixmi-primary)",
+            borderBottomLeftRadius: "0.5rem",
+            borderBottomRightRadius: "0.5rem",
+            transform: isBookNowHovered ? "scaleY(1)" : "scaleY(0)",
+            opacity: isBookNowHovered ? 1 : 0,
+            zIndex: 5,
+          }}
+        />
+
+        <nav
+          className="relative z-10 flex items-center justify-between w-full px-3 sm:px-4 md:px-12 lg:px-16"
+          style={{ maxWidth: "90rem", marginLeft: "auto", marginRight: "auto", height: "4.5rem" }}
+        >
         {/* Logo */}
         <Link
           href={getLocalizedPath("/")}
@@ -214,12 +288,17 @@ export default function Navbar() {
             accentColor="var(--fixmi-primary)"
             isFixed={false}
             closeOnClickAway={true}
-            onMenuOpen={() => setIsMobileMenuOpen(true)}
+            onMenuOpen={() => {
+              navVisibleRef.current = true;
+              setIsNavVisible(true);
+              setIsMobileMenuOpen(true);
+            }}
             onMenuClose={() => setIsMobileMenuOpen(false)}
             onNavigate={(href) => router.push(href)}
           />
         </div>
-      </nav>
+        </nav>
+      </div>
     </header>
   );
 }
