@@ -312,28 +312,28 @@ export const enDictionary: Dictionary = {
     timelineHeading2: "JOURNEY",
     timeline: [
       {
-        year: "2024 – Present",
+        year: "2024 – now",
         role: "INTEGRATED ECOSYSTEM: SERVICE, ACADEMY & B2B",
         company: "FIXMI SERVICE CENTER",
         description:
           "Expanding smart device repair services, standardized certified micro-soldering labs, and providing enterprise B2B technical support across corporate networks in Bali.",
       },
       {
-        year: "2021 – 2024",
+        year: "2021 – 2023",
         role: "OFFICIAL GADGET RETAIL PARTNER",
         company: "BALI REGIONAL",
         description:
           "Appointed as official authorized repair partner for prominent electronics and retail chains in Bali including Cellular World ID, iUsed Phone, and RA Gadget.",
       },
       {
-        year: "2017 – 2021",
+        year: "2014 – 2019",
         role: "ESTABLISHMENT OF FIXMI TECH ACADEMY",
         company: "KEDONGANAN, KUTA",
         description:
           "Launching professional technician training and certification programs in collaboration with national technical education institutions like Borneo Flasher Indonesia.",
       },
       {
-        year: "2014 – 2017",
+        year: "2006 – 2014",
         role: "FOUNDING OF FIXMI SERVICE CENTER",
         company: "JL. RAYA ULUWATU",
         description:
