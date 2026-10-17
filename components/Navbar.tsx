@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLenis } from "lenis/react";
+import type Lenis from "lenis";
 import StaggeredMenu from "./StaggeredMenu";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useI18n } from "@/lib/i18n/context";
@@ -15,8 +16,6 @@ const SOCIAL_ITEMS = [
   { label: "WhatsApp", link: whatsappUrl() },
   { label: "TikTok", link: SOCIAL_LINKS.tiktok },
 ];
-
-const NAV_REVEAL_DELTA = 12;
 
 // ponytail: shared inline style objects — previously duplicated across elements
 const NAV_FONT_STYLE = {
@@ -53,15 +52,16 @@ export default function Navbar() {
   const [isNavPinned, setIsNavPinned] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const lastScrollY = useRef(0);
-  const revealAnchorY = useRef(0);
   const navVisibleRef = useRef(true);
+  const navPinnedRef = useRef(false);
+  const revealFrameRef = useRef<number | null>(null);
   const hasScrolledRef = useRef(false);
   const pathname = usePathname();
   const router = useRouter();
   const lenis = useLenis();
   const { dict, getLocalizedPath } = useI18n();
 
-  const updateNavigationForScroll = useCallback((scrollY: number) => {
+  const updateNavigationForScroll = useCallback((scrollY: number, direction = 0) => {
     const currentY = Math.max(scrollY, 0);
     const delta = currentY - lastScrollY.current;
     lastScrollY.current = currentY;
@@ -78,30 +78,58 @@ export default function Navbar() {
       setIsNavVisible(visible);
     };
 
-    if (currentY <= 1) {
-      revealAnchorY.current = currentY;
-      setIsNavPinned(false);
-      setNavigationVisibility(true);
-      return;
-    }
+    const setNavigationPinned = (pinned: boolean) => {
+      if (navPinnedRef.current === pinned) return;
+      navPinnedRef.current = pinned;
+      setIsNavPinned(pinned);
+    };
 
-    if (delta > 0) {
-      revealAnchorY.current = currentY;
-      setIsNavPinned(false);
+    const revealNavigation = () => {
+      if (navPinnedRef.current) {
+        setNavigationVisibility(true);
+        return;
+      }
+
+      setNavigationPinned(true);
       setNavigationVisibility(false);
+      if (revealFrameRef.current !== null) cancelAnimationFrame(revealFrameRef.current);
+      revealFrameRef.current = requestAnimationFrame(() => {
+        revealFrameRef.current = null;
+        setNavigationVisibility(true);
+      });
+    };
+
+    const hideNavigation = () => {
+      if (revealFrameRef.current !== null) cancelAnimationFrame(revealFrameRef.current);
+      revealFrameRef.current = null;
+      setNavigationPinned(false);
+      setNavigationVisibility(false);
+    };
+
+    if (currentY <= 1) {
+      setNavigationPinned(false);
+      setNavigationVisibility(true);
       return;
     }
 
-    if (delta < 0 && revealAnchorY.current - currentY >= NAV_REVEAL_DELTA) {
-      revealAnchorY.current = currentY;
-      setIsNavPinned(true);
-      setNavigationVisibility(true);
+    if (direction === 1 || (direction === 0 && delta > 0)) {
+      hideNavigation();
+      return;
+    }
+
+    if (direction === -1 || (direction === 0 && delta < 0)) {
+      revealNavigation();
     }
   }, []);
 
   // Lenis uses virtual scrolling on desktop, while mobile/tablet use native scrolling.
   // Listening to both paths keeps the navigation behavior consistent at every breakpoint.
-  useLenis((instance) => updateNavigationForScroll(instance.scroll), [updateNavigationForScroll]);
+  const handleLenisScroll = useCallback(
+    (instance: Lenis) => updateNavigationForScroll(instance.scroll, instance.direction),
+    [updateNavigationForScroll],
+  );
+
+  useLenis(handleLenisScroll, [handleLenisScroll]);
 
   const navLinks = [
     { href: getLocalizedPath("/"), label: dict.nav.home },
@@ -120,21 +148,18 @@ export default function Navbar() {
 
   useEffect(() => {
     lastScrollY.current = Math.max(window.scrollY, 0);
-    revealAnchorY.current = lastScrollY.current;
     updateNavigationForScroll(lastScrollY.current);
 
     const handleNativeScroll = () => updateNavigationForScroll(window.scrollY);
-    const handleWheel = (event: WheelEvent) => {
-      // Lenis may keep the page's native scroll position unchanged while easing.
-      // Wheel intent makes the navbar react immediately, then Lenis supplies the exact value.
-      updateNavigationForScroll(lastScrollY.current + event.deltaY);
-    };
+    const handleWheel = (event: WheelEvent) =>
+      updateNavigationForScroll(lastScrollY.current + event.deltaY, Math.sign(event.deltaY));
     window.addEventListener("scroll", handleNativeScroll, { passive: true });
     window.addEventListener("wheel", handleWheel, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleNativeScroll);
       window.removeEventListener("wheel", handleWheel);
+      if (revealFrameRef.current !== null) cancelAnimationFrame(revealFrameRef.current);
     };
   }, [updateNavigationForScroll]);
 
@@ -170,6 +195,7 @@ export default function Navbar() {
         }}
         onFocusCapture={() => {
           navVisibleRef.current = true;
+          navPinnedRef.current = true;
           setIsNavPinned(true);
           setIsNavVisible(true);
         }}
@@ -296,6 +322,7 @@ export default function Navbar() {
             closeOnClickAway={true}
             onMenuOpen={() => {
               navVisibleRef.current = true;
+              navPinnedRef.current = true;
               setIsNavPinned(true);
               setIsNavVisible(true);
               setIsMobileMenuOpen(true);
