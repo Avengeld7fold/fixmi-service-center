@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ChevronDown } from "lucide-react";
+import { Plus } from "lucide-react";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
 import ConfirmModal from "./ConfirmModal";
+import MacDisclosureButton from "./MacDisclosureButton";
 import IconPickerModal from "./IconPickerModal";
 import ServiceIcon from "@/components/pricelist/ServiceIcon";
 import { brandImage, slugify, type Category, type ServiceType } from "@/lib/data";
@@ -672,9 +673,11 @@ export default function PricelistEditor({
   const removeService = (svcSlug: string, svcLabel: string) => {
     setConfirmModal({
       isOpen: true,
-      title: "Hapus Jenis Layanan?",
-      subtitle: `"${svcLabel}" · ${activeCategory.Name}`,
-      description: `Apakah Anda yakin ingin menghapus layanan "${svcLabel}" beserta seluruh daftar harga modelnya dari kategori ${activeCategory.Name}? Perubahan akan berlaku permanen setelah disimpan.`,
+      title: `Hapus Layanan “${svcLabel}”?`,
+      subtitle: `${svcLabel} · ${activeCategory.Name}`,
+      description: `Layanan “${svcLabel}” dan seluruh harga model di dalamnya akan dihapus dari katalog ${activeCategory.Name}.`,
+      confirmText: "Hapus",
+      cancelText: "Batal",
       onConfirm: () => {
         setMessage(null);
         setDraft((prev) =>
@@ -800,11 +803,11 @@ export default function PricelistEditor({
   const discard = () => {
     setConfirmModal({
       isOpen: true,
-      title: "Batalkan Semua Perubahan?",
-      description: "Seluruh perubahan yang belum Anda simpan akan dikembalikan ke data awal. Lanjutkan?",
-      confirmText: "Ya, Batalkan",
-      cancelText: "Kembali Mengedit",
-      variant: "warning",
+      title: "Buang Semua Perubahan?",
+      description: "Perubahan yang belum Anda simpan akan dibuang dan kembali ke data tersimpan.",
+      confirmText: "Buang Perubahan",
+      cancelText: "Batal",
+      variant: "danger",
       onConfirm: () => {
         setDraft(JSON.parse(baseline));
         setMessage(null);
@@ -815,42 +818,44 @@ export default function PricelistEditor({
 
   return (
     <>
-      <div className="mt-8 space-y-6 min-h-[75vh]">
-        {/* ── Tab Kategori (Sticky saat scroll agar selalu siap switch) ── */}
+      <div className="admin-catalog space-y-4">
+        {/* ── macOS Segmented Control Tab Kategori (Ref 49, 50) ── */}
         <div
           ref={tabBarRef}
           role="tablist"
           aria-label="Pilih kategori perangkat"
-          className="sticky top-0 z-20 flex items-center gap-2 border-b border-white/[0.08] py-3 -mx-2 px-2 bg-background/95 backdrop-blur-md overflow-x-auto scrollbar-none sm:flex-wrap max-w-full transition-colors"
+          className="admin-category-tabs sticky top-0 z-20 flex items-center justify-start border-b border-panel-border py-2.5 -mx-2 px-2 bg-background/90 backdrop-blur-[20px] overflow-x-auto scrollbar-none sm:flex-wrap max-w-full transition-colors"
         >
-          {draft.map((c) => {
-            const active = c.Slug === activeCategory.Slug;
-            return (
-              <button
-                key={c.Slug}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => handleSelectCategory(c.Slug)}
-                className={`inline-flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all duration-150 shrink-0 active:scale-[0.98] ${
-                  active
-                    ? "border border-primary/50 bg-white/[0.08] text-white shadow-[0_0_15px_rgba(255,107,0,0.1)] ring-1 ring-primary/20"
-                    : "border border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:border-white/[0.2] hover:bg-white/[0.06] hover:text-white"
-                }`}
-              >
-                <span>{c.Name}</span>
-                <span
-                  className={`rounded-md px-1.5 py-0.5 font-mono text-[0.625rem] font-semibold transition-colors ${
+          <div className="inline-flex p-1 rounded-[10px] bg-black/5 dark:bg-white/10 border border-black/[0.05] dark:border-white/[0.08]  gap-0.5">
+            {draft.map((c) => {
+              const active = c.Slug === activeCategory.Slug;
+              return (
+                <button
+                  key={c.Slug}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => handleSelectCategory(c.Slug)}
+                  className={`inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1.5 text-xs font-medium transition-all duration-120 shrink-0 select-none active:scale-[0.98] ${
                     active
-                      ? "bg-primary text-white"
-                      : "bg-white/[0.06] text-neutral-400"
+                      ? "bg-primary text-white shadow-[0_1px_2px_rgba(0,122,255,0.3)] font-semibold"
+                      : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                   }`}
                 >
-                  {c.service_types.length}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{c.Name}</span>
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 font-mono text-[10px] font-semibold transition-colors ${
+                      active
+                        ? "bg-white/25 text-white"
+                        : "bg-black/5 dark:bg-white/10 text-neutral-500 dark:text-neutral-400"
+                    }`}
+                  >
+                    {c.service_types.length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── Quick Expand Controls ── */}
@@ -879,19 +884,19 @@ export default function PricelistEditor({
           </div>
         )}
 
-        {/* ── Form Tambah Layanan Baru ── */}
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          <p className="mb-3 font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-400">
+        {/* ── macOS Form Box Tambah Layanan Baru (Ref 06, 29) ── */}
+        <div className="rounded-[12px] border border-panel-border bg-panel p-4 ">
+          <p className="mb-2.5 text-[11px] font-medium text-text-muted">
             Tambah Layanan di {activeCategory.Name}
           </p>
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5">
+          <div className="space-y-2.5">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
               {/* Tombol Pilih Ikon untuk Layanan Baru */}
               <button
                 type="button"
                 onClick={() => setOpenAddIconPicker(true)}
                 title="Pilih ikon layanan"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white transition-all duration-150 hover:border-primary/50 hover:bg-white/[0.08] active:scale-95 shrink-0"
+                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] border border-panel-border bg-panel-raised px-3 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] shrink-0"
               >
                 <span className="flex h-4 w-4 items-center justify-center text-primary">
                   <ServiceIcon name={newIcon} className="h-3.5 w-3.5" />
@@ -909,7 +914,7 @@ export default function PricelistEditor({
                     }}
                     placeholder="Merk (wajib), mis. Samsung"
                     aria-label="Merk layanan baru"
-                    className="flex-1 min-w-[130px] sm:min-w-[160px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    className="flex-1 min-w-[130px] sm:min-w-[160px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
                   />
                   <input
                     value={newSeries}
@@ -919,7 +924,7 @@ export default function PricelistEditor({
                     }}
                     placeholder="Series (opsional), mis. Galaxy A Series"
                     aria-label="Series layanan baru"
-                    className="flex-1 min-w-[140px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    className="flex-1 min-w-[140px] sm:min-w-[180px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
                   />
                 </>
               )}
@@ -932,26 +937,26 @@ export default function PricelistEditor({
                     : "Nama layanan (ID), mis. Ganti LCD / Baterai"
                 }
                 aria-label="Nama perbaikan layanan baru (Bahasa Indonesia)"
-                className="flex-1 min-w-[150px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                className="flex-1 min-w-[150px] sm:min-w-[180px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
               <input
                 value={newNameEn}
                 onChange={(e) => setNewNameEn(e.target.value)}
                 placeholder="English Name (opsional), mis. Screen Replacement"
                 aria-label="Nama perbaikan layanan baru (English - opsional)"
-                className="flex-1 min-w-[150px] sm:min-w-[180px] rounded-xl border border-white/[0.10] bg-white/[0.04] px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                className="flex-1 min-w-[150px] sm:min-w-[180px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
               <button
                 type="button"
                 onClick={addService}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 hover:bg-primary-light hover:brightness-105 active:scale-95 shrink-0"
+                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] shrink-0"
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Tambah Layanan</span>
               </button>
             </div>
             {addError && (
-              <p role="alert" className="text-xs text-primary font-medium">
+              <p role="alert" className="text-xs text-[#FF3B30] font-medium">
                 {addError}
               </p>
             )}
@@ -1067,7 +1072,7 @@ export default function PricelistEditor({
                             });
                           }}
                           title={`Klik untuk mengganti logo/ikon merk ${brand}`}
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-panel-raised font-mono text-base font-bold text-primary transition-all hover:bg-white/[0.15] hover:scale-105 active:scale-95 group/brand-icon cursor-pointer border border-transparent hover:border-white/20 shadow-sm"
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-panel-raised font-mono text-base font-bold text-primary transition-all hover:bg-white/[0.15] hover:scale-105 active:scale-95 group/brand-icon cursor-pointer border border-transparent hover:border-white/20 "
                         >
                           {activeCategory.brand_icons?.[brand] ? (
                             <ServiceIcon
@@ -1094,14 +1099,7 @@ export default function PricelistEditor({
                               : `${svcCount} jenis service`}
                           </span>
                         </span>
-                        <span
-                          className={`flex h-8 w-8 items-center justify-center rounded-lg border border-panel-border bg-background text-text-muted transition-transform duration-200 ${
-                            brandOpen ? "rotate-180 text-primary border-primary/40" : ""
-                          }`}
-                          aria-hidden="true"
-                        >
-                          <ChevronDown className="h-4 w-4" />
-                        </span>
+                        <MacDisclosureButton expanded={brandOpen} size="regular" asSpan />
                       </button>
 
                       <div
@@ -1139,14 +1137,7 @@ export default function PricelistEditor({
                                     <span className="font-mono text-[0.6875rem] uppercase tracking-widest text-text-muted">
                                       {svcList.length} service
                                     </span>
-                                    <span
-                                      className={`flex h-7 w-7 items-center justify-center rounded-lg border border-panel-border bg-background text-text-muted transition-transform duration-200 ${
-                                        seriesOpen ? "rotate-180 text-primary border-primary/40" : ""
-                                      }`}
-                                      aria-hidden="true"
-                                    >
-                                      <ChevronDown className="h-3.5 w-3.5" />
-                                    </span>
+                                    <MacDisclosureButton expanded={seriesOpen} size="small" asSpan />
                                   </button>
 
                                   <div
@@ -1173,22 +1164,22 @@ export default function PricelistEditor({
           })()}
         </div>
 
-        {/* ── Floating Sticky Save Bar ── */}
+        {/* ── macOS Floating Save Dock (Ref 09, 10, 17) ── */}
         {dirty && (
-          <div className="sticky bottom-4 z-30 mt-8 rounded-2xl border border-primary/50 bg-[#141416]/95 p-3.5 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.7)] backdrop-blur-md">
+          <div className="sticky bottom-4 z-30 mt-8 rounded-[18px] border border-black/10 dark:border-white/15 bg-white/90 dark:bg-[#252528]/90 p-3 sm:px-4 sm:py-3 shadow-[0_20px_50px_rgba(0,0,0,0.22),0_2px_8px_rgba(0,0,0,0.06)] backdrop-blur-[40px] saturate-[180%]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
-                <span className="text-xs sm:text-sm font-medium text-white">
+              <div className="flex items-center gap-2.5">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0 shadow-[0_0_8px_rgba(0,122,255,0.6)]" />
+                <span className="text-xs sm:text-sm font-medium text-neutral-900 dark:text-white">
                   Ada perubahan yang belum disimpan
                 </span>
               </div>
-              <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
+              <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={discard}
                   disabled={saving}
-                  className="flex-1 sm:flex-initial rounded-xl border border-white/[0.10] bg-white/[0.04] px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 transition-all hover:bg-white/[0.08] hover:text-white disabled:opacity-50 active:scale-95 text-center"
+                  className="flex-1 sm:flex-initial rounded-full bg-[#E5E5EA] dark:bg-[#3A3A3C] hover:bg-[#D8D8DC] dark:hover:bg-[#48484A] text-neutral-900 dark:text-white px-4 py-1.5 text-xs font-medium transition-all active:scale-[0.97] disabled:opacity-50 text-center"
                 >
                   Batalkan
                 </button>
@@ -1196,7 +1187,7 @@ export default function PricelistEditor({
                   type="button"
                   onClick={save}
                   disabled={saving}
-                  className="flex-1 sm:flex-initial rounded-xl bg-primary px-6 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-light hover:brightness-105 disabled:opacity-50 active:scale-95 text-center"
+                  className="flex-1 sm:flex-initial rounded-full bg-primary hover:bg-[#0066D6] text-white px-5 py-1.5 text-xs font-semibold  transition-all active:scale-[0.97] disabled:opacity-50 text-center"
                 >
                   {saving ? "Menyimpan…" : "Simpan Perubahan"}
                 </button>
@@ -1223,7 +1214,7 @@ export default function PricelistEditor({
         title={confirmModal.title}
         subtitle={confirmModal.subtitle}
         description={confirmModal.description}
-        confirmText={confirmModal.confirmText || "Ya, Lanjutkan"}
+        confirmText={confirmModal.confirmText || "Hapus"}
         cancelText={confirmModal.cancelText || "Batal"}
         variant={confirmModal.variant || "danger"}
         onConfirm={confirmModal.onConfirm}

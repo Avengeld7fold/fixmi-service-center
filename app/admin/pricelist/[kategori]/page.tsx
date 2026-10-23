@@ -7,6 +7,8 @@ import AdminNav from "@/components/admin/AdminNav";
 import PricelistEditor from "@/components/admin/PricelistEditor";
 import ImportPanel from "@/components/admin/ImportPanel";
 import BackupPanel from "@/components/admin/BackupPanel";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = categories.find((c) => c.Slug.toLowerCase() === kategori.toLowerCase());
   const categoryName = category?.Name || (kategori.charAt(0).toUpperCase() + kategori.slice(1));
   return {
-    title: `Kelola Daftar Harga ${categoryName} — FIXMI Admin`,
+    title: `Kelola Daftar Harga ${categoryName} — ${ADMIN_IDENTITY.adminName}`,
   };
 }
 
@@ -56,47 +58,13 @@ export default async function CategoryAdminPricelistPage({ params }: PageProps) 
   }));
 
   return (
-    <div className="mx-auto w-full max-w-[75rem] px-3.5 sm:px-6 md:px-10 py-6 sm:py-10 lg:py-14 min-h-[120vh]">
-      {/* ── Shared Admin Navigation Switcher ── */}
+    <div className="admin-page">
       <AdminNav
         showExport
         exportCategories={importDestinations}
       />
 
-      {/* Header — Mengikuti tipografi dan ukuran halaman /pricelist */}
-      <header className="mb-10 lg:mb-14">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div>
-            <div className="mb-4 flex items-center gap-2.5">
-              <span
-                className="inline-block h-1.5 w-1.5 rounded-full bg-primary"
-                aria-hidden="true"
-              />
-              <span className="font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-text-muted">
-                KATALOG PRICELIST & LAYANAN
-              </span>
-            </div>
-
-            <h1
-              style={{
-                fontFamily: "var(--font-bayon), sans-serif",
-                fontWeight: 400,
-                lineHeight: 0.95,
-                letterSpacing: "-0.02em",
-                color: "var(--fixmi-text-primary)",
-                textTransform: "uppercase" as const,
-              }}
-              className="text-[clamp(2.25rem,7vw,3.125rem)] md:text-[clamp(3.125rem,5.5vw,4rem)] lg:text-[clamp(4rem,5vw,4.75rem)]"
-            >
-              Kelola Daftar Harga
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm md:text-base text-text-secondary leading-relaxed">
-              Atur varian harga, spesifikasi garansi, dan model perangkat secara real-time.
-              Perubahan langsung aktif di website tanpa perlu build ulang.
-            </p>
-          </div>
-        </div>
-      </header>
+      <AdminPageHeader title="Daftar Harga" description="Atur layanan, varian harga, garansi, dan model perangkat. Perubahan aktif tanpa build ulang." />
 
       {/* Panel Impor Data Excel / CSV */}
       <ImportPanel categories={importDestinations} />

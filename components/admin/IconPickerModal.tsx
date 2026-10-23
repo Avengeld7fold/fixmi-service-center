@@ -1,159 +1,141 @@
 "use client";
+import AdminSymbol from "./AdminSymbol";
 
-import { useState, useMemo, useEffect } from "react";
+
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
+import { useAdminDialog } from "./useAdminDialog";
 import ServiceIcon, { REPAIR_ICON_OPTIONS, type RepairIconMeta } from "@/components/pricelist/ServiceIcon";
 
-interface IconPickerModalProps {
+export interface IconPickerModalProps {
   isOpen: boolean;
   currentIcon: string;
   onSelect: (iconId: string) => void;
-  onClose: () => void;
+  onClose?: () => void;
   serviceTitle?: string;
   categorySlug?: string;
+  isAndroid?: boolean;
 }
 
+/**
+ * Apple HIG Icon Picker Sheet Dialog (macOS Tahoe Specification)
+ * Referensi: Ref 14 Utility Panel & Ref 53 Sheet Modal
+ */
 export default function IconPickerModal({
   isOpen,
   currentIcon,
   onSelect,
-  onClose,
+  onClose = () => {},
   serviceTitle,
   categorySlug,
+  isAndroid: isAndroidProp,
 }: IconPickerModalProps) {
-  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (wasOpen !== isOpen) { setWasOpen(isOpen); setSearch(""); }
+  const { dialogRef, initialFocusRef } = useAdminDialog<HTMLInputElement>(isOpen, onClose);
 
-  const isAndroid = categorySlug === "android";
+  const isAndroid = isAndroidProp ?? (categorySlug === "android");
 
-  useEffect(() => {
-    // Client-only portal mount guard prevents document.body access during SSR.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
 
-  // Reset search saat modal dibuka
-  useEffect(() => {
-    if (isOpen) {
-      // Reset transient search state whenever a new modal session opens.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSearch("");
-    }
-  }, [isOpen]);
-
-  // Tutup modal dengan tombol Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  // Filter daftar ikon berdasarkan pencarian dan kategori aktif (hanya tampilkan logo merk Android jika di tab Android)
   const filteredIcons = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return REPAIR_ICON_OPTIONS.filter((icon) => {
-      // Sembunyikan Logo Merk Android jika bukan di tab Android
+    return REPAIR_ICON_OPTIONS.filter((icon: RepairIconMeta) => {
       if (!isAndroid && icon.category === "Logo Merk Android") {
         return false;
       }
       if (!q) return true;
       const matchLabel = icon.label.toLowerCase().includes(q);
-      const matchCategory = icon.category.toLowerCase().includes(q);
       const matchId = icon.id.toLowerCase().includes(q);
-      const matchKeywords = icon.keywords.some((k) => k.includes(q));
-      return matchLabel || matchCategory || matchId || matchKeywords;
+      const matchKeywords = icon.keywords.some((k: string) => k.includes(q));
+      return matchLabel || matchId || matchKeywords;
     });
   }, [search, isAndroid]);
 
-  // Kelompokkan ikon berdasarkan kategori
   const groupedCategories = useMemo(() => {
     const map = new Map<string, RepairIconMeta[]>();
     for (const icon of filteredIcons) {
-      if (!map.has(icon.category)) map.set(icon.category, []);
-      map.get(icon.category)!.push(icon);
+      const cat = icon.category || "Lainnya";
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(icon);
     }
     return Array.from(map.entries());
   }, [filteredIcons]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-200 animate-in fade-in select-none"
+      className="admin-modal-backdrop"
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="icon-picker-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl border border-white/[0.12] bg-[#161618] shadow-[0_25px_60px_rgba(0,0,0,0.9)]"
+        className="admin-sheet"
       >
-        {/* Header Modal */}
-        <div className="flex items-center justify-between border-b border-white/[0.08] px-4 sm:px-6 py-3.5 sm:py-4">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.08] dark:border-white/10">
           <div>
-            <h3 className="text-sm sm:text-base font-semibold text-white tracking-tight">
+            <h3 id="icon-picker-title" className="text-[15px] font-bold text-neutral-900 dark:text-white leading-tight">
               Pilih Ikon Layanan
             </h3>
-            <p className="text-xs text-neutral-400 mt-0.5">
-              {serviceTitle ? `Untuk ${serviceTitle}` : "Pilih ikon perbaikan yang sesuai"}
-            </p>
+            {serviceTitle && (
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-sm">
+                Untuk {serviceTitle}
+              </p>
+            )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Tutup"
-            className="rounded-full bg-white/[0.06] p-1.5 text-neutral-400 transition-colors hover:bg-white/[0.12] hover:text-white"
+            className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Kolom Pencarian */}
-        <div className="border-b border-white/[0.08] px-4 sm:px-6 py-3 bg-white/[0.02]">
+        {/* Search Field (macOS Pill) */}
+        <div className="pt-3 pb-2">
           <div className="relative flex items-center">
-            <Search className="absolute left-3.5 h-4 w-4 text-neutral-400" />
+<AdminSymbol name="magnifying" className="absolute left-2.5 w-3.5 h-3.5 object-contain pointer-events-none" />
             <input
+              ref={initialFocusRef}
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={
-                isAndroid
-                  ? "Cari merk / komponen, mis. Samsung, Xiaomi, LCD…"
-                  : "Cari komponen, mis. LCD, Baterai, Port Cas…"
-              }
-              autoFocus
-              className="w-full rounded-xl border border-white/[0.12] bg-white/[0.04] pl-9 pr-4 py-2 text-xs sm:text-sm text-white outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-neutral-500"
+              placeholder="Cari simbol (kamera, layar, baterai, chip)…"
+              className="w-full h-8 pl-8 pr-7 rounded-full text-xs bg-black/5 dark:bg-white/10 text-neutral-900 dark:text-white placeholder:text-neutral-400 outline-none border border-transparent focus:border-primary focus:bg-white dark:focus:bg-neutral-900 transition-all"
             />
-          </div>
-        </div>
-
-        {/* Grid Daftar Ikon */}
-        <div
-          data-lenis-prevent="true"
-          className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-5 sm:space-y-6 scrollbar-thin scrollbar-thumb-white/15 hover:scrollbar-thumb-white/25"
-        >
-          {groupedCategories.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-sm text-neutral-400">
-                Tidak ada ikon yang sesuai dengan &ldquo;{search}&rdquo;
-              </p>
+            {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="mt-3 text-xs font-medium text-primary hover:underline"
+                className="absolute right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
               >
-                Tampilkan semua ikon
+                <X className="w-3.5 h-3.5" />
               </button>
+            )}
+          </div>
+        </div>
+
+        {/* List of Icons */}
+        <div className="flex-1 overflow-y-auto py-2 pr-1 space-y-4 max-h-[50vh]">
+          {groupedCategories.length === 0 ? (
+            <div className="py-12 text-center text-xs text-neutral-400">
+              Tidak ada simbol yang cocok dengan &ldquo;{search}&rdquo;.
             </div>
           ) : (
             groupedCategories.map(([categoryName, icons]) => (
-              <div key={categoryName} className="space-y-2.5">
-                <p className="font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-400">
+              <div key={categoryName} className="space-y-1.5">
+                <div className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 px-1 uppercase tracking-wider">
                   {categoryName}
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-2.5">
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {icons.map((icon) => {
                     const isSelected = currentIcon === icon.id;
                     return (
@@ -164,32 +146,26 @@ export default function IconPickerModal({
                           onSelect(icon.id);
                           onClose();
                         }}
-                        className={`group relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-150 active:scale-[0.98] ${
+                        className={`group relative flex flex-col items-center justify-center p-2.5 rounded-[10px] border transition-all active:scale-[0.95] ${
                           isSelected
-                            ? "border-primary/50 bg-white/[0.08] text-white shadow-[0_0_15px_rgba(255,107,0,0.08)] ring-1 ring-primary/25"
-                            : "border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:border-white/[0.22] hover:bg-white/[0.07] hover:text-white"
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "bg-white/60 dark:bg-neutral-800/60 border-black/8 dark:border-white/10 hover:bg-white dark:hover:bg-neutral-700 hover:border-black/20"
                         }`}
+                        title={`${icon.label} (${icon.category})`}
                       >
+                        <div className="w-6 h-6 flex items-center justify-center mb-1">
+                          <ServiceIcon name={icon.id} className="w-5 h-5" />
+                        </div>
                         <span
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                            isSelected
-                              ? "bg-primary text-white shadow-sm"
-                              : "bg-white/[0.06] text-neutral-300 group-hover:text-primary group-hover:bg-white/[0.12]"
+                          className={`text-[10px] text-center truncate max-w-full font-medium ${
+                            isSelected ? "text-white" : "text-neutral-700 dark:text-neutral-300"
                           }`}
                         >
-                          <ServiceIcon name={icon.id} className="h-5 w-5" />
+                          {icon.label}
                         </span>
-                        <div className="flex-1 min-w-0 pr-4">
-                          <p className={`text-xs truncate ${isSelected ? "text-white font-semibold" : "text-neutral-200 group-hover:text-white font-medium"}`}>
-                            {icon.label}
-                          </p>
-                          <p className="font-mono text-[0.625rem] text-neutral-400 truncate">
-                            {icon.id}
-                          </p>
-                        </div>
                         {isSelected && (
-                          <div className="absolute top-2.5 right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-white shadow-sm">
-                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-white text-primary flex items-center justify-center shadow-sm">
+                            <Check className="w-2.5 h-2.5 stroke-[3]" />
                           </div>
                         )}
                       </button>
@@ -201,19 +177,19 @@ export default function IconPickerModal({
           )}
         </div>
 
-        {/* Footer Modal */}
-        <div className="border-t border-white/[0.08] px-6 py-3 bg-white/[0.02] flex items-center justify-between text-xs text-neutral-400">
-          <span>Klik ikon untuk memilih</span>
+        {/* Footer */}
+        <div className="pt-3 border-t border-black/8 dark:border-white/10 flex items-center justify-between text-[11px] text-neutral-500">
+          <span>{filteredIcons.length} glif tersedia</span>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-white/[0.12] bg-white/[0.05] px-3.5 py-1.5 font-medium text-neutral-200 transition-colors hover:border-primary/50 hover:bg-white/[0.10] hover:text-white"
+            className="h-7 px-3 rounded-[6px] font-medium bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-neutral-700 dark:text-neutral-300 transition-all active:scale-[0.97]"
           >
-            Tutup
+            Selesai
           </button>
         </div>
       </div>
     </div>,
-    document.body
+    document.querySelector(".admin-shell") || document.body
   );
 }

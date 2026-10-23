@@ -43,7 +43,7 @@ export interface Category {
 }
 
 export interface GalleryItem {
-  id: number;
+  id: number | string;
   Title: string;
   Image: string | null;
   altText?: string;

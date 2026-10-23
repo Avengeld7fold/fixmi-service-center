@@ -23,6 +23,7 @@ import { getPricelist } from "@/lib/pricelist-server";
 import type { Category } from "@/lib/data";
 import { addPromoItem, deletePromoItem, type PromoImageItem } from "@/lib/promo-server";
 import { addGalleryImage, deleteGalleryImage, type GalleryImage } from "@/lib/gallery-server";
+import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 
 // ============================================================
 // Auth
@@ -324,7 +325,7 @@ export async function uploadPromoAction(formData: FormData): Promise<ActionResul
     const created = await addPromoItem({
       Title: title || undefined,
       Image: finalImagePath,
-      altText: title || "Banner Promo FIXMI Service Center",
+      altText: title || `Banner Promo ${ADMIN_IDENTITY.serviceCenterName}`,
       badge: badge || undefined,
       validUntil: validUntil || undefined,
       link: link || undefined,
@@ -387,7 +388,7 @@ export async function uploadGalleryAction(formData: FormData): Promise<ActionRes
     const created = await addGalleryImage({
       Title: title || undefined,
       Image: finalImagePath,
-      altText: altText || title || `Dokumentasi servis ${category} FIXMI Service Center`,
+      altText: altText || title || `Dokumentasi servis ${category} ${ADMIN_IDENTITY.serviceCenterName}`,
       category,
     });
 

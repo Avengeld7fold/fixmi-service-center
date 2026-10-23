@@ -1,22 +1,22 @@
 "use client";
+import AdminSymbol from "./AdminSymbol";
 
-import { useState, useRef, useMemo, useEffect } from "react";
+
+import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  Camera,
-  Upload,
   Plus,
-  Trash2,
   ExternalLink,
   CheckCircle2,
   AlertCircle,
   X,
-  Eye,
 } from "lucide-react";
 import { uploadGalleryAction, deleteGalleryAction } from "@/app/admin/actions";
 import type { GalleryImage } from "@/lib/gallery-server";
+import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 import ConfirmModal from "./ConfirmModal";
+import { useAdminDialog } from "./useAdminDialog";
 
 const GALLERY_CATEGORIES = [
   "Semua",
@@ -30,6 +30,10 @@ const GALLERY_CATEGORIES = [
   "Lainnya",
 ];
 
+/**
+ * macOS Gallery Editor & Asset Manager (macOS 26 Tahoe Specification)
+ * Referensi Resmi: Ref 06, Ref 29, Ref 30, Ref 49
+ */
 export default function GalleryEditor({ initialImages }: { initialImages: GalleryImage[] }) {
   const router = useRouter();
   const [images, setImages] = useState<GalleryImage[]>(initialImages);
@@ -58,6 +62,8 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
 
   // Lightbox preview modal di admin
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const closeLightbox = useCallback(() => setLightboxIndex(null), []);
+  const { dialogRef: lightboxRef, initialFocusRef: lightboxCloseRef } = useAdminDialog<HTMLButtonElement>(lightboxIndex !== null, closeLightbox);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,7 +102,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
     if (selectedFile) formData.append("image", selectedFile);
     formData.append("title", title);
     formData.append("category", category);
-    formData.append("altText", title || `Dokumentasi servis ${category} FIXMI`);
+    formData.append("altText", title || `Dokumentasi servis ${category} ${ADMIN_IDENTITY.brandName}`);
 
     const res = await uploadGalleryAction(formData);
     setIsSubmitting(false);
@@ -137,59 +143,64 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
   }, [images, selectedCategory]);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Feedback Toast */}
       {feedback && (
         <div
           role="status"
-          className={`flex items-center justify-between gap-3 p-4 rounded-xl border animate-in fade-in duration-200 ${
+          aria-live="polite"
+          className={`flex items-center justify-between gap-3 p-3.5 rounded-[10px] border text-xs font-medium animate-in fade-in duration-150 ${
             feedback.kind === "ok"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-red-500/30 bg-red-500/10 text-red-300"
+              ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+              : "border-red-500/25 bg-red-500/10 text-red-700 dark:text-red-300"
           }`}
         >
-          <div className="flex items-center gap-2.5 text-xs sm:text-sm font-medium">
+          <div className="flex items-center gap-2">
             {feedback.kind === "ok" ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
             ) : (
-              <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+              <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
             )}
             <span>{feedback.text}</span>
           </div>
           <button
             type="button"
             onClick={() => setFeedback(null)}
-            className="p-1 rounded-md text-neutral-400 hover:text-white"
+            className="p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
 
-      {/* ── Form Upload Dokumentasi Galeri ── */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 sm:p-7 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_40px_rgba(0,0,0,0.4)]">
-        <div className="mb-6 flex items-center gap-2.5">
-          <Camera className="h-5 w-5 text-primary" />
-          <h2 className="text-base sm:text-lg font-semibold text-white">
+      {/* ── macOS Form Box Upload Dokumentasi Galeri (Ref 29, 30) ── */}
+      <div className="admin-group admin-media-form">
+        <div className="mb-5 flex items-center gap-2">
+<AdminSymbol name="camera" className="h-4 w-4 object-contain" />
+          <h2 className="text-sm sm:text-base font-semibold text-foreground">
             Upload Foto Dokumentasi Hasil Perbaikan
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Dropzone Upload Foto */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Dropzone Image Well (Ref 30) */}
             <div className="lg:col-span-5">
-              <label className="block mb-2 font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-400">
+              <label className="block mb-2 text-[11px] font-medium text-text-muted">
                 Berkas Foto Servis (Wajib)
               </label>
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
+                role="button"
+                tabIndex={0}
+                aria-label="Pilih gambar untuk diunggah"
+                onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); fileInputRef.current?.click(); } }}
                 onClick={() => fileInputRef.current?.click()}
-                className={`relative flex flex-col items-center justify-center p-6 min-h-[220px] rounded-xl border border-dashed text-center cursor-pointer transition-all duration-200 ${
+                className={`admin-image-well relative flex flex-col items-center justify-center p-5 min-h-[200px] rounded-[12px] border border-dashed text-center cursor-pointer transition-all duration-150 ${
                   previewUrl
-                    ? "border-primary/50 bg-white/[0.04]"
-                    : "border-white/[0.14] bg-white/[0.02] hover:border-primary/40 hover:bg-white/[0.04]"
+                    ? "border-primary/60 bg-primary/5"
+                    : "border-panel-border bg-panel-raised/40 hover:border-primary/40 hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
                 }`}
               >
                 <input
@@ -201,7 +212,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                 />
 
                 {previewUrl ? (
-                  <div className="relative w-full h-44 rounded-lg overflow-hidden border border-white/[0.10]">
+                  <div className="relative w-full h-40 rounded-[8px] overflow-hidden border border-panel-border">
                     <Image
                       src={previewUrl}
                       alt="Preview Foto Galeri"
@@ -214,15 +225,15 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center gap-3 text-neutral-400">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.06] text-primary">
-                      <Upload className="h-5 w-5" />
+                  <div className="flex flex-col items-center gap-2.5 text-text-muted">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10">
+<AdminSymbol name="upload" className="h-5 w-5 object-contain" />
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm font-semibold text-white">
+                      <p className="text-xs font-semibold text-foreground">
                         Klik atau Drag & Drop Foto Servis
                       </p>
-                      <p className="text-[0.6875rem] text-neutral-500 mt-1">
+                      <p className="text-[10px] text-text-muted mt-0.5">
                         Format JPG, PNG, atau WebP resolusi tinggi
                       </p>
                     </div>
@@ -232,9 +243,9 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
             </div>
 
             {/* Metadata Foto */}
-            <div className="lg:col-span-7 space-y-4">
+            <div className="lg:col-span-7 space-y-3.5">
               <div>
-                <label className="block mb-1.5 font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-400">
+                <label className="block mb-1 text-[11px] font-medium text-text-muted">
                   Judul / Deskripsi Singkat Pengerjaan (Opsional)
                 </label>
                 <input
@@ -242,24 +253,24 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Mis. Rekondisi Kaca LCD iPhone 15 Pro Max Tanpa Notifikasi"
-                  className="w-full rounded-xl border border-white/[0.10] bg-white/[0.04] px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-neutral-500 outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                  className="w-full h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
                 />
               </div>
 
               <div>
-                <label className="block mb-1.5 font-mono text-[0.6875rem] font-semibold uppercase tracking-wider text-neutral-400">
+                <label className="block mb-1.5 text-[11px] font-medium text-text-muted">
                   Kategori Perangkat / Pengerjaan
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {GALLERY_CATEGORIES.filter((c) => c !== "Semua").map((cat) => (
                     <button
                       key={cat}
                       type="button"
                       onClick={() => setCategory(cat)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      className={`px-2.5 py-1 rounded-[6px] text-xs font-medium transition-all select-none active:scale-[0.97] ${
                         category === cat
-                          ? "bg-primary text-white shadow-sm"
-                          : "border border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white"
+                          ? "bg-primary text-white  font-semibold"
+                          : "border border-panel-border bg-panel-raised text-text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10"
                       }`}
                     >
                       {cat}
@@ -268,13 +279,13 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-2 flex justify-end">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-primary-light hover:brightness-105 active:scale-95 disabled:opacity-50"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3.5 w-3.5" />
                   <span>{isSubmitting ? "Mengunggah Foto…" : "Publikasikan ke Galeri"}</span>
                 </button>
               </div>
@@ -283,113 +294,120 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
         </form>
       </div>
 
-      {/* ── Filter Kategori & Grid Galeri ── */}
-      <div className="space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/[0.08] pb-3.5 sm:pb-4">
-          {/* Tab Filter Kategori (Smooth swipe on mobile) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:flex-wrap max-w-full">
+      {/* ── Koleksi Galeri Aktif ── */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-panel-border pb-3">
+          <div>
+            <h3 className="text-[11px] font-medium text-text-muted">
+              Dokumentasi Galeri di Website ({images.length} Foto)
+            </h3>
+            <p className="text-xs text-text-muted mt-0.5">
+              Menampilkan {filteredImages.length} foto untuk kategori &ldquo;{selectedCategory}&rdquo;
+            </p>
+          </div>
+          <a
+            href="/gallery"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <span>Lihat Galeri Publik</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
+
+        {/* macOS Segmented Filter Bar (Ref 49, 50) */}
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-1">
+          <div className="inline-flex p-1 rounded-[9px] bg-black/5 dark:bg-white/10 border border-black/[0.05] dark:border-white/[0.08] gap-0.5">
             {GALLERY_CATEGORIES.map((cat) => {
               const active = selectedCategory === cat;
-              const count =
-                cat === "Semua"
-                  ? images.length
-                  : images.filter((img) => img.category?.toLowerCase() === cat.toLowerCase()).length;
               return (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all shrink-0 active:scale-95 ${
+                  className={`px-3 py-1 rounded-[6px] text-xs font-medium transition-all select-none shrink-0 active:scale-[0.98] ${
                     active
-                      ? "bg-white/[0.10] text-white border border-primary/50 shadow-sm"
-                      : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                      ? "bg-primary text-white  font-semibold"
+                      : "text-text-muted hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                   }`}
                 >
                   <span>{cat}</span>
-                  <span className="font-mono text-[0.625rem] text-neutral-500">({count})</span>
+                  {cat === "Semua" && (
+                    <span className="ml-1.5 opacity-70 font-mono text-[10px]">
+                      {images.length}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
-
-          <a
-            href="/gallery"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline shrink-0"
-          >
-            <span>Lihat Galeri Publik</span>
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
         </div>
 
         {filteredImages.length === 0 ? (
-          <div className="relative overflow-hidden flex flex-col items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.02] px-6 py-12 sm:py-14 text-center backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.35)]">
-            {/* Soft ambient orange glow */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-12 h-36 w-36 rounded-full bg-primary/10 blur-3xl"
-            />
-
-            <span className="relative z-10 mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.10] bg-white/[0.04] text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-              <Camera className="h-5 w-5 stroke-[2]" />
+          <div className="relative overflow-hidden flex flex-col items-center justify-center rounded-[14px] border border-panel-border bg-panel px-6 py-12 text-center ">
+            <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/5 dark:bg-white/10">
+<AdminSymbol name="camera" className="h-5 w-5 object-contain" />
             </span>
-
-            <h4 className="relative z-10 text-sm sm:text-base font-semibold text-white tracking-tight">
-              Belum Ada Foto di Kategori &ldquo;{selectedCategory}&rdquo;
+            <h4 className="text-sm font-semibold text-foreground">
+              Tidak Ada Foto untuk Kategori Ini
             </h4>
-
-            <p className="relative z-10 mt-1.5 max-w-[44ch] text-xs sm:text-sm text-neutral-400 leading-relaxed">
-              Gunakan formulir upload di atas untuk mempublikasikan foto hasil pengerjaan nyata teknisi ke galeri website.
+            <p className="mt-1 max-w-[40ch] text-xs text-text-muted">
+              Belum ada foto dokumentasi servis yang diunggah untuk kategori &ldquo;{selectedCategory}&rdquo;.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filteredImages.map((img, idx) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+            {filteredImages.map((img) => (
               <div
                 key={img.id}
-                className="group relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition-all duration-200 hover:border-white/[0.22] hover:bg-white/[0.05]"
+                className="group relative overflow-hidden rounded-[10px] border border-panel-border bg-panel  transition-all duration-150 hover:border-black/20 dark:hover:border-white/20"
               >
-                {/* Photo aspect square */}
-                <div className="relative aspect-square w-full overflow-hidden bg-neutral-900">
+                {/* Thumbnail */}
+                <div className="relative aspect-square w-full overflow-hidden bg-neutral-900/10">
                   <Image
                     src={img.Image}
-                    alt={img.altText || img.Title || "Foto Galeri"}
+                    alt={img.altText || img.Title || "Foto Dokumentasi"}
                     fill
                     unoptimized
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover transition-transform duration-200 group-hover:scale-103"
                   />
+
+                  {/* Kategori Badge */}
                   {img.category && (
-                    <div className="absolute top-2 left-2 rounded bg-black/70 px-2 py-0.5 font-mono text-[0.5625rem] font-semibold uppercase tracking-wider text-neutral-300 backdrop-blur-md">
+                    <span className="absolute top-2 left-2 rounded-[5px] bg-black/60  px-1.5 py-0.5 font-mono text-[9px] font-semibold text-white tracking-wide uppercase">
                       {img.category}
-                    </div>
+                    </span>
                   )}
 
-                  {/* Hover Overlay Controls */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  {/* Quick Action Overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setLightboxIndex(idx)}
-                      title="Lihat foto resolusi penuh"
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-colors hover:bg-primary"
+                      onClick={() => {
+                        const idx = filteredImages.findIndex((i) => String(i.id) === String(img.id));
+                        if (idx !== -1) setLightboxIndex(idx);
+                      }}
+                      title="Pratinjau foto besar"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white  transition-all hover:bg-white/50 active:scale-[0.97]"
                     >
-                      <Eye className="h-4 w-4" />
+<AdminSymbol name="eye" className="w-3.5 h-3.5 object-contain" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeleteTarget(img)}
                       title="Hapus foto galeri"
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-colors hover:bg-red-500"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white  transition-all hover:bg-[#FF3B30] active:scale-[0.97]"
                     >
-                      <Trash2 className="h-4 w-4" />
+<AdminSymbol name="trash" className="w-3.5 h-3.5 object-contain" />
                     </button>
                   </div>
                 </div>
 
                 {/* Caption info */}
                 {img.Title && (
-                  <div className="p-2.5">
-                    <p className="text-xs font-medium text-white truncate" title={img.Title}>
+                  <div className="p-2">
+                    <p className="text-[11px] font-medium text-foreground truncate" title={img.Title}>
                       {img.Title}
                     </p>
                   </div>
@@ -400,13 +418,13 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
         )}
       </div>
 
-      {/* ── Modal Konfirmasi Hapus ── */}
+      {/* ── Apple HIG Alert Modal (Ref 03, 18) ── */}
       <ConfirmModal
         isOpen={Boolean(deleteTarget)}
         title="Hapus Foto Galeri?"
         subtitle={deleteTarget?.Title || "Foto Dokumentasi Servis"}
-        description="Foto ini akan dihapus permanen dari galeri dokumentasi website FIXMI."
-        confirmText={isDeleting ? "Menghapus…" : "Ya, Hapus Foto"}
+        description={`Foto ini akan dihapus dari galeri dokumentasi website ${ADMIN_IDENTITY.brandName}.`}
+        confirmText={isDeleting ? "Menghapus…" : "Hapus"}
         cancelText="Batal"
         variant="danger"
         onConfirm={handleDelete}
@@ -416,25 +434,31 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
       {/* ── Lightbox Preview Modal ── */}
       {lightboxIndex !== null && filteredImages[lightboxIndex] && (
         <div
-          onClick={() => setLightboxIndex(null)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in select-none"
+          onClick={closeLightbox}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85  animate-in fade-in select-none"
         >
           <div
+            ref={lightboxRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Pratinjau foto galeri"
             onClick={(e) => e.stopPropagation()}
             className="relative max-w-4xl max-h-[85vh] w-full flex flex-col items-center"
           >
             <button
+              ref={lightboxCloseRef}
               type="button"
-              onClick={() => setLightboxIndex(null)}
-              className="absolute -top-12 right-0 p-2 text-neutral-400 hover:text-white rounded-full bg-white/10 transition-colors"
+              onClick={closeLightbox}
+              aria-label="Tutup pratinjau"
+              className="absolute -top-11 right-0 flex h-9 w-9 items-center justify-center text-white/80 hover:text-white rounded-full bg-white/10 transition-colors"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
 
-            <div className="relative w-full h-[65vh] rounded-2xl overflow-hidden border border-white/[0.12]">
+            <div className="relative w-full h-[65vh] rounded-[14px] overflow-hidden border border-white/20 shadow-2xl">
               <Image
                 src={filteredImages[lightboxIndex].Image}
-                alt={filteredImages[lightboxIndex].Title || "Foto Galeri"}
+                alt={filteredImages[lightboxIndex].Title || "Foto Layar Penuh"}
                 fill
                 unoptimized
                 className="object-contain"
@@ -442,7 +466,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
             </div>
 
             {filteredImages[lightboxIndex].Title && (
-              <p className="mt-4 text-sm font-medium text-white text-center">
+              <p className="mt-3 text-center text-xs text-white/90 font-medium">
                 {filteredImages[lightboxIndex].Title}
               </p>
             )}

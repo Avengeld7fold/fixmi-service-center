@@ -1,7 +1,9 @@
 "use client";
+import AdminSymbol from "./AdminSymbol";
+
 
 import { useState, useMemo, useRef } from "react";
-import { Trash2, Search, X, ArrowDown, ArrowUp } from "lucide-react";
+import { X, ArrowDown, ArrowUp } from "lucide-react";
 import { formatThousands, parseThousands, type DevicePrice, type ServiceType } from "@/lib/data";
 import ConfirmModal from "./ConfirmModal";
 
@@ -11,6 +13,10 @@ interface PriceGridProps {
   onChange: (next: ServiceType) => void;
 }
 
+/**
+ * macOS Finder-style List View Table (macOS 26 Tahoe Specification)
+ * Referensi Resmi: Ref 07, Ref 31, Ref 65
+ */
 export default function PriceGrid({ service, categoryName, onChange }: PriceGridProps) {
   // Search / Quick Filter Model
   const [modelSearch, setModelSearch] = useState("");
@@ -66,7 +72,6 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
     colIndex: number
   ) => {
     if (e.key === "Enter" || e.key === "ArrowDown") {
-      // Hanya navigasi jika bukan di tengah multiline
       e.preventDefault();
       const targetRow = rowIndex + 1;
       const nextInput = tableRef.current?.querySelector<HTMLInputElement>(
@@ -135,9 +140,9 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
     const model = service.device_prices[originalIndex]?.DeviceModel || `Model #${originalIndex + 1}`;
     setConfirmModal({
       isOpen: true,
-      title: "Hapus Baris Model?",
+      title: `Hapus Baris “${model}”?`,
       subtitle: `${model} · ${service.Name} (${categoryName})`,
-      description: `Apakah Anda yakin ingin menghapus baris model "${model}"? Perubahan akan disimpan saat Anda menekan tombol Simpan Perubahan.`,
+      description: `Data harga model “${model}” akan dihapus dari tabel katalog. Tindakan ini tidak dapat dibatalkan setelah disimpan.`,
       onConfirm: () => {
         setRows(service.device_prices.filter((_, i) => i !== originalIndex));
         setConfirmModal((prev) => ({ ...prev, isOpen: false }));
@@ -151,7 +156,7 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
       isOpen: true,
       title: `Hapus ${count} Model Terpilih?`,
       subtitle: `${service.Name} (${categoryName})`,
-      description: `Apakah Anda yakin ingin menghapus ${count} baris model terpilih? Data harga pada baris-baris ini akan dihilangkan dari tabel.`,
+      description: `Data harga ${count} baris model terpilih akan dihilangkan dari tabel katalog.`,
       onConfirm: () => {
         setRows(service.device_prices.filter((_, i) => !selected.has(i)));
         setConfirmModal((prev) => ({ ...prev, isOpen: false }));
@@ -181,35 +186,35 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
 
   return (
     <>
-      <div className="p-3.5 sm:p-5 space-y-3">
-        {/* ── Toolbar Filter Model Cepat & Tambah Model ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] p-3 rounded-xl border border-white/[0.08]">
-          {/* Kolom Cari Model */}
-          <div className="relative flex-1 min-w-[180px] w-full sm:max-w-md flex items-center">
-            <Search className="absolute left-3 h-4 w-4 text-neutral-400" />
+      <div className="p-3 sm:p-4 space-y-2.5">
+        {/* ── macOS Finder Toolbar (Ref 07, 65) ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-[10px] border border-panel-border bg-panel-raised/40 p-2 sm:px-3 sm:py-2">
+          {/* Kolom Cari Model (macOS Pill Search Field) */}
+          <div className="relative flex-1 min-w-[180px] w-full sm:max-w-xs flex items-center">
+<AdminSymbol name="magnifying" className="absolute left-2.5 h-3.5 w-3.5 object-contain pointer-events-none" />
             <input
               type="text"
               value={modelSearch}
               onChange={(e) => setModelSearch(e.target.value)}
-              placeholder="Cari model HP, mis. 15 Pro, Note 12…"
+              placeholder="Cari model HP…"
               aria-label="Cari model HP di layanan ini"
-              className="w-full rounded-xl border border-white/[0.10] bg-white/[0.04] pl-9 pr-8 py-2 text-xs sm:text-sm text-white outline-none transition-all focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-neutral-500"
+              className="w-full h-7 rounded-full border border-panel-border bg-panel pl-8 pr-7 text-xs text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
             />
             {modelSearch && (
               <button
                 type="button"
                 onClick={() => setModelSearch("")}
                 aria-label="Reset pencarian"
-                className="absolute right-2.5 rounded-full p-1 text-neutral-400 hover:text-white"
+                className="absolute right-2 rounded-full p-0.5 text-text-muted hover:text-foreground transition-colors"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-3 w-3" />
               </button>
             )}
           </div>
 
-          {/* Quick Counter & Tombol Tambah */}
-          <div className="flex items-center justify-between sm:justify-end gap-2.5 w-full sm:w-auto">
-            <span className="font-mono text-xs text-neutral-400">
+          {/* Quick Counter & Tombol Tambah (macOS Toolbar Buttons) */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+            <span className="font-mono text-[11px] text-text-muted">
               {modelSearch ? (
                 <>
                   <span className="text-primary font-semibold">{filteredRows.length}</span>/{service.device_prices.length}
@@ -224,34 +229,32 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                 type="button"
                 onClick={addRowTop}
                 title="Tambah model baru di baris paling atas"
-                className="inline-flex items-center gap-1 rounded-xl border border-white/[0.10] bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-white transition-all hover:bg-white/[0.08] hover:border-primary/50 active:scale-95"
+                className="inline-flex h-7 items-center gap-1 rounded-[7px] border border-panel-border bg-panel px-2.5 text-[11px] font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
               >
-                <ArrowUp className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                <span className="hidden sm:inline">Tambah di Atas</span>
-                <span className="sm:hidden">+ Atas</span>
+                <ArrowUp className="h-3 w-3 text-primary" aria-hidden="true" />
+                <span>Tambah di Atas</span>
               </button>
 
               <button
                 type="button"
                 onClick={addRowBottom}
                 title="Tambah model baru di baris paling bawah"
-                className="inline-flex items-center gap-1 rounded-xl border border-white/[0.10] bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-white transition-all hover:bg-white/[0.08] hover:border-primary/50 active:scale-95"
+                className="inline-flex h-7 items-center gap-1 rounded-[7px] border border-panel-border bg-panel px-2.5 text-[11px] font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
               >
-                <ArrowDown className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-                <span className="hidden sm:inline">Tambah di Bawah</span>
-                <span className="sm:hidden">+ Bawah</span>
+                <ArrowDown className="h-3 w-3 text-primary" aria-hidden="true" />
+                <span>Tambah di Bawah</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* ── Tabel Harga ── */}
-        <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-white/[0.08] bg-white/[0.01] scrollbar-thin scrollbar-thumb-white/15 hover:scrollbar-thumb-white/25 scrollbar-track-transparent">
-          <table ref={tableRef} className="w-full border-collapse text-left">
+        {/* ── macOS Finder Data Table (Ref 07, 31) ── */}
+        <div className="admin-price-scroller rounded-[10px] border border-panel-border bg-panel" role="region" aria-label="Tabel harga layanan" tabIndex={0}>
+          <table ref={tableRef} className="admin-price-table w-full border-collapse text-left">
             <thead>
-              <tr className="bg-white/[0.03]">
-                <th className="sticky left-0 z-10 min-w-[10rem] sm:min-w-[14rem] border-b border-r border-white/[0.08] bg-[#161618] px-3 py-2.5">
-                  <span className="flex items-center gap-3">
+              <tr className="border-b border-panel-border bg-panel-raised/70">
+                <th className="sticky left-0 z-10 min-w-[11rem] sm:min-w-[15rem] border-r border-panel-border bg-panel-raised/95 px-3 py-2">
+                  <span className="flex items-center gap-2.5">
                     <input
                       type="checkbox"
                       checked={allVisibleSelected}
@@ -262,9 +265,9 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                       }}
                       onChange={toggleAllVisible}
                       aria-label="Pilih semua model terlihat"
-                      className="h-4 w-4 shrink-0 cursor-pointer accent-[var(--fixmi-primary)]"
+                      className="h-3.5 w-3.5 rounded-[4px] cursor-pointer accent-[#007AFF]"
                     />
-                    <span className="font-mono text-[0.6875rem] uppercase tracking-wider text-text-secondary">
+                    <span className="text-[11px] font-medium text-text-muted">
                       Tipe / Model HP
                     </span>
                     {/* Tombol hapus massal */}
@@ -274,9 +277,9 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                         onClick={bulkDelete}
                         aria-label={`Hapus ${selected.size} model terpilih`}
                         title={`Hapus ${selected.size} model terpilih`}
-                        className="inline-flex items-center gap-1.5 rounded-[6px] bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-rose-500 shadow-sm"
+                        className="inline-flex h-5 items-center gap-1 rounded-full bg-[#FF3B30] hover:bg-[#E0352B] px-2 text-[10px] font-semibold text-white transition-all active:scale-[0.97]  ml-auto"
                       >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+<AdminSymbol name="trash" className="w-2.5 h-2.5 object-contain" />
                         <span>Hapus ({selected.size})</span>
                       </button>
                     )}
@@ -285,12 +288,12 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                 {service.variants.map((v) => (
                   <th
                     key={v.Key}
-                    className="min-w-[8.5rem] border-b border-panel-border px-3 py-2.5 text-right font-mono text-[0.6875rem] uppercase tracking-wider text-text-secondary"
+                    className="min-w-[8.5rem] border-b border-panel-border px-3 py-2 text-right text-[11px] font-medium text-text-muted"
                   >
                     {v.Label}
                   </th>
                 ))}
-                <th className="w-12 border-b border-panel-border" aria-label="Aksi" />
+                <th className="w-10 border-b border-panel-border" aria-label="Aksi" />
               </tr>
             </thead>
             <tbody>
@@ -298,7 +301,7 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                 <tr>
                   <td
                     colSpan={service.variants.length + 2}
-                    className="py-10 text-center text-xs sm:text-sm text-text-muted"
+                    className="py-10 text-center text-xs text-text-muted"
                   >
                     {modelSearch ? (
                       <div>
@@ -312,96 +315,110 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                         </button>
                       </div>
                     ) : (
-                      <p>Belum ada daftar model HP pada layanan ini. Klik tombol di atas untuk menambah model.</p>
+                      <p>Belum ada daftar model HP pada layanan ini. Gunakan tombol di atas untuk menambah model.</p>
                     )}
                   </td>
                 </tr>
               ) : (
-                filteredRows.map(({ dp, originalIndex }, visibleRowIdx) => (
-                  <tr
-                    key={originalIndex}
-                    className={`border-b border-panel-border transition-colors hover:bg-white/[0.02] ${
-                      selected.has(originalIndex) ? "bg-primary/5" : ""
-                    }`}
-                  >
-                    <td className="sticky left-0 z-10 border-r border-panel-border bg-panel px-3 py-1.5">
-                      <span className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={selected.has(originalIndex)}
-                          onChange={() => toggleRow(originalIndex)}
-                          aria-label={`Pilih ${dp.DeviceModel || `baris ${originalIndex + 1}`}`}
-                          className="h-4 w-4 shrink-0 cursor-pointer accent-[var(--fixmi-primary)]"
-                        />
-                        <input
-                          data-row={visibleRowIdx}
-                          data-col={0}
-                          value={dp.DeviceModel}
-                          onChange={(e) => updateModel(originalIndex, e.target.value)}
-                          onKeyDown={(e) => handleCellKeyDown(e, visibleRowIdx, 0)}
-                          placeholder="Ketik tipe/model HP, mis. iPhone 15 Pro…"
-                          aria-label={`Nama model baris ${originalIndex + 1}`}
-                          className="w-full rounded-[6px] border border-transparent bg-transparent px-2 py-1.5 text-sm text-foreground outline-none transition-colors focus:border-primary focus:bg-background"
-                        />
-                      </span>
-                    </td>
-                    {service.variants.map((v, colIdx) => {
-                      const val = dp.prices[v.Key];
-                      const isText = v.Type === "text" || typeof val === "string";
-
-                      return (
-                        <td key={v.Key} className="px-2 py-1.5 text-right">
+                filteredRows.map(({ dp, originalIndex }, visibleRowIdx) => {
+                  const isRowSelected = selected.has(originalIndex);
+                  return (
+                    <tr
+                      key={originalIndex}
+                      className={`border-b border-panel-border/60 transition-colors ${
+                        isRowSelected
+                          ? "bg-primary/10 dark:bg-primary/20"
+                          : "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                      }`}
+                    >
+                      <td
+                        className={`sticky left-0 z-10 border-r border-panel-border px-3 py-1 ${
+                          isRowSelected
+                            ? "bg-blue-50/90 dark:bg-[#1a2d48]/90"
+                            : "bg-panel"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <input
+                            type="checkbox"
+                            checked={isRowSelected}
+                            onChange={() => toggleRow(originalIndex)}
+                            aria-label={`Pilih ${dp.DeviceModel || `baris ${originalIndex + 1}`}`}
+                            className="h-3.5 w-3.5 rounded-[4px] cursor-pointer accent-[#007AFF]"
+                          />
                           <input
                             data-row={visibleRowIdx}
-                            data-col={colIdx + 1}
-                            inputMode={isText ? "text" : "numeric"}
-                            value={
-                              isText
-                                ? (val !== null && val !== undefined ? String(val) : "")
-                                : formatThousands(val as number)
-                            }
-                            onChange={(e) => updatePrice(originalIndex, v.Key, e.target.value, isText)}
-                            onKeyDown={(e) => handleCellKeyDown(e, visibleRowIdx, colIdx + 1)}
-                            placeholder="–"
-                            aria-label={`Nilai ${dp.DeviceModel || `baris ${originalIndex + 1}`} pilihan ${v.Label}`}
-                            className={`w-full rounded-[6px] border border-transparent bg-transparent px-2 py-1.5 text-sm tabular-nums outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:bg-background ${
-                              isText ? "font-mono text-center text-foreground font-normal" : "font-instrument text-right text-primary font-bold"
-                            }`}
+                            data-col={0}
+                            value={dp.DeviceModel}
+                            onChange={(e) => updateModel(originalIndex, e.target.value)}
+                            onKeyDown={(e) => handleCellKeyDown(e, visibleRowIdx, 0)}
+                            placeholder="Ketik model HP…"
+                            aria-label={`Nama model baris ${originalIndex + 1}`}
+                            className="w-full rounded-[5px] border border-transparent bg-transparent px-2 py-1 text-xs text-foreground font-medium outline-none transition-colors hover:border-panel-border/60 focus:border-primary focus:bg-background focus:ring-1 focus:ring-primary/30"
                           />
-                        </td>
-                      );
-                    })}
-                    <td className="px-2 py-1.5 text-center">
-                      <button
-                        type="button"
-                        onClick={() => removeRow(originalIndex)}
-                        aria-label={`Hapus model ${dp.DeviceModel || `baris ${originalIndex + 1}`}`}
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] text-text-muted transition-colors hover:text-rose-400 hover:bg-rose-500/10"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                        </span>
+                      </td>
+                      {service.variants.map((v, colIdx) => {
+                        const val = dp.prices[v.Key];
+                        const isText = v.Type === "text" || typeof val === "string";
+
+                        return (
+                          <td key={v.Key} className="px-2 py-1 text-right">
+                            <input
+                              data-row={visibleRowIdx}
+                              data-col={colIdx + 1}
+                              inputMode={isText ? "text" : "numeric"}
+                              value={
+                                isText
+                                  ? (val !== null && val !== undefined ? String(val) : "")
+                                  : formatThousands(val as number)
+                              }
+                              onChange={(e) => updatePrice(originalIndex, v.Key, e.target.value, isText)}
+                              onKeyDown={(e) => handleCellKeyDown(e, visibleRowIdx, colIdx + 1)}
+                              placeholder="–"
+                              aria-label={`Nilai ${dp.DeviceModel || `baris ${originalIndex + 1}`} pilihan ${v.Label}`}
+                              className={`w-full rounded-[5px] border border-transparent bg-transparent px-2 py-1 text-xs tabular-nums outline-none transition-colors placeholder:text-text-muted hover:border-panel-border/60 focus:border-primary focus:bg-background focus:ring-1 focus:ring-primary/30 ${
+                                isText
+                                  ? "font-mono text-center text-foreground font-normal"
+                                  : "font-mono text-right text-foreground font-semibold"
+                              }`}
+                            />
+                          </td>
+                        );
+                      })}
+                      <td className="px-1.5 py-1 text-center">
+                        <button
+                          type="button"
+                          onClick={() => removeRow(originalIndex)}
+                          aria-label={`Hapus model ${dp.DeviceModel || `baris ${originalIndex + 1}`}`}
+                          title="Hapus baris ini"
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-[5px] text-text-muted transition-colors hover:text-[#FF3B30] hover:bg-[#FF3B30]/10"
+                        >
+<AdminSymbol name="trash" className="w-3 h-3 object-contain" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-text-muted pt-1">
+        <div className="flex items-center justify-between text-[11px] text-text-muted px-1">
           <span>
-            💡 <strong>Tips Cepat:</strong> Gunakan tombol <code>Enter</code> atau <code>↓ / ↑</code> untuk berpindah baris input seperti di Excel.
+            Gunakan tombol <code>Enter</code> atau <code>↓ / ↑</code> untuk berpindah baris input.
           </span>
         </div>
       </div>
 
-      {/* ── Custom Centered Confirmation Modal ── */}
+      {/* ── Apple HIG Alert Modal (Ref 03, 18) ── */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         title={confirmModal.title}
         subtitle={confirmModal.subtitle}
         description={confirmModal.description}
-        confirmText="Ya, Hapus"
+        confirmText="Hapus"
         cancelText="Batal"
         variant="danger"
         onConfirm={confirmModal.onConfirm}

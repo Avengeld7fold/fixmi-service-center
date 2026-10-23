@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MoveLeft, MoveRight, Search, X, MessageCircle } from "lucide-react";
+import { MoveLeft, MoveRight, X, MessageCircle } from "lucide-react";
 import type { ServiceType } from "@/lib/data";
 import { whatsappUrl } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
@@ -73,7 +73,7 @@ function SmartCell({
         s.type === "badge" ? (
           <span
             key={idx}
-            className="inline-flex items-center rounded-[5px] border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[0.6875rem] sm:text-xs font-medium text-neutral-200 shadow-sm shrink-0"
+            className="price-model-code"
           >
             {s.value}
           </span>
@@ -189,19 +189,24 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
   }, [variants, seriesColumns]);
 
   return (
-    <div className="pt-4">
+    <div className="price-table pt-4">
       {/* Pencarian + penghitung model */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="relative w-full max-w-[22rem]">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/icons/magnifying.png"
+            alt=""
+            width={16}
+            height={16}
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 object-contain"
             aria-hidden="true"
           />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={dict.pricelist.searchPlaceholder}
+            placeholder={isEn ? "Search device model..." : "Cari model perangkat..."}
             aria-label={dict.pricelist.searchPlaceholder}
             className={`w-full rounded-[12px] border py-2.5 pl-9 pr-9 text-sm text-foreground placeholder:text-text-muted outline-none transition-[border-color,box-shadow] duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden ${
               sub ? "border-[#282828] bg-[#121212]" : "border-panel-border bg-background"
@@ -211,7 +216,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label={dict.common.close}
+              aria-label={isEn ? "Clear search" : "Hapus pencarian"}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-foreground transition-colors p-1"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -231,11 +236,11 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
           {canRight ? (
             <>
               {isEn ? "Swipe table for details" : "Geser tabel untuk detail"}
-              <MoveRight className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+              <MoveRight className="h-3.5 w-3.5" aria-hidden="true" />
             </>
           ) : (
             <>
-              <MoveLeft className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+              <MoveLeft className="h-3.5 w-3.5" aria-hidden="true" />
               {isEn ? "Swipe table for details" : "Geser tabel untuk detail"}
             </>
           )}
@@ -276,14 +281,14 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
               <tr>
                 <th
                   scope="col"
-                  className={`sticky top-0 left-0 z-30 w-[10rem] sm:w-[11rem] lg:w-[14.5rem] min-w-[10rem] sm:min-w-[11rem] lg:min-w-[14.5rem] max-w-[10rem] sm:max-w-[11rem] lg:max-w-[14.5rem] border-b border-r px-2.5 sm:px-3 lg:px-4 pb-2.5 sm:pb-3 pt-2 text-center align-middle font-instrument ${
+                  className={`sticky top-0 left-0 z-30 w-[10rem] sm:w-[11rem] lg:w-[14.5rem] min-w-[10rem] sm:min-w-[11rem] lg:min-w-[14.5rem] max-w-[10rem] sm:max-w-[11rem] lg:max-w-[14.5rem] border-b border-r px-2.5 sm:px-3 lg:px-4 pb-2.5 sm:pb-3 pt-2 text-center align-middle font-sans ${
                     sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                   }`}
                 >
-                  <span className="block font-instrument text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
+                  <span className="block font-sans text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center">
                     {getLocalizedServiceName(service, locale)}
                   </span>
-                  <span className="mt-0.5 block font-instrument text-[0.625rem] font-normal tracking-wide text-text-muted text-center">
+                  <span className="mt-0.5 block font-sans text-[0.625rem] font-normal tracking-wide text-text-muted text-center">
                     {categoryName} {isEn ? "Models" : "Model"}
                   </span>
                 </th>
@@ -291,15 +296,15 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                   <th
                     key={v.Key}
                     scope="col"
-                    className={`sticky top-0 z-20 border-b px-2.5 sm:px-3 lg:px-4 pb-2.5 sm:pb-3 pt-2 text-center align-middle font-instrument ${
+                    className={`sticky top-0 z-20 border-b px-2.5 sm:px-3 lg:px-4 pb-2.5 sm:pb-3 pt-2 text-center align-middle font-sans ${
                       sub ? "border-[#262626] bg-[#161616]" : "border-panel-border bg-panel"
                     }`}
                   >
-                    <span className="block font-instrument text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center leading-snug">
+                    <span className="block font-sans text-[0.6875rem] uppercase tracking-[0.14em] text-foreground text-center leading-snug">
                       {getLocalizedVariantLabel(v, locale)}
                     </span>
                     {v.Note && (
-                      <span className="mt-0.5 block font-instrument text-[0.625rem] font-normal normal-case tracking-wide text-text-muted text-center leading-tight">
+                      <span className="mt-0.5 block font-sans text-[0.625rem] font-normal normal-case tracking-wide text-text-muted text-center leading-tight">
                         {getLocalizedVariantNote(v.Note, locale)}
                       </span>
                     )}
@@ -344,8 +349,8 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
                             <SmartCell text={String(val)} align="center" />
                           ) : (
                             <>
-                              <span className="mr-1 text-primary font-semibold lg:font-bold font-instrument">Rp.</span>
-                              <span className="text-primary font-semibold lg:font-bold font-instrument">
+                              <span className="price-currency">Rp</span>
+                              <span className="price-amount">
                                 {priceFormatter.format(val as number)}
                               </span>
                             </>
@@ -362,9 +367,7 @@ export default function PriceTable({ service, categoryName, sub = false }: Price
         {/* Gradien fade tepi kanan */}
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-y-0 right-0 z-40 w-10 transition-opacity duration-300 ${
-            sub ? "bg-gradient-to-l from-[#161616] to-transparent" : "bg-gradient-to-l from-panel to-transparent"
-          } ${canRight ? "opacity-100" : "opacity-0"}`}
+          className={`price-scroll-fade pointer-events-none absolute inset-y-0 right-0 z-40 transition-opacity duration-300 ${canRight ? "opacity-100" : "opacity-0"}`}
         />
       </div>
       {rows.length === 0 && (

@@ -49,29 +49,29 @@
 }
 
 @theme inline {
-  --color-background: var(--fixmi-bg-primary);
-  --color-foreground: var(--fixmi-text-secondary);
-  --color-primary: var(--fixmi-primary);
-  --color-primary-light: var(--fixmi-primary-light);
-  --color-primary-dark: var(--fixmi-primary-dark);
-  --color-accent: var(--fixmi-accent);
-  --color-accent-light: var(--fixmi-accent-light);
-  --color-surface: var(--fixmi-bg-secondary);
-  --color-surface-alt: var(--fixmi-bg-tertiary);
-  --color-surface-elevated: var(--fixmi-panel-elevated);
-  --color-text-secondary: var(--fixmi-text-secondary-alt);
-  --color-text-muted: var(--fixmi-text-muted);
-  --color-border: var(--fixmi-border);
-  --color-border-light: var(--fixmi-divider);
-  --color-divider: var(--fixmi-divider);
-  --color-panel: var(--fixmi-panel);
-  --color-panel-raised: var(--fixmi-panel-raised);
-  --color-panel-border: var(--fixmi-panel-border);
-  --font-display: var(--font-neue-montreal);
-  --font-sans: var(--font-neue-montreal);
-  --font-mono: var(--font-mono);
-  --font-bayon: var(--font-bayon);
-  --font-instrument: var(--font-instrument-sans), sans-serif;
+  --color-background: var(--admin-background, var(--fixmi-bg-primary));
+  --color-foreground: var(--admin-foreground, var(--fixmi-text-secondary));
+  --color-primary: var(--admin-primary, var(--fixmi-primary));
+  --color-primary-light: var(--admin-primary-light, var(--fixmi-primary-light));
+  --color-primary-dark: var(--admin-primary-dark, var(--fixmi-primary-dark));
+  --color-accent: var(--admin-primary, var(--fixmi-accent));
+  --color-accent-light: var(--admin-primary-light, var(--fixmi-accent-light));
+  --color-surface: var(--admin-surface, var(--fixmi-bg-secondary));
+  --color-surface-alt: var(--admin-surface-alt, var(--fixmi-bg-tertiary));
+  --color-surface-elevated: var(--admin-surface-elevated, var(--fixmi-panel-elevated));
+  --color-text-secondary: var(--admin-text-secondary, var(--fixmi-text-secondary-alt));
+  --color-text-muted: var(--admin-text-muted, var(--fixmi-text-muted));
+  --color-border: var(--admin-border, var(--fixmi-border));
+  --color-border-light: var(--admin-divider, var(--fixmi-divider));
+  --color-divider: var(--admin-divider, var(--fixmi-divider));
+  --color-panel: var(--admin-panel, var(--fixmi-panel));
+  --color-panel-raised: var(--admin-panel-raised, var(--fixmi-panel-raised));
+  --color-panel-border: var(--admin-panel-border, var(--fixmi-panel-border));
+  --font-display: var(--admin-font-body, var(--font-neue-montreal));
+  --font-sans: var(--admin-font-body, var(--font-neue-montreal));
+  --font-mono: var(--admin-font-mono, var(--font-mono));
+  --font-bayon: var(--admin-font-display, var(--font-bayon));
+  --font-instrument: var(--admin-font-data, var(--font-instrument-sans)), sans-serif;
 }
 
 /* ============================

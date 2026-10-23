@@ -74,3 +74,6 @@ skills-lock.json
 
 # Dev-only scripts
 scripts/
+!scripts/
+scripts/*
+!scripts/check-admin-parity.mjs

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
-import { Download, X, FileSpreadsheet, Layers, Wrench, CheckCircle2 } from "lucide-react";
+import { Download, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { useAdminDialog } from "./useAdminDialog";
 
 export interface ExportCategoryOption {
   Name: string;
@@ -16,57 +17,22 @@ interface ExportModalProps {
   categories: ExportCategoryOption[];
 }
 
+/**
+ * Apple HIG Save / Export Attached Sheet Dialog (macOS Tahoe Specification)
+ * Referensi Resmi: Ref 05, Ref 11, Ref 26, Ref 53
+ * https://developer.apple.com/design/human-interface-guidelines/sheets
+ */
 export default function ExportModal({ isOpen, onClose, categories }: ExportModalProps) {
-  const [mounted, setMounted] = useState(false);
   const [scope, setScope] = useState<"all" | "category" | "service">("all");
   const [selectedCat, setSelectedCat] = useState<string>("");
   const [selectedSvc, setSelectedSvc] = useState<string>("");
+  const { dialogRef, initialFocusRef } = useAdminDialog<HTMLSelectElement>(isOpen, onClose);
 
-  useEffect(() => {
-    // Client-only portal mount guard prevents document.body access during SSR.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
+  if (!isOpen || typeof document === "undefined") return null;
 
-  // Set default selected category saat categories tersedia
-  useEffect(() => {
-    if (categories.length > 0 && !selectedCat) {
-      // Keep the first available category selected when server data arrives.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedCat(categories[0].Slug);
-    }
-  }, [categories, selectedCat]);
+  const activeCat = categories.find((c) => c.Slug === selectedCat) || categories[0];
+  const activeSvc = activeCat?.services.find((s) => s.Slug === selectedSvc) || activeCat?.services[0];
 
-  // Update default selected service saat category berubah
-  useEffect(() => {
-    const cat = categories.find((c) => c.Slug === selectedCat);
-    if (cat && cat.services.length > 0) {
-      // Keep the service selection valid for the selected category.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedSvc(cat.services[0].Slug);
-    } else {
-      setSelectedSvc("");
-    }
-  }, [selectedCat, categories]);
-
-  // Close on Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen || !mounted) return null;
-
-  const activeCat = categories.find((c) => c.Slug === selectedCat);
-  const activeSvc = activeCat?.services.find((s) => s.Slug === selectedSvc);
-
-  // Generate nama file preview
   const today = new Date().toISOString().slice(0, 10);
   let fileSuffix = "semua";
   if (scope === "category" && activeCat) {
@@ -80,11 +46,11 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
     let url = "/api/admin/export";
     const params = new URLSearchParams();
 
-    if (scope === "category" && selectedCat) {
-      params.set("category", selectedCat);
-    } else if (scope === "service" && selectedCat && selectedSvc) {
-      params.set("category", selectedCat);
-      params.set("service", selectedSvc);
+    if (scope === "category" && activeCat) {
+      params.set("category", activeCat.Slug);
+    } else if (scope === "service" && activeCat && activeSvc) {
+      params.set("category", activeCat.Slug);
+      params.set("service", activeSvc.Slug);
     }
 
     const query = params.toString();
@@ -92,7 +58,7 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
       url += `?${query}`;
     }
 
-    // Native navigation is required so Content-Disposition triggers the file download.
+    // Native navigation preserves the spreadsheet download response.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.href = url;
     onClose();
@@ -101,196 +67,137 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
   return createPortal(
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-200 animate-in fade-in select-none"
+      className="admin-modal-backdrop"
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-sheet-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/[0.12] bg-[#161618] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.85)]"
+        className="admin-sheet"
       >
-        {/* Specular Top Hairline */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Tutup"
-          className="absolute top-4 right-4 rounded-full bg-white/[0.06] p-1.5 text-neutral-400 transition-colors hover:bg-white/[0.12] hover:text-white"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        {/* Modal Header */}
-        <div className="flex items-start gap-3.5 mb-5">
-          <div className="rounded-xl border border-primary/20 bg-primary/10 p-3 text-primary shrink-0 shadow-[0_0_15px_rgba(255,107,0,0.15)]">
-            <Download className="h-6 w-6" />
+        {/* Sheet Header (Ref 05, 26) */}
+        <div className="flex items-center gap-3 pb-4 border-b border-black/8 dark:border-white/10">
+          <div className="w-10 h-10 rounded-xl bg-primary/12 text-primary flex items-center justify-center shrink-0">
+            <FileSpreadsheet className="w-5 h-5" />
           </div>
-          <div className="pr-6">
-            <h3 className="text-lg font-bold text-white tracking-tight leading-snug">
-              Export Data ke Excel (.xlsx)
+          <div>
+            <h3 id="export-sheet-title" className="text-[15px] font-bold text-neutral-900 dark:text-white leading-tight">
+              Ekspor Dokumen Excel
             </h3>
-            <p className="text-xs text-neutral-400 mt-0.5">
-              Pilih cakupan data harga yang ingin diunduh untuk diedit.
+            <p className="text-[12px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+              Simpan katalog harga ke format spreadsheet (.xlsx).
             </p>
           </div>
         </div>
 
-        {/* Scope Selector Options */}
-        <div className="space-y-2 mb-5">
-          <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-            Cakupan Data yang Di-export:
-          </label>
-
-          {/* Option 1: Full / Semua Kategori */}
-          <label
-            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-              scope === "all"
-                ? "border-primary/50 bg-primary/[0.08] text-white ring-1 ring-primary/25"
-                : "border-white/[0.08] bg-white/[0.02] text-neutral-300 hover:bg-white/[0.05]"
-            }`}
-          >
-            <input
-              type="radio"
-              name="export-scope"
-              checked={scope === "all"}
-              onChange={() => setScope("all")}
-              className="accent-primary h-4 w-4"
-            />
-            <FileSpreadsheet className={`h-4 w-4 shrink-0 ${scope === "all" ? "text-primary" : "text-neutral-400"}`} />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs sm:text-sm font-semibold">Semua Kategori & Layanan (Full)</div>
-              <div className="text-[0.6875rem] text-neutral-400">
-                Unduh seluruh data katalog harga ({categories.length} kategori).
-              </div>
+        {/* Sheet Form Rows (Ref 05, 29) */}
+        <div className="py-4 space-y-3.5 text-[13px]">
+          {/* File Name Preview (Save As Field) */}
+          <div>
+            <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+              Nama Berkas (Save As)
+            </label>
+            <div className="h-8 px-3 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-mono text-[12px] flex items-center shadow-inner">
+              {previewFilename}
             </div>
-          </label>
+          </div>
 
-          {/* Option 2: Per Kategori */}
-          <label
-            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-              scope === "category"
-                ? "border-primary/50 bg-primary/[0.08] text-white ring-1 ring-primary/25"
-                : "border-white/[0.08] bg-white/[0.02] text-neutral-300 hover:bg-white/[0.05]"
-            }`}
-          >
-            <input
-              type="radio"
-              name="export-scope"
-              checked={scope === "category"}
-              onChange={() => setScope("category")}
-              className="accent-primary h-4 w-4"
-            />
-            <Layers className={`h-4 w-4 shrink-0 ${scope === "category" ? "text-primary" : "text-neutral-400"}`} />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs sm:text-sm font-semibold">Hanya 1 Kategori Tertentu</div>
-              <div className="text-[0.6875rem] text-neutral-400">
-                Hanya mengunduh seluruh layanan dalam kategori yang dipilih (misal: iPhone).
-              </div>
-            </div>
-          </label>
-
-          {/* Option 3: Per Layanan Spesifik */}
-          <label
-            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-              scope === "service"
-                ? "border-primary/50 bg-primary/[0.08] text-white ring-1 ring-primary/25"
-                : "border-white/[0.08] bg-white/[0.02] text-neutral-300 hover:bg-white/[0.05]"
-            }`}
-          >
-            <input
-              type="radio"
-              name="export-scope"
-              checked={scope === "service"}
-              onChange={() => setScope("service")}
-              className="accent-primary h-4 w-4"
-            />
-            <Wrench className={`h-4 w-4 shrink-0 ${scope === "service" ? "text-primary" : "text-neutral-400"}`} />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs sm:text-sm font-semibold">Layanan Perbaikan Spesifik</div>
-              <div className="text-[0.6875rem] text-neutral-400">
-                Hanya mengunduh 1 jenis layanan perbaikan (misal: iPhone · LCD / Display).
-              </div>
-            </div>
-          </label>
-        </div>
-
-        {/* Dropdowns jika memilih Category atau Service */}
-        {scope !== "all" && (
-          <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] space-y-3 mb-5 animate-in fade-in">
-            {/* Pilih Kategori */}
-            <div>
-              <label className="text-[0.6875rem] font-mono uppercase tracking-wider text-text-muted block mb-1.5">
-                Pilih Kategori Perangkat:
-              </label>
+          {/* Scope Selector (Pop-Up Button Style) */}
+          <div>
+            <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+              Cakupan Data (Scope)
+            </label>
+            <div className="relative">
               <select
-                value={selectedCat}
-                onChange={(e) => setSelectedCat(e.target.value)}
-                className="w-full rounded-lg border border-white/[0.12] bg-[#1a1a1c] px-3 py-2 text-xs sm:text-sm font-medium text-white outline-none focus:border-primary transition-colors cursor-pointer"
+                ref={initialFocusRef}
+                value={scope}
+                onChange={(e) => setScope(e.target.value as "all" | "category" | "service")}
+                className="w-full h-8 pl-3 pr-8 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-[13px] appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
               >
-                {categories.map((cat) => (
-                  <option key={cat.Slug} value={cat.Slug} className="bg-[#1a1a1c] text-white">
-                    {cat.Name} ({cat.services.length} layanan)
-                  </option>
-                ))}
+                <option value="all">Semua Kategori & Layanan (Penuh)</option>
+                <option value="category">Satu Kategori Perangkat</option>
+                <option value="service">Satu Layanan Spesifik</option>
               </select>
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
             </div>
+          </div>
 
-            {/* Pilih Layanan jika scope === 'service' */}
-            {scope === "service" && (
-              <div>
-                <label className="text-[0.6875rem] font-mono uppercase tracking-wider text-text-muted block mb-1.5">
-                  Pilih Jenis Layanan:
-                </label>
+          {/* Conditional Category Filter */}
+          {scope !== "all" && (
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+                Kategori Perangkat
+              </label>
+              <div className="relative">
                 <select
-                  value={selectedSvc}
-                  onChange={(e) => setSelectedSvc(e.target.value)}
-                  className="w-full rounded-lg border border-white/[0.12] bg-[#1a1a1c] px-3 py-2 text-xs sm:text-sm font-medium text-white outline-none focus:border-primary transition-colors cursor-pointer"
+                  value={activeCat?.Slug || ""}
+                  onChange={(e) => { setSelectedCat(e.target.value); setSelectedSvc(""); }}
+                  className="w-full h-8 pl-3 pr-8 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-[13px] appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                 >
-                  {activeCat?.services.map((svc) => (
-                    <option key={svc.Slug} value={svc.Slug} className="bg-[#1a1a1c] text-white">
-                      {svc.title}
+                  {categories.map((c) => (
+                    <option key={c.Slug} value={c.Slug}>
+                      {c.Name}
                     </option>
                   ))}
                 </select>
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Preview Summary Box */}
-        <div className="rounded-xl border border-primary/20 bg-primary/[0.04] p-3.5 mb-6 text-xs leading-relaxed text-neutral-300">
-          <div className="flex items-center gap-1.5 font-medium text-primary mb-1">
-            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-            <span>Format Kompatibel Penuh dengan Re-Import</span>
-          </div>
-          <div className="font-mono text-[0.6875rem] text-neutral-400 break-all">
-            File target: <span className="text-white font-medium">{previewFilename}</span>
-          </div>
-          <p className="text-[0.6875rem] text-neutral-400 mt-1">
-            Saat di-import kembali, hanya data kategori/layanan ini yang diperbarui. Kategori lainnya dijamin tetap aman.
-          </p>
+          {/* Conditional Service Filter */}
+          {scope === "service" && activeCat && (
+            <div>
+              <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+                Pilih Layanan
+              </label>
+              <div className="relative">
+                <select
+                  value={activeSvc?.Slug || ""}
+                  onChange={(e) => setSelectedSvc(e.target.value)}
+                  className="w-full h-8 pl-3 pr-8 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-[13px] appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                >
+                  {activeCat.services.map((s) => (
+                    <option key={s.Slug} value={s.Slug}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Modal Actions */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-2.5 sm:gap-3 pt-3 border-t border-white/[0.08]">
+        {/* Sheet Action Footer (Ref 05, 26) */}
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-black/8 dark:border-white/10">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white text-center"
+            className="h-8 px-4 rounded-[6px] text-[13px] font-medium bg-black/5 dark:bg-white/10 text-neutral-800 dark:text-neutral-200 hover:bg-black/10 dark:hover:bg-white/15 transition-all active:scale-[0.97]"
           >
             Batal
           </button>
+
           <button
             type="button"
             onClick={handleDownload}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-[0_4px_16px_rgba(255,107,0,0.3)] transition-all hover:bg-primary-light hover:brightness-105 active:scale-95 text-center"
+            className="h-8 px-4 rounded-[6px] text-[13px] font-semibold bg-primary hover:bg-[#0066D6] text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-[0.97]"
           >
-            <Download className="h-4 w-4" />
-            <span>Unduh Excel (.xlsx)</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>Ekspor Sekarang</span>
           </button>
         </div>
       </div>
     </div>,
-    document.body
+    document.querySelector(".admin-shell") || document.body
   );
 }

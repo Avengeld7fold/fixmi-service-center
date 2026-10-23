@@ -1,171 +1,48 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Receipt, Sparkles, Image as ImageIcon, ExternalLink, LogOut, Download, RefreshCw } from "lucide-react";
+import { Download, ExternalLink, LogOut, MoreHorizontal, RefreshCw } from "lucide-react";
 import { logoutAction, syncFrontendCacheAction } from "@/app/admin/actions";
 import ExportModal, { type ExportCategoryOption } from "./ExportModal";
 
-interface AdminNavProps {
-  showExport?: boolean;
-  exportCategories?: ExportCategoryOption[];
-}
+interface AdminNavProps { showExport?: boolean; exportCategories?: ExportCategoryOption[]; }
 
 export default function AdminNav({ showExport = false, exportCategories = [] }: AdminNavProps) {
   const pathname = usePathname();
-  const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<string | null>(null);
-
-  const handleSyncCache = async () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
-    setSyncStatus(null);
-    try {
-      const res = await syncFrontendCacheAction();
-      if (res.ok) {
-        setSyncStatus("Tersinkron!");
-        setTimeout(() => setSyncStatus(null), 3000);
-      } else {
-        setSyncStatus("Gagal");
-        setTimeout(() => setSyncStatus(null), 3000);
-      }
-    } catch {
-      setSyncStatus("Error");
-      setTimeout(() => setSyncStatus(null), 3000);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const NAV_ITEMS = [
-    {
-      href: "/admin/pricelist",
-      publicHref: "/pricelist",
-      label: "Daftar Harga & Layanan",
-      shortLabel: "Daftar Harga",
-      icon: Receipt,
-    },
-    {
-      href: "/admin/promo",
-      publicHref: "/promo",
-      label: "Promo & Banner",
-      shortLabel: "Promo",
-      icon: Sparkles,
-    },
-    {
-      href: "/admin/gallery",
-      publicHref: "/gallery",
-      label: "Galeri Dokumentasi Repair",
-      shortLabel: "Galeri Repair",
-      icon: ImageIcon,
-    },
-  ];
-
-  const currentItem = NAV_ITEMS.find((item) => pathname.startsWith(item.href)) ?? NAV_ITEMS[0];
-
+  const [exportOpen, setExportOpen] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [status, setStatus] = useState("");
+  const details = useRef<HTMLDetailsElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const title = pathname.startsWith("/admin/pricelist") ? "Daftar Harga" : pathname.startsWith("/admin/promo") ? "Promo & Banner" : pathname.startsWith("/admin/gallery") ? "Galeri" : "Ringkasan";
+  const category = pathname.split("/").filter(Boolean)[2];
+  const href = pathname.startsWith("/admin/pricelist") ? `/pricelist${category ? "/" + category : ""}` : pathname.startsWith("/admin/promo") ? "/promo" : pathname.startsWith("/admin/gallery") ? "/gallery" : "/";
+  async function sync() {
+    if (syncing) return;
+    setSyncing(true);
+    setStatus("");
+    try { const result = await syncFrontendCacheAction(); setStatus(result.ok ? "Tersinkron" : "Gagal menyinkronkan"); }
+    catch { setStatus("Gagal menyinkronkan"); }
+    finally { setSyncing(false); timer.current = setTimeout(() => setStatus(""), 3000); }
+  }
   return (
-    <nav className="mb-8 sm:mb-10 lg:mb-12 flex flex-col gap-3.5 sm:gap-4 border-b border-white/[0.08] pb-4 sm:pb-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-        {/* Navigation Tabs (Smooth horizontal scroll on mobile, flex on sm+) */}
-        <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-md overflow-x-auto scrollbar-none max-w-full">
-          {NAV_ITEMS.map((item) => {
-            const active = pathname.startsWith(item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`inline-flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all duration-150 shrink-0 active:scale-[0.98] ${
-                  active
-                    ? "border border-primary/50 bg-white/[0.08] text-white shadow-[0_0_15px_rgba(255,107,0,0.12)] ring-1 ring-primary/25"
-                    : "text-neutral-400 hover:text-white hover:bg-white/[0.05]"
-                }`}
-              >
-                <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${active ? "text-primary" : "text-neutral-400"}`} />
-                <span className="hidden md:inline">{item.label}</span>
-                <span className="md:hidden">{item.shortLabel}</span>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Action Controls */}
-        <div className="flex items-center justify-end gap-2 sm:gap-2.5 shrink-0">
-          {/* Quick link to live public site (peka terhadap kategori yang sedang aktif) */}
-          {(() => {
-            let publicHref = currentItem.publicHref;
-            if (pathname.startsWith("/admin/pricelist")) {
-              const parts = pathname.split("/").filter(Boolean);
-              if (parts.length >= 3 && parts[1] === "pricelist") {
-                publicHref = `/pricelist/${parts[2]}`;
-              }
-            }
-            return (
-              <a
-                href={publicHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Buka halaman publik di tab baru"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-neutral-300 transition-all duration-150 hover:bg-white/[0.08] hover:text-white hover:border-white/20"
-              >
-                <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-neutral-400" />
-                <span className="hidden sm:inline">Lihat Web</span>
-                <span className="sm:hidden">Web</span>
-              </a>
-            );
-          })()}
-
-          {/* Sync Frontend ISR Cache Button */}
-          <button
-            type="button"
-            onClick={handleSyncCache}
-            disabled={isSyncing}
-            title="Segarkan cache frontend seketika (Sync ISR)"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-neutral-300 transition-all duration-150 hover:bg-white/[0.08] hover:text-white hover:border-primary/50 cursor-pointer disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary ${isSyncing ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">{syncStatus || "Sync Cache"}</span>
-            <span className="sm:hidden">{syncStatus || "Sync"}</span>
-          </button>
-
-          {/* Export Excel only if showExport is true */}
-          {showExport && (
-            <button
-              type="button"
-              onClick={() => setExportModalOpen(true)}
-              title="Unduh data harga dalam format Excel"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-white transition-all duration-150 hover:bg-white/[0.08] hover:border-primary/50 cursor-pointer"
-            >
-              <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" aria-hidden="true" />
-              <span className="hidden sm:inline">Export Excel</span>
-              <span className="sm:hidden">Excel</span>
-            </button>
-          )}
-
-          {/* Logout Button */}
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              title="Keluar dari sesi admin"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.10] bg-white/[0.03] px-3 py-1.5 sm:px-3.5 sm:py-2 text-[0.6875rem] sm:text-xs font-medium text-neutral-400 transition-all duration-150 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400"
-            >
-              <LogOut className="h-3 w-3 sm:h-3.5 sm:w-3.5" aria-hidden="true" />
-              <span>Keluar</span>
-            </button>
-          </form>
-        </div>
+    <header className="admin-toolbar">
+      <h1>{title}</h1>
+      <div className="admin-toolbar-actions">
+        <a href={href} target="_blank" rel="noopener noreferrer" className="admin-control" title="Lihat website"><ExternalLink aria-hidden="true" /><span>Lihat Web</span></a>
+        {showExport && <button type="button" className="admin-control" aria-label="Ekspor" onClick={() => setExportOpen(true)}><Download aria-hidden="true" /><span>Ekspor</span></button>}
+        <details ref={details} className="admin-actions-menu" onKeyDown={event => {if (event.key === "Escape") { details.current?.removeAttribute("open"); details.current?.querySelector("summary")?.focus(); }}}>
+          <summary className="admin-control" aria-label="Tindakan lainnya"><MoreHorizontal aria-hidden="true" /></summary>
+          <div className="admin-actions-popover">
+            <button type="button" className="admin-menu-item" disabled={syncing} aria-busy={syncing} onClick={sync}><RefreshCw aria-hidden="true" className={syncing ? "animate-spin" : ""} /><span>{syncing ? "Menyinkronkan…" : "Sync Cache"}</span></button>
+            <form action={logoutAction}><button type="submit" className="admin-menu-item"><LogOut aria-hidden="true" /><span>Keluar</span></button></form>
+          </div>
+        </details>
+        <span className="admin-toolbar-status" role="status">{status}</span>
       </div>
-
-      {/* Export Options Modal */}
-      {showExport && (
-        <ExportModal
-          isOpen={exportModalOpen}
-          onClose={() => setExportModalOpen(false)}
-          categories={exportCategories}
-        />
-      )}
-    </nav>
+      {showExport && <ExportModal isOpen={exportOpen} onClose={() => setExportOpen(false)} categories={exportCategories} />}
+    </header>
   );
 }

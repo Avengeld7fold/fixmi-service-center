@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Lock } from "lucide-react";
 import { loginAction, type LoginState } from "../actions";
+import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 
 const initialState: LoginState = { error: "" };
 
@@ -10,17 +11,13 @@ export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
-    <section className="flex min-h-screen items-center justify-center px-6">
-      <form action={formAction} className="fixmi-card w-full max-w-[24rem] p-8">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-panel-raised">
+    <section className="admin-login">
+      <form action={formAction} className="admin-login-card">
+        <div className="admin-login-icon">
             <Lock className="h-5 w-5 text-primary" aria-hidden="true" />
-          </span>
-          <div>
-            <h1 className="font-display text-xl font-bold text-foreground">FIXMI Admin</h1>
-            <p className="text-sm text-text-secondary">Masuk untuk mengelola pricelist</p>
-          </div>
         </div>
+        <h1>{ADMIN_IDENTITY.adminName}</h1>
+        <p className="admin-login-copy">Masuk untuk mengelola website dan katalog layanan.</p>
 
         <label htmlFor="password" className="mb-2 block text-sm font-medium text-text-secondary">
           Password
@@ -32,11 +29,11 @@ export default function AdminLoginPage() {
           required
           autoFocus
           autoComplete="current-password"
-          className="mb-4 w-full rounded-[8px] border border-panel-border bg-background px-3 py-2.5 text-foreground outline-none transition-colors focus:border-primary"
+          className="w-full border px-3 py-2.5 outline-none"
         />
 
         {state.error && (
-          <p role="alert" className="mb-4 text-sm text-primary">
+          <p role="alert" className="admin-login-error">
             {state.error}
           </p>
         )}
@@ -44,7 +41,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-[8px] bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-primary-light disabled:opacity-60"
+          className="disabled:opacity-60"
         >
           {pending ? "Memeriksa…" : "Masuk"}
         </button>
