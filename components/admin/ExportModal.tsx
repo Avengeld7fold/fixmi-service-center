@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { Download, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { Download, FileSpreadsheet, ChevronDown } from "@/components/admin/AdminIcons";
 import { useAdminDialog } from "./useAdminDialog";
 
 export interface ExportCategoryOption {
@@ -26,9 +26,9 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
   const [scope, setScope] = useState<"all" | "category" | "service">("all");
   const [selectedCat, setSelectedCat] = useState<string>("");
   const [selectedSvc, setSelectedSvc] = useState<string>("");
-  const { dialogRef, initialFocusRef } = useAdminDialog<HTMLSelectElement>(isOpen, onClose);
+  const { dialogRef, initialFocusRef, present } = useAdminDialog<HTMLSelectElement>(isOpen, onClose);
 
-  if (!isOpen || typeof document === "undefined") return null;
+  if (!present || typeof document === "undefined") return null;
 
   const activeCat = categories.find((c) => c.Slug === selectedCat) || categories[0];
   const activeSvc = activeCat?.services.find((s) => s.Slug === selectedSvc) || activeCat?.services[0];
@@ -67,10 +67,11 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
   return createPortal(
     <div
       onClick={onClose}
-      className="admin-modal-backdrop"
+      className="admin-modal-backdrop" inert={!isOpen}
     >
       <div
         ref={dialogRef}
+        data-lenis-prevent
         role="dialog"
         aria-modal="true"
         aria-labelledby="export-sheet-title"
@@ -93,11 +94,11 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
         </div>
 
         {/* Sheet Form Rows (Ref 05, 29) */}
-        <div className="py-4 space-y-3.5 text-[13px]">
+        <div className="admin-sheet-form py-4 space-y-3.5 text-[13px]">
           {/* File Name Preview (Save As Field) */}
           <div>
             <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
-              Nama Berkas (Save As)
+              Nama berkas
             </label>
             <div className="h-8 px-3 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-mono text-[12px] flex items-center shadow-inner">
               {previewFilename}
@@ -106,12 +107,12 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
 
           {/* Scope Selector (Pop-Up Button Style) */}
           <div>
-            <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
-              Cakupan Data (Scope)
+            <label htmlFor="export-scope" className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+              Cakupan data
             </label>
             <div className="relative">
               <select
-                ref={initialFocusRef}
+                ref={initialFocusRef} id="export-scope"
                 value={scope}
                 onChange={(e) => setScope(e.target.value as "all" | "category" | "service")}
                 className="w-full h-8 pl-3 pr-8 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-[13px] appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
@@ -129,12 +130,12 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
           {/* Conditional Category Filter */}
           {scope !== "all" && (
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label htmlFor="export-category" className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
                 Kategori Perangkat
               </label>
               <div className="relative">
                 <select
-                  value={activeCat?.Slug || ""}
+                  id="export-category" value={activeCat?.Slug || ""}
                   onChange={(e) => { setSelectedCat(e.target.value); setSelectedSvc(""); }}
                   className="w-full h-8 pl-3 pr-8 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-[13px] appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                 >
@@ -154,12 +155,12 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
           {/* Conditional Service Filter */}
           {scope === "service" && activeCat && (
             <div>
-              <label className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label htmlFor="export-service" className="block text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">
                 Pilih Layanan
               </label>
               <div className="relative">
                 <select
-                  value={activeSvc?.Slug || ""}
+                  id="export-service" value={activeSvc?.Slug || ""}
                   onChange={(e) => setSelectedSvc(e.target.value)}
                   className="w-full h-8 pl-3 pr-8 rounded-[6px] border border-black/15 dark:border-white/15 bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 text-[13px] appearance-none focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                 >
@@ -182,7 +183,7 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
           <button
             type="button"
             onClick={onClose}
-            className="h-8 px-4 rounded-[6px] text-[13px] font-medium bg-black/5 dark:bg-white/10 text-neutral-800 dark:text-neutral-200 hover:bg-black/10 dark:hover:bg-white/15 transition-all active:scale-[0.97]"
+            className="admin-button h-8 px-4 rounded-[6px] text-[13px] font-medium bg-black/5 dark:bg-white/10 text-neutral-800 dark:text-neutral-200 hover:bg-black/10 dark:hover:bg-white/15 transition-all active:scale-[0.97]"
           >
             Batal
           </button>
@@ -190,7 +191,7 @@ export default function ExportModal({ isOpen, onClose, categories }: ExportModal
           <button
             type="button"
             onClick={handleDownload}
-            className="h-8 px-4 rounded-[6px] text-[13px] font-semibold bg-primary hover:bg-[#0066D6] text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-[0.97]"
+            className="admin-button admin-button--primary h-8 px-4 rounded-[6px] text-[13px] font-semibold bg-primary hover:bg-[#0066D6] text-white shadow-sm inline-flex items-center gap-1.5 transition-all active:scale-[0.97]"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Ekspor Sekarang</span>

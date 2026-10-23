@@ -10,6 +10,7 @@ export interface PromoImageItem {
   validUntil?: string;
   badge?: string;
   link?: string;
+  waNote?: string;
   createdAt?: string;
 }
 

@@ -3,7 +3,7 @@ import AdminSymbol from "./AdminSymbol";
 
 
 import { useState, useMemo, useRef } from "react";
-import { X, ArrowDown, ArrowUp } from "lucide-react";
+import { X, ArrowDown, ArrowUp, Plus } from "@/components/admin/AdminIcons";
 import { formatThousands, parseThousands, type DevicePrice, type ServiceType } from "@/lib/data";
 import ConfirmModal from "./ConfirmModal";
 
@@ -165,6 +165,8 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
   };
 
   const addRowBottom = () => {
+    const nextIndex = service.device_prices.length;
+    setModelSearch("");
     setRows([
       ...service.device_prices,
       {
@@ -172,9 +174,15 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
         prices: Object.fromEntries(service.variants.map((v) => [v.Key, null])),
       },
     ]);
+    requestAnimationFrame(() => {
+      tableRef.current
+        ?.querySelector<HTMLInputElement>(`[data-row="${nextIndex}"][data-col="0"]`)
+        ?.focus();
+    });
   };
 
   const addRowTop = () => {
+    setModelSearch("");
     setRows([
       {
         DeviceModel: "",
@@ -182,6 +190,9 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
       },
       ...service.device_prices,
     ]);
+    requestAnimationFrame(() => {
+      tableRef.current?.querySelector<HTMLInputElement>('[data-row="0"][data-col="0"]')?.focus();
+    });
   };
 
   return (
@@ -205,7 +216,7 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                 type="button"
                 onClick={() => setModelSearch("")}
                 aria-label="Reset pencarian"
-                className="absolute right-2 rounded-full p-0.5 text-text-muted hover:text-foreground transition-colors"
+                className="admin-button admin-button--plain absolute right-2 rounded-full p-0.5 text-text-muted hover:text-foreground transition-colors"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -229,27 +240,27 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                 type="button"
                 onClick={addRowTop}
                 title="Tambah model baru di baris paling atas"
-                className="inline-flex h-7 items-center gap-1 rounded-[7px] border border-panel-border bg-panel px-2.5 text-[11px] font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
+                className="admin-button inline-flex h-7 items-center gap-1 rounded-[7px] border border-panel-border bg-panel px-2.5 text-[11px] font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
               >
                 <ArrowUp className="h-3 w-3 text-primary" aria-hidden="true" />
-                <span>Tambah di Atas</span>
+                <span>Sisipkan model di atas</span>
               </button>
 
               <button
                 type="button"
                 onClick={addRowBottom}
                 title="Tambah model baru di baris paling bawah"
-                className="inline-flex h-7 items-center gap-1 rounded-[7px] border border-panel-border bg-panel px-2.5 text-[11px] font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
+                className="admin-button inline-flex h-7 items-center gap-1 rounded-[7px] border border-panel-border bg-panel px-2.5 text-[11px] font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
               >
                 <ArrowDown className="h-3 w-3 text-primary" aria-hidden="true" />
-                <span>Tambah di Bawah</span>
+                <span>Tambah model</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* ── macOS Finder Data Table (Ref 07, 31) ── */}
-        <div className="admin-price-scroller rounded-[10px] border border-panel-border bg-panel" role="region" aria-label="Tabel harga layanan" tabIndex={0}>
+        <div data-lenis-prevent className="admin-price-scroller rounded-[10px] border border-panel-border bg-panel" role="region" aria-label="Tabel harga layanan" tabIndex={0}>
           <table ref={tableRef} className="admin-price-table w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-panel-border bg-panel-raised/70">
@@ -277,7 +288,7 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                         onClick={bulkDelete}
                         aria-label={`Hapus ${selected.size} model terpilih`}
                         title={`Hapus ${selected.size} model terpilih`}
-                        className="inline-flex h-5 items-center gap-1 rounded-full bg-[#FF3B30] hover:bg-[#E0352B] px-2 text-[10px] font-semibold text-white transition-all active:scale-[0.97]  ml-auto"
+                        className="admin-button inline-flex h-5 items-center gap-1 rounded-full bg-[#FF3B30] hover:bg-[#E0352B] px-2 text-[10px] font-semibold text-white transition-all active:scale-[0.97]  ml-auto"
                       >
 <AdminSymbol name="trash" className="w-2.5 h-2.5 object-contain" />
                         <span>Hapus ({selected.size})</span>
@@ -309,13 +320,24 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                         <button
                           type="button"
                           onClick={() => setModelSearch("")}
-                          className="mt-2 text-xs font-medium text-primary hover:underline"
+                          className="admin-button admin-button--plain mt-2 text-xs font-medium text-primary hover:underline"
                         >
                           Tampilkan semua model
                         </button>
                       </div>
                     ) : (
-                      <p>Belum ada daftar model HP pada layanan ini. Gunakan tombol di atas untuk menambah model.</p>
+                      <div className="mx-auto grid max-w-sm justify-items-center gap-2">
+                        <p className="font-medium text-foreground">Belum ada model untuk layanan ini.</p>
+                        <p>Tambahkan model perangkat terlebih dahulu, lalu isi harga pada kolom pilihan suku cadang.</p>
+                        <button
+                          type="button"
+                          onClick={addRowBottom}
+                          className="admin-button admin-button--primary mt-1 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[8px] bg-primary px-4 text-sm font-semibold text-white transition-all hover:bg-[#0066D6] active:scale-[0.97]"
+                        >
+                          <Plus className="h-4 w-4" aria-hidden="true" />
+                          <span>Tambah model</span>
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -392,7 +414,7 @@ export default function PriceGrid({ service, categoryName, onChange }: PriceGrid
                           onClick={() => removeRow(originalIndex)}
                           aria-label={`Hapus model ${dp.DeviceModel || `baris ${originalIndex + 1}`}`}
                           title="Hapus baris ini"
-                          className="inline-flex h-6 w-6 items-center justify-center rounded-[5px] text-text-muted transition-colors hover:text-[#FF3B30] hover:bg-[#FF3B30]/10"
+                          className="admin-button admin-button--danger inline-flex h-6 w-6 items-center justify-center rounded-[5px] text-text-muted transition-colors hover:text-[#FF3B30] hover:bg-[#FF3B30]/10"
                         >
 <AdminSymbol name="trash" className="w-3 h-3 object-contain" />
                         </button>

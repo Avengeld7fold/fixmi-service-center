@@ -4,7 +4,7 @@ import AdminSymbol from "./AdminSymbol";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { RotateCcw, Clock } from "lucide-react";
+import { RotateCcw, Clock } from "@/components/admin/AdminIcons";
 import {
   createManualBackupAction,
   deleteBackupAction,
@@ -138,7 +138,7 @@ export default function BackupPanel({ backups }: BackupPanelProps) {
               onClick={handleCreateBackup}
               disabled={creating || busy !== ""}
               title="Buat cadangan data snapshot saat ini"
-              className="inline-flex h-7 items-center gap-1.5 rounded-[7px] border border-panel-border bg-panel px-2.5 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] disabled:opacity-50"
+              className="admin-button inline-flex h-7 items-center gap-1.5 rounded-[7px] border border-panel-border bg-panel px-2.5 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] disabled:opacity-50"
             >
 <AdminSymbol name="backup" className="w-3.5 h-3.5 object-contain" />
               <span>{creating ? "Mencadangkan…" : "Buat Cadangan Manual"}</span>
@@ -150,7 +150,7 @@ export default function BackupPanel({ backups }: BackupPanelProps) {
                 onClick={() => setModalAction({ type: "clear-all", totalCount: backups.length })}
                 disabled={busy !== "" || creating}
                 title="Kosongkan seluruh riwayat file cadangan"
-                className="inline-flex h-7 items-center gap-1 rounded-[7px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] px-2.5 text-xs font-medium transition-all active:scale-[0.97] disabled:opacity-50"
+                className="admin-button admin-button--danger inline-flex h-7 items-center gap-1 rounded-[7px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] px-2.5 text-xs font-medium transition-all active:scale-[0.97] disabled:opacity-50"
               >
 <AdminSymbol name="trash" className="w-3.5 h-3.5 object-contain" />
                 <span>Kosongkan Semua</span>
@@ -203,7 +203,7 @@ export default function BackupPanel({ backups }: BackupPanelProps) {
                       type="button"
                       onClick={() => setModalAction({ type: "restore", filename: b.name })}
                       disabled={busy !== ""}
-                      className="inline-flex h-6 items-center gap-1 rounded-[5px] bg-primary hover:bg-[#0066D6] px-2.5 text-[11px] font-semibold text-white transition-all active:scale-[0.97] disabled:opacity-50 "
+                      className="admin-button admin-button--primary inline-flex h-6 items-center gap-1 rounded-[5px] bg-primary hover:bg-[#0066D6] px-2.5 text-[11px] font-semibold text-white transition-all active:scale-[0.97] disabled:opacity-50 "
                     >
                       <RotateCcw className="h-3 w-3" aria-hidden="true" />
                       <span>Pulihkan</span>
@@ -213,7 +213,7 @@ export default function BackupPanel({ backups }: BackupPanelProps) {
                       onClick={() => setModalAction({ type: "delete", filename: b.name })}
                       disabled={busy !== ""}
                       title="Hapus permanen file backup ini"
-                      className="inline-flex h-6 items-center gap-1 rounded-[5px] border border-panel-border bg-panel px-2 text-[11px] font-medium text-text-muted transition-all hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] active:scale-[0.97] disabled:opacity-50"
+                      className="admin-button admin-button--danger inline-flex h-6 items-center gap-1 rounded-[5px] border border-panel-border bg-panel px-2 text-[11px] font-medium text-text-muted transition-all hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] active:scale-[0.97] disabled:opacity-50"
                     >
 <AdminSymbol name="trash" className="w-3 h-3 object-contain" />
                       <span>Hapus</span>
@@ -256,7 +256,7 @@ export default function BackupPanel({ backups }: BackupPanelProps) {
         }
         description={
           modalAction?.type === "restore"
-            ? "Data saat ini akan digantikan oleh cadangan ini. Snapshot data terkini akan dibuat otomatis sebelum pemulihan."
+            ? "Snapshot data terkini akan dibuat sebelum pemulihan. File cadangan yang dipilih tetap tersimpan jika Anda perlu mengulang pemulihan."
             : modalAction?.type === "delete"
             ? "File cadangan ini akan dihapus permanen dari server dan tidak dapat dipulihkan."
             : modalAction?.type === "clear-all"

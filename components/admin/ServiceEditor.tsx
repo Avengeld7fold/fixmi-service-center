@@ -3,7 +3,7 @@ import AdminSymbol from "./AdminSymbol";
 
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/admin/AdminIcons";
 import ServiceIcon from "@/components/pricelist/ServiceIcon";
 import PriceGrid from "./PriceGrid";
 import ConfirmModal from "./ConfirmModal";
@@ -149,7 +149,7 @@ export default function ServiceEditor({
         {/* Header service — macOS outline row style */}
         <div
           {...dragRowProps}
-          className={`flex items-center gap-3 px-4 py-3 transition-colors select-none cursor-grab active:cursor-grabbing touch-none ${
+          className={`admin-service-row flex items-center gap-3 px-4 py-3 transition-colors select-none cursor-grab active:cursor-grabbing touch-none ${
             isDragging ? "bg-panel-raised" : "hover:bg-panel-raised/50"
           }`}
         >
@@ -162,7 +162,7 @@ export default function ServiceEditor({
               setOpenIconPicker(true);
             }}
             title="Klik untuk mengganti ikon"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-panel-raised border border-panel-border transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] group/icon cursor-pointer"
+            className="admin-button admin-button--icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-panel-raised border border-panel-border transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] group/icon cursor-pointer"
           >
             <ServiceIcon name={service.icon} className="h-4 w-4 text-primary group-hover/icon:scale-105 transition-transform" />
           </button>
@@ -171,14 +171,9 @@ export default function ServiceEditor({
           <div className="flex-1 min-w-0 pointer-events-none">
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground truncate">
               <span className="truncate">{service.Name}</span>
-              {service.Name_en && (
-                <span className="hidden sm:inline-block shrink-0 rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 px-2 py-0.5 font-mono text-[10px] font-normal text-text-muted">
-                  EN: {service.Name_en}
-                </span>
-              )}
             </div>
             <span className="block text-[11px] text-text-muted truncate mt-0.5">
-              {service.Brand ? `${service.Brand} · ${service.Series} · ` : ""}
+              {service.Brand ? `${service.Brand}${service.Series ? ` · ${service.Series}` : ""} · ` : ""}
               {service.device_prices.length} model · {service.variants.length} pilihan kualitas
             </span>
           </div>
@@ -216,7 +211,7 @@ export default function ServiceEditor({
                   type="button"
                   onClick={() => setOpenIconPicker(true)}
                   title="Ganti ikon layanan"
-                  className="inline-flex h-7 items-center justify-center gap-1.5 rounded-[7px] border border-panel-border bg-panel px-2.5 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] shrink-0"
+                  className="admin-button inline-flex h-7 items-center justify-center gap-1.5 rounded-[7px] border border-panel-border bg-panel px-2.5 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] shrink-0"
                 >
                   <ServiceIcon name={service.icon} className="h-3 w-3 text-primary" />
                   <span>Ubah Ikon</span>
@@ -227,14 +222,6 @@ export default function ServiceEditor({
                   onChange={(e) => onChange({ ...service, Name: e.target.value, title: e.target.value })}
                   placeholder="Nama layanan (ID)"
                   aria-label="Nama layanan (ID)"
-                  className="flex-1 min-w-[150px] sm:min-w-[180px] h-7 rounded-[7px] border border-panel-border bg-background px-2.5 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
-                />
-
-                <input
-                  value={service.Name_en || ""}
-                  onChange={(e) => onChange({ ...service, Name_en: e.target.value || undefined })}
-                  placeholder="English Name (opsional)"
-                  aria-label="Nama layanan (EN)"
                   className="flex-1 min-w-[150px] sm:min-w-[180px] h-7 rounded-[7px] border border-panel-border bg-background px-2.5 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
                 />
 
@@ -263,7 +250,7 @@ export default function ServiceEditor({
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="sm:ml-auto inline-flex h-7 items-center justify-center gap-1.5 rounded-[7px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] px-2.5 text-xs font-medium transition-all active:scale-[0.97] shrink-0"
+                  className="admin-button admin-button--danger sm:ml-auto inline-flex h-7 items-center justify-center gap-1.5 rounded-[7px] border border-[#FF3B30]/25 bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] px-2.5 text-xs font-medium transition-all active:scale-[0.97] shrink-0"
                 >
 <AdminSymbol name="trash" className="w-3.5 h-3.5 object-contain" />
                   <span>Hapus Layanan</span>
@@ -273,9 +260,10 @@ export default function ServiceEditor({
 
             {/* Manajemen varian kualitas */}
             <div className="border-y border-panel-border px-4 py-3 bg-panel">
-              <p className="mb-2 text-[11px] font-medium text-text-muted">
-                Pilihan Kualitas Suku Cadang & Garansi
-              </p>
+              <div className="mb-2">
+                <p className="text-[11px] font-semibold text-foreground">Pilihan suku cadang & garansi</p>
+                <p className="mt-1 text-xs text-text-muted">Setiap pilihan menjadi kolom pada tabel. Isi harga per model di bagian tabel setelah ini.</p>
+              </div>
               <div className="space-y-2">
                 {service.variants.map((v) => (
                   <div key={v.Key} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -297,7 +285,7 @@ export default function ServiceEditor({
                         type="button"
                         onClick={() => removeVariant(v.Key)}
                         aria-label={`Hapus pilihan ${v.Label}`}
-                        className="flex h-7 w-7 items-center justify-center rounded-[6px] text-text-muted transition-all hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] active:scale-[0.97]"
+                        className="admin-button admin-button--danger admin-button--icon flex h-7 w-7 items-center justify-center rounded-[6px] text-text-muted transition-all hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] active:scale-[0.97]"
                       >
 <AdminSymbol name="trash" className="w-3.5 h-3.5 object-contain" />
                       </button>
@@ -324,10 +312,10 @@ export default function ServiceEditor({
                   <button
                     type="button"
                     onClick={addVariant}
-                    className="inline-flex h-7 items-center justify-center gap-1 rounded-[7px] bg-primary hover:bg-[#0066D6] px-3 text-xs font-semibold text-white  transition-all active:scale-[0.97] shrink-0"
+                    className="admin-button admin-button--primary inline-flex h-7 items-center justify-center gap-1 rounded-[7px] bg-primary hover:bg-[#0066D6] px-3 text-xs font-semibold text-white  transition-all active:scale-[0.97] shrink-0"
                   >
                     <Plus className="h-3 w-3" aria-hidden="true" />
-                    <span>Tambah Kualitas</span>
+                    <span>Tambah opsi</span>
                   </button>
                 </div>
               )}

@@ -4,7 +4,7 @@ import AdminSymbol from "./AdminSymbol";
 
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Check } from "lucide-react";
+import { X, Check } from "@/components/admin/AdminIcons";
 import { useAdminDialog } from "./useAdminDialog";
 import ServiceIcon, { REPAIR_ICON_OPTIONS, type RepairIconMeta } from "@/components/pricelist/ServiceIcon";
 
@@ -34,7 +34,7 @@ export default function IconPickerModal({
   const [search, setSearch] = useState("");
   const [wasOpen, setWasOpen] = useState(isOpen);
   if (wasOpen !== isOpen) { setWasOpen(isOpen); setSearch(""); }
-  const { dialogRef, initialFocusRef } = useAdminDialog<HTMLInputElement>(isOpen, onClose);
+  const { dialogRef, initialFocusRef, present } = useAdminDialog<HTMLInputElement>(isOpen, onClose);
 
   const isAndroid = isAndroidProp ?? (categorySlug === "android");
 
@@ -63,12 +63,12 @@ export default function IconPickerModal({
     return Array.from(map.entries());
   }, [filteredIcons]);
 
-  if (!isOpen || typeof document === "undefined") return null;
+  if (!present || typeof document === "undefined") return null;
 
   return createPortal(
     <div
       onClick={onClose}
-      className="admin-modal-backdrop"
+      className="admin-modal-backdrop" inert={!isOpen}
     >
       <div
         ref={dialogRef}
@@ -92,8 +92,8 @@ export default function IconPickerModal({
           </div>
           <button
             type="button"
-            onClick={onClose}
-            className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
+            onClick={onClose} aria-label="Tutup pemilih ikon"
+            className="admin-button admin-button--icon w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -115,7 +115,7 @@ export default function IconPickerModal({
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
+                className="admin-button absolute right-2.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -124,7 +124,13 @@ export default function IconPickerModal({
         </div>
 
         {/* List of Icons */}
-        <div className="flex-1 overflow-y-auto py-2 pr-1 space-y-4 max-h-[50vh]">
+        <div
+          data-lenis-prevent
+          role="region"
+          aria-label="Daftar ikon layanan"
+          tabIndex={0}
+          className="flex-1 overflow-y-auto overscroll-contain py-2 pr-1 space-y-4 max-h-[50vh]"
+        >
           {groupedCategories.length === 0 ? (
             <div className="py-12 text-center text-xs text-neutral-400">
               Tidak ada simbol yang cocok dengan &ldquo;{search}&rdquo;.
@@ -183,7 +189,7 @@ export default function IconPickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="h-7 px-3 rounded-[6px] font-medium bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-neutral-700 dark:text-neutral-300 transition-all active:scale-[0.97]"
+            className="admin-button h-7 px-3 rounded-[6px] font-medium bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-neutral-700 dark:text-neutral-300 transition-all active:scale-[0.97]"
           >
             Selesai
           </button>

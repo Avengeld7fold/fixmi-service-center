@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Lock } from "lucide-react";
+import { Lock } from "@/components/admin/AdminIcons";
 import { loginAction, type LoginState } from "../actions";
 import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 

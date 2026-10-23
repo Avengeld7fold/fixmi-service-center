@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-} from "lucide-react";
+} from "@/components/admin/AdminIcons";
 import { uploadGalleryAction, deleteGalleryAction } from "@/app/admin/actions";
 import type { GalleryImage } from "@/lib/gallery-server";
 import { ADMIN_IDENTITY } from "@/lib/admin/identity";
@@ -69,22 +69,26 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && ["image/jpeg", "image/png", "image/webp"].includes(file.type) && file.size <= 8 * 1024 * 1024) {
       setSelectedFile(file);
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
       setFeedback(null);
+    } else if (file) {
+      setFeedback({ kind: "error", text: "Pilih gambar JPG, PNG, atau WebP berukuran maksimum 8 MB." });
     }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
+    if (file && ["image/jpeg", "image/png", "image/webp"].includes(file.type) && file.size <= 8 * 1024 * 1024) {
       setSelectedFile(file);
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
       setFeedback(null);
+    } else if (file) {
+      setFeedback({ kind: "error", text: "Pilih gambar JPG, PNG, atau WebP berukuran maksimum 8 MB." });
     }
   };
 
@@ -166,7 +170,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
           <button
             type="button"
             onClick={() => setFeedback(null)}
-            className="p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
+            className="admin-button admin-button--plain p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -206,7 +210,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -283,7 +287,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
+                  className="admin-button admin-button--primary inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>{isSubmitting ? "Mengunggah Foto…" : "Publikasikan ke Galeri"}</span>
@@ -389,7 +393,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                         if (idx !== -1) setLightboxIndex(idx);
                       }}
                       title="Pratinjau foto besar"
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white  transition-all hover:bg-white/50 active:scale-[0.97]"
+                      className="admin-button admin-button--icon flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white  transition-all hover:bg-white/50 active:scale-[0.97]"
                     >
 <AdminSymbol name="eye" className="w-3.5 h-3.5 object-contain" />
                     </button>
@@ -397,7 +401,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
                       type="button"
                       onClick={() => setDeleteTarget(img)}
                       title="Hapus foto galeri"
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white  transition-all hover:bg-[#FF3B30] active:scale-[0.97]"
+                      className="admin-button admin-button--icon flex h-7 w-7 items-center justify-center rounded-full bg-white/30 text-white  transition-all hover:bg-[#FF3B30] active:scale-[0.97]"
                     >
 <AdminSymbol name="trash" className="w-3.5 h-3.5 object-contain" />
                     </button>
@@ -450,7 +454,7 @@ export default function GalleryEditor({ initialImages }: { initialImages: Galler
               type="button"
               onClick={closeLightbox}
               aria-label="Tutup pratinjau"
-              className="absolute -top-11 right-0 flex h-9 w-9 items-center justify-center text-white/80 hover:text-white rounded-full bg-white/10 transition-colors"
+              className="admin-button admin-button--icon absolute -top-11 right-0 flex h-9 w-9 items-center justify-center text-white/80 hover:text-white rounded-full bg-white/10 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>

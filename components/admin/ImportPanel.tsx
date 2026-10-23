@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   RefreshCw,
   CopyCheck,
-} from "lucide-react";
+} from "@/components/admin/AdminIcons";
 import MacDisclosureButton from "./MacDisclosureButton";
 import {
   importApplyAction,
@@ -192,7 +192,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
           <button
             type="button"
             onClick={() => setAppliedMessage("")}
-            className="p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
+            className="admin-button admin-button--plain p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -206,7 +206,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-expanded={isOpen}
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left outline-none transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+          className="admin-button flex w-full items-center justify-between gap-3 px-4 py-3 text-left outline-none transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
         >
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-black/5 dark:bg-white/10 text-primary">
@@ -432,7 +432,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                       if (fileRef.current) fileRef.current.value = "";
                     }}
                     title="Hapus pilihan file"
-                    className="absolute top-2.5 right-2.5 rounded-full p-1 text-text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10"
+                    className="admin-button admin-button--plain absolute top-2.5 right-2.5 rounded-full p-1 text-text-muted hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -446,7 +446,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                     type="button"
                     onClick={apply}
                     disabled={applying}
-                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] bg-emerald-600 hover:bg-emerald-500 px-5 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
+                    className="admin-button inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] bg-emerald-600 hover:bg-emerald-500 px-5 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
                   >
                     <Check className="h-3.5 w-3.5 stroke-[2.5]" aria-hidden="true" />
                     <span>{applying ? "Mengimpor Data…" : "Import Sekarang"}</span>
@@ -456,7 +456,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                     type="button"
                     onClick={check}
                     disabled={checking || targetIncomplete || !selectedFile}
-                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white transition-all active:scale-[0.97] disabled:opacity-50 "
+                    className="admin-button admin-button--primary inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white transition-all active:scale-[0.97] disabled:opacity-50 "
                   >
                     {checking ? (
                       <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -473,7 +473,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                     type="button"
                     onClick={check}
                     disabled={checking || applying}
-                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] border border-panel-border bg-panel px-3.5 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
+                    className="admin-button inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] border border-panel-border bg-panel px-3.5 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97]"
                   >
                     <RefreshCw className={`h-3 w-3 ${checking ? "animate-spin" : ""}`} />
                     <span>Tinjau Ulang</span>
@@ -528,7 +528,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                               <button
                                 type="button"
                                 onClick={selectAllCats}
-                                className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+                                className="admin-button admin-button--plain text-xs font-semibold text-primary hover:underline cursor-pointer"
                               >
                                 Pilih Semua
                               </button>
@@ -536,7 +536,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                               <button
                                 type="button"
                                 onClick={deselectAllCats}
-                                className="text-xs font-medium text-text-muted hover:text-foreground hover:underline cursor-pointer"
+                                className="admin-button admin-button--plain text-xs font-medium text-text-muted hover:text-foreground hover:underline cursor-pointer"
                               >
                                 Batal Semua
                               </button>
@@ -630,7 +630,7 @@ export default function ImportPanel({ categories }: { categories: ImportDestinat
                       <p className="mb-1.5 text-[11px] font-medium text-[#FF3B30]">
                         Terdapat {preview.errors.length} baris bermasalah — perbaiki file lalu unggah ulang
                       </p>
-                      <ul className="max-h-48 space-y-0.5 overflow-y-auto text-xs text-text-muted">
+                      <ul data-lenis-prevent className="max-h-48 space-y-0.5 overflow-y-auto overscroll-contain text-xs text-text-muted">
                         {preview.errors.map((e, i) => (
                           <li key={i}>
                             <span className="font-mono text-[#FF3B30] font-medium">Baris {e.row}:</span> {e.message}

@@ -71,6 +71,7 @@ const nextConfig: NextConfig = {
     cpus: 1,
     staticGenerationMaxConcurrency: 1,
     optimizePackageImports: ["lucide-react"],
+    serverActions: { bodySizeLimit: "10mb" },
   },
 
   images: {

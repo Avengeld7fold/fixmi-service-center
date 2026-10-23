@@ -220,12 +220,12 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
             onClick={(e) => e.stopPropagation()}
             className="relative flex flex-col items-center max-w-5xl max-h-[90vh] w-full select-none"
           >
-            <div className="relative flex items-center justify-center max-h-[78vh] w-auto max-w-full overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
+            <div className={`relative flex items-center justify-center ${selectedPromo.waNote ? "max-h-[62vh]" : "max-h-[78vh]"} w-auto max-w-full overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={selectedPromo.Image}
                 alt={selectedPromo.altText || selectedPromo.Title || (isEn ? "FIXMI Promo Banner" : "Banner Promo FIXMI")}
-                className="max-h-[78vh] max-w-full object-contain block"
+                className={`${selectedPromo.waNote ? "max-h-[62vh]" : "max-h-[78vh]"} max-w-full object-contain block`}
               />
             </div>
 
@@ -242,6 +242,19 @@ export default function PromoViewer({ promos }: PromoViewerProps) {
                 </span>
               )}
             </div>
+            {selectedPromo.waNote && (
+              <a
+                href={whatsappUrl(selectedPromo.waNote)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition-colors hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                {isEn ? "Ask about this offer on WhatsApp" : "Tanyakan promo ini via WhatsApp"}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </a>
+            )}
           </div>
         </div>
       )}

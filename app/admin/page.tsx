@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArchiveRestore, ChevronRight, Images, ReceiptText, ShieldCheck, Sparkles } from "lucide-react";
+import { ArchiveRestore, ChevronRight, Images, ReceiptText, ShieldCheck, Sparkles } from "@/components/admin/AdminIcons";
 import { getPricelist } from "@/lib/pricelist-server";
 import { getPromoItems } from "@/lib/promo-server";
 import { getGalleryImages } from "@/lib/gallery-server";

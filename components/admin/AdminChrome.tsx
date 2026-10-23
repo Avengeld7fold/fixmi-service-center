@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Images, LayoutDashboard, Menu, ReceiptText, Sparkles, X } from "lucide-react";
+import { Images, LayoutDashboard, Menu, ReceiptText, Sparkles, X } from "@/components/admin/AdminIcons";
 import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 import AdminBrandLogo from "./AdminBrandLogo";
 

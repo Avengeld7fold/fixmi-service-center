@@ -24,6 +24,8 @@ import type { Category } from "@/lib/data";
 import { addPromoItem, deletePromoItem, type PromoImageItem } from "@/lib/promo-server";
 import { addGalleryImage, deleteGalleryImage, type GalleryImage } from "@/lib/gallery-server";
 import { ADMIN_IDENTITY } from "@/lib/admin/identity";
+import { randomUUID } from "node:crypto";
+import { readAdminImageUpload } from "@/lib/admin/upload-validation";
 
 // ============================================================
 // Auth
@@ -296,25 +298,26 @@ export async function refreshBackupsAction() {
 
 export async function uploadPromoAction(formData: FormData): Promise<ActionResult & { promo?: PromoImageItem }> {
   if (!(await requireSession())) return { ok: false, error: "Sesi berakhir — silakan login ulang." };
+  let uploadedPath: string | null = null;
+  let metadataSaved = false;
   try {
     const title = String(formData.get("title") ?? "").trim();
     const badge = String(formData.get("badge") ?? "").trim();
     const validUntil = String(formData.get("validUntil") ?? "").trim();
     const link = String(formData.get("link") ?? "").trim();
-    const file = formData.get("image") as File | null;
+    const file = formData.get("image");
+    const waNote = String(formData.get("waNote") ?? "").trim();
     const imageUrl = String(formData.get("imageUrl") ?? "").trim();
-
     let finalImagePath = imageUrl;
 
-    if (file && file.size > 0) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase();
-      const filename = `promo-${Date.now()}-${sanitizedName}`;
+    if (file instanceof File) {
+      const { buffer, extension } = await readAdminImageUpload(file);
+      const filename = `promo-${randomUUID()}.${extension}`;
       const uploadDir = path.join(process.cwd(), "public", "images", "promo");
       await fs.mkdir(uploadDir, { recursive: true });
       const targetPath = path.join(uploadDir, filename);
-      await fs.writeFile(targetPath, buffer);
+      await fs.writeFile(targetPath, buffer, { flag: "wx" });
+      uploadedPath = targetPath;
       finalImagePath = `/images/promo/${filename}`;
     }
 
@@ -329,13 +332,16 @@ export async function uploadPromoAction(formData: FormData): Promise<ActionResul
       badge: badge || undefined,
       validUntil: validUntil || undefined,
       link: link || undefined,
+      waNote: waNote || undefined,
     });
+    metadataSaved = true;
 
     revalidatePath("/promo");
     revalidatePath("/en/promo");
     revalidatePath("/admin/promo");
     return { ok: true, message: "Banner promo berhasil ditambahkan.", promo: created };
   } catch (e) {
+    if (uploadedPath && !metadataSaved) await fs.unlink(uploadedPath).catch(() => {});
     return { ok: false, error: e instanceof Error ? e.message : "Gagal menambahkan promo." };
   }
 }
@@ -360,24 +366,25 @@ export async function deletePromoAction(id: string): Promise<ActionResult> {
 
 export async function uploadGalleryAction(formData: FormData): Promise<ActionResult & { galleryItem?: GalleryImage }> {
   if (!(await requireSession())) return { ok: false, error: "Sesi berakhir — silakan login ulang." };
+  let uploadedPath: string | null = null;
+  let metadataSaved = false;
   try {
     const title = String(formData.get("title") ?? "").trim();
     const category = String(formData.get("category") ?? "").trim() || "iPhone";
     const altText = String(formData.get("altText") ?? "").trim();
-    const file = formData.get("image") as File | null;
+    const file = formData.get("image");
     const imageUrl = String(formData.get("imageUrl") ?? "").trim();
 
     let finalImagePath = imageUrl;
 
-    if (file && file.size > 0) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase();
-      const filename = `gallery-${Date.now()}-${sanitizedName}`;
+    if (file instanceof File) {
+      const { buffer, extension } = await readAdminImageUpload(file);
+      const filename = `gallery-${randomUUID()}.${extension}`;
       const uploadDir = path.join(process.cwd(), "public", "images", "gallery");
       await fs.mkdir(uploadDir, { recursive: true });
       const targetPath = path.join(uploadDir, filename);
-      await fs.writeFile(targetPath, buffer);
+      await fs.writeFile(targetPath, buffer, { flag: "wx" });
+      uploadedPath = targetPath;
       finalImagePath = `/images/gallery/${filename}`;
     }
 
@@ -391,12 +398,14 @@ export async function uploadGalleryAction(formData: FormData): Promise<ActionRes
       altText: altText || title || `Dokumentasi servis ${category} ${ADMIN_IDENTITY.serviceCenterName}`,
       category,
     });
+    metadataSaved = true;
 
     revalidatePath("/gallery");
     revalidatePath("/en/gallery");
     revalidatePath("/admin/gallery");
     return { ok: true, message: "Foto dokumentasi servis berhasil ditambahkan ke galeri.", galleryItem: created };
   } catch (e) {
+    if (uploadedPath && !metadataSaved) await fs.unlink(uploadedPath).catch(() => {});
     return { ok: false, error: e instanceof Error ? e.message : "Gagal mengunggah foto galeri." };
   }
 }

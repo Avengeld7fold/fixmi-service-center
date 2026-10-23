@@ -14,7 +14,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Plus,
-} from "lucide-react";
+} from "@/components/admin/AdminIcons";
 import { uploadPromoAction, deletePromoAction } from "@/app/admin/actions";
 import { ADMIN_IDENTITY } from "@/lib/admin/identity";
 import ConfirmModal from "./ConfirmModal";
@@ -26,6 +26,7 @@ export interface PromoItem {
   badge?: string;
   validUntil?: string;
   link?: string;
+  waNote?: string;
   altText?: string;
   createdAt?: string;
 }
@@ -58,8 +59,8 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        setFeedback({ kind: "err", text: "Format file harus berupa gambar (JPG, PNG, WebP)." });
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 8 * 1024 * 1024) {
+        setFeedback({ kind: "err", text: "Pilih gambar JPG, PNG, atau WebP berukuran maksimum 8 MB." });
         return;
       }
       setSelectedFile(file);
@@ -71,10 +72,12 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
+      if (file && ["image/jpeg", "image/png", "image/webp"].includes(file.type) && file.size <= 8 * 1024 * 1024) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       setFeedback(null);
+      } else {
+        setFeedback({ kind: "err", text: "Pilih gambar JPG, PNG, atau WebP berukuran maksimum 8 MB." });
     }
   };
 
@@ -100,7 +103,7 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
 
     try {
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      formData.append("image", selectedFile);
       if (title.trim()) formData.append("title", title.trim());
       if (badge.trim()) formData.append("badge", badge.trim());
       if (validUntil.trim()) formData.append("validUntil", validUntil.trim());
@@ -164,7 +167,7 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
           <button
             type="button"
             onClick={() => setFeedback(null)}
-            className="p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
+            className="admin-button admin-button--plain p-1 rounded-full text-text-muted hover:text-foreground transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -204,7 +207,7 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -232,7 +235,7 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
                         Klik atau Drag & Drop Gambar Banner
                       </p>
                       <p className="text-[10px] text-text-muted mt-0.5">
-                        Format JPG, PNG, atau WebP (Landscape 16:9 atau poster 4:5)
+                        JPG, PNG, atau WebP · maksimum 8 MB (disarankan landscape 16:9 atau poster 4:5)
                       </p>
                     </div>
                   </div>
@@ -300,7 +303,7 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
+                  className="admin-button admin-button--primary inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] disabled:opacity-50"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>{isSubmitting ? "Mengunggah Promo…" : "Publikasikan Promo"}</span>
@@ -376,7 +379,7 @@ export default function PromoEditor({ initialPromos }: PromoEditorProps) {
                       type="button"
                       onClick={() => setDeleteTarget(promo)}
                       title="Hapus promo ini"
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white  transition-all hover:bg-[#FF3B30] active:scale-[0.97]"
+                      className="admin-button admin-button--icon flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white  transition-all hover:bg-[#FF3B30] active:scale-[0.97]"
                     >
 <AdminSymbol name="trash" className="h-3.5 w-3.5 object-contain" />
                     </button>

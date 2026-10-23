@@ -157,8 +157,10 @@ export function validateAndStrip(input: unknown): StoredCategory[] {
 // Backup & tulis atomik
 // ============================================================
 
+let lastBackupTimestamp = 0;
 function timestamp(): string {
-  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  lastBackupTimestamp = Math.max(Date.now(), lastBackupTimestamp + 1);
+  return new Date(lastBackupTimestamp).toISOString().replace(/[:.]/g, "-").slice(0, 23);
 }
 
 /**
@@ -216,7 +218,7 @@ async function backupCurrent(reason?: string): Promise<string> {
     await cleanExpiredBackups();
     return filename;
   } catch {
-    return ""; // file utama belum ada atau penyimpanan server read-only
+    fail("Gagal membuat snapshot sebelum perubahan. Data Pricelist tidak diubah.");
   }
 }
 
@@ -233,25 +235,33 @@ async function checkIfDeletionOccurred(storedNew: StoredCategory[]): Promise<Del
 
     // Kumpulkan semua service slug saat ini: "categorySlug::serviceSlug" -> info
     const currentServices = new Map<string, { serviceName: string; catName: string }>();
-    let currentModelCount = 0;
+    const currentModels = new Map<string, Set<string>>();
     for (const cat of current) {
       for (const svc of cat.service_types || []) {
-        currentServices.set(`${cat.Slug}::${svc.Slug}`, {
+        const serviceKey = `${cat.Slug}::${svc.Slug}`;
+        currentServices.set(serviceKey, {
           serviceName: svc.Name || svc.Slug,
           catName: cat.Name || cat.Slug,
         });
-        currentModelCount += (svc.device_prices || []).length;
+        currentModels.set(serviceKey, new Set((svc.device_prices || []).map((dp) => dp.DeviceModel.trim().toLowerCase())));
       }
     }
 
     // Kumpulkan semua service slug di data baru
     const newServices = new Set<string>();
-    let newModelCount = 0;
+    const newModels = new Map<string, Set<string>>();
     for (const cat of storedNew) {
       for (const svc of cat.service_types || []) {
-        newServices.add(`${cat.Slug}::${svc.Slug}`);
-        newModelCount += (svc.device_prices || []).length;
+        const serviceKey = `${cat.Slug}::${svc.Slug}`;
+        newServices.add(serviceKey);
+        newModels.set(serviceKey, new Set((svc.device_prices || []).map((dp) => dp.DeviceModel.trim().toLowerCase())));
       }
+    }
+
+    const newCategories = new Set(storedNew.map((cat) => cat.Slug));
+    const deletedCategories = current.filter((cat) => !newCategories.has(cat.Slug));
+    if (deletedCategories.length > 0) {
+      return { hasDeletion: true, reason: `hapus-kategori-${slugify(deletedCategories[0].Name) || "kategori"}` };
     }
 
     // Cari layanan yang dihapus
@@ -278,12 +288,16 @@ async function checkIfDeletionOccurred(storedNew: StoredCategory[]): Promise<Del
       };
     }
 
-    // Jika jumlah baris model berkurang (ada model yang dihapus)
-    if (newModelCount < currentModelCount) {
-      const diff = currentModelCount - newModelCount;
+    // Compare identities, not row counts: replacing a model still removes data.
+    let deletedModelCount = 0;
+    for (const [serviceKey, models] of currentModels) {
+      const nextModels = newModels.get(serviceKey) ?? new Set<string>();
+      for (const model of models) if (!nextModels.has(model)) deletedModelCount++;
+    }
+    if (deletedModelCount > 0) {
       return {
         hasDeletion: true,
-        reason: `hapus-${diff}-model-perangkat`,
+        reason: `hapus-${deletedModelCount}-model-perangkat`,
       };
     }
 
@@ -296,14 +310,14 @@ async function checkIfDeletionOccurred(storedNew: StoredCategory[]): Promise<Del
 /**
  * Validasi → deteksi penghapusan → tulis atomik (tmp + rename) → revalidate.
  * Satu-satunya pintu penulisan pricelist.json.
- * Cadangan data otomatis dibuat jika mendeteksi penghapusan layanan atau model.
+ * Cadangan data otomatis dibuat jika kategori, layanan, atau identitas model dihapus.
  */
-export async function writePricelist(input: unknown): Promise<void> {
+export async function writePricelist(input: unknown, options: { backupDeletions?: boolean } = {}): Promise<void> {
   const stored = validateAndStrip(input);
 
   // Otomatis buat cadangan HANYA jika ada layanan/model yang dihapus
   const checkResult = await checkIfDeletionOccurred(stored);
-  if (checkResult.hasDeletion) {
+  if (checkResult.hasDeletion && options.backupDeletions !== false) {
     await backupCurrent(checkResult.reason);
   }
 
@@ -436,10 +450,15 @@ export async function restoreBackup(name: string): Promise<void> {
   }
 
   const parsed = JSON.parse(await readFile(source, "utf8"));
-  await writePricelist(parsed); // validasi + tulis + revalidate
+  try {
+    await stat(PRICELIST_PATH);
+    await backupCurrent("sebelum-pemulihan");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
 
-  // Setelah dipulihkan, hapus file snapshot ini agar tidak tertinggal di riwayat
-  await unlink(source).catch(() => {});
+  // Snapshot terkini wajib berhasil sebelum restore; sumber backup tetap tersedia untuk retry/undo.
+  await writePricelist(parsed, { backupDeletions: false });
 }
 
 /**

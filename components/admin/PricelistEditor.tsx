@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/admin/AdminIcons";
 import { savePricelistAction } from "@/app/admin/actions";
 import ServiceEditor from "./ServiceEditor";
 import ConfirmModal from "./ConfirmModal";
@@ -243,7 +243,6 @@ export default function PricelistEditor({
 
   // Form tambah layanan service baru
   const [newName, setNewName] = useState("");
-  const [newNameEn, setNewNameEn] = useState("");
   const [newBrand, setNewBrand] = useState("");
   const [newSeries, setNewSeries] = useState("");
   const [newIcon, setNewIcon] = useState("smartphone");
@@ -261,13 +260,11 @@ export default function PricelistEditor({
           // Restore the draft only after the browser has mounted.
           // eslint-disable-next-line react-hooks/set-state-in-effect
           if (parsed.name) setNewName(parsed.name);
-          if (parsed.nameEn) setNewNameEn(parsed.nameEn);
           if (parsed.brand) setNewBrand(parsed.brand);
           if (parsed.series) setNewSeries(parsed.series);
           if (parsed.icon) setNewIcon(parsed.icon);
         } else {
           setNewName("");
-          setNewNameEn("");
           setNewBrand("");
           setNewSeries("");
           setNewIcon("smartphone");
@@ -280,12 +277,11 @@ export default function PricelistEditor({
   useEffect(() => {
     if (typeof window !== "undefined" && activeSlug) {
       try {
-        if (newName || newNameEn || newBrand || newSeries) {
+        if (newName || newBrand || newSeries) {
           sessionStorage.setItem(
             `fixmi_admin_draft_add_${activeSlug}`,
             JSON.stringify({
               name: newName,
-              nameEn: newNameEn,
               brand: newBrand,
               series: newSeries,
               icon: newIcon,
@@ -296,7 +292,7 @@ export default function PricelistEditor({
         }
       } catch {}
     }
-  }, [newName, newNameEn, newBrand, newSeries, newIcon, activeSlug]);
+  }, [newName, newBrand, newSeries, newIcon, activeSlug]);
 
   // Modal pemilih icon untuk level Merk Android
   const [brandIconModal, setBrandIconModal] = useState<{
@@ -720,7 +716,6 @@ export default function PricelistEditor({
 
   const addService = () => {
     const name = newName.trim();
-    const nameEn = newNameEn.trim();
     const brand = brandedMode ? newBrand.trim() : "";
     const series = brandedMode ? newSeries.trim() : "";
     if (brandedMode && !brand)
@@ -737,13 +732,12 @@ export default function PricelistEditor({
 
     const svc: ServiceType = {
       Name: name,
-      ...(nameEn ? { Name_en: nameEn } : {}),
       Slug: slug,
       ...(brand ? { Brand: brand } : {}),
       ...(series ? { Series: series } : {}),
       icon: newIcon,
       variants: [{ Key: "harga", Label: "HARGA", Label_en: "PRICE", Note: "" }],
-      device_prices: [],
+      device_prices: [{ DeviceModel: "", prices: { harga: null } }],
       title: name,
     };
 
@@ -771,8 +765,15 @@ export default function PricelistEditor({
     });
     setOpenBrand(brand || null);
     setOpenSeries(brand ? `${brand}::${series || "Semua Model"}` : null);
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(`[data-service-slug="${slug}"]`)
+        ?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+          block: "center",
+        });
+    });
     setNewName("");
-    setNewNameEn("");
     setNewBrand("");
     setNewSeries("");
     setNewIcon("smartphone");
@@ -861,14 +862,14 @@ export default function PricelistEditor({
         {/* ── Quick Expand Controls ── */}
         {activeCategory.service_types.length > 0 && (
           <div className="flex items-center justify-between text-xs text-text-muted">
-            <span className="font-mono uppercase tracking-wider text-[0.6875rem]">
+            <span className="admin-section-label">
               Daftar Layanan Service {activeCategory.Name} ({activeCategory.service_types.length})
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={expandAllSvcs}
-                className="hover:text-primary transition-colors underline text-xs"
+                className="admin-button admin-button--plain hover:text-primary transition-colors underline text-xs"
               >
                 Buka Semua
               </button>
@@ -876,7 +877,7 @@ export default function PricelistEditor({
               <button
                 type="button"
                 onClick={collapseAllSvcs}
-                className="hover:text-primary transition-colors underline text-xs"
+                className="admin-button admin-button--plain hover:text-primary transition-colors underline text-xs"
               >
                 Tutup Semua
               </button>
@@ -884,84 +885,99 @@ export default function PricelistEditor({
           </div>
         )}
 
-        {/* ── macOS Form Box Tambah Layanan Baru (Ref 06, 29) ── */}
-        <div className="rounded-[12px] border border-panel-border bg-panel p-4 ">
-          <p className="mb-2.5 text-[11px] font-medium text-text-muted">
-            Tambah Layanan di {activeCategory.Name}
-          </p>
-          <div className="space-y-2.5">
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-              {/* Tombol Pilih Ikon untuk Layanan Baru */}
-              <button
-                type="button"
-                onClick={() => setOpenAddIconPicker(true)}
-                title="Pilih ikon layanan"
-                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] border border-panel-border bg-panel-raised px-3 text-xs font-medium text-foreground transition-all hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.97] shrink-0"
-              >
-                <span className="flex h-4 w-4 items-center justify-center text-primary">
-                  <ServiceIcon name={newIcon} className="h-3.5 w-3.5" />
-                </span>
-                <span>Ikon</span>
-              </button>
-
-              {brandedMode && (
-                <>
+        {/* ── macOS grouped form: layanan baru ── */}
+        <section className="admin-add-service rounded-[12px] border border-panel-border bg-panel p-4">
+          <div className="mb-3">
+            <h2 className="text-sm font-semibold text-foreground">Tambah layanan</h2>
+            <p id="admin-add-service-help" className="mt-1 text-xs text-text-muted">
+              {brandedMode
+                ? "Tentukan merk, seri bila perlu, lalu nama perbaikannya."
+                : `Buat jenis perbaikan baru untuk ${activeCategory.Name}.`}{" "}
+              Satu baris model langsung disiapkan agar Anda bisa mengisi harga.
+            </p>
+          </div>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              addService();
+            }}
+            className={`grid grid-cols-1 gap-3 sm:grid-cols-2 xl:items-end ${
+              brandedMode
+                ? "xl:grid-cols-[minmax(130px,1fr)_minmax(140px,1fr)_minmax(170px,1.2fr)_auto_auto]"
+                : "xl:grid-cols-[minmax(180px,1fr)_auto_auto]"
+            }`}
+          >
+            {brandedMode && (
+              <>
+                <label className="admin-add-service-field grid gap-1.5 text-xs font-medium text-foreground">
+                  Merk <span className="text-text-muted">(wajib)</span>
                   <input
                     value={newBrand}
                     onChange={(e) => {
                       setNewBrand(e.target.value);
                       setAddError("");
                     }}
-                    placeholder="Merk (wajib), mis. Samsung"
+                    placeholder="Mis. Samsung atau Xiaomi"
                     aria-label="Merk layanan baru"
-                    className="flex-1 min-w-[130px] sm:min-w-[160px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
+                    aria-required="true"
+                    aria-describedby={addError ? "admin-add-service-error" : undefined}
+                    className="min-h-11 w-full rounded-[8px] border border-panel-border bg-background px-3 text-sm font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 sm:min-h-9"
                   />
+                </label>
+                <label className="admin-add-service-field grid gap-1.5 text-xs font-medium text-foreground">
+                  Seri <span className="text-text-muted">(opsional)</span>
                   <input
                     value={newSeries}
                     onChange={(e) => {
                       setNewSeries(e.target.value);
                       setAddError("");
                     }}
-                    placeholder="Series (opsional), mis. Galaxy A Series"
-                    aria-label="Series layanan baru"
-                    className="flex-1 min-w-[140px] sm:min-w-[180px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
+                    placeholder="Mis. Galaxy A Series"
+                    aria-label="Seri layanan baru"
+                    className="min-h-11 w-full rounded-[8px] border border-panel-border bg-background px-3 text-sm font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 sm:min-h-9"
                   />
-                </>
-              )}
+                </label>
+              </>
+            )}
+            <label className="admin-add-service-field grid gap-1.5 text-xs font-medium text-foreground">
+              Nama layanan
               <input
                 value={newName}
                 onChange={(e) => handleNameChange(e.target.value)}
-                placeholder={
-                  brandedMode
-                    ? "Nama perbaikan (ID), mis. Service LCD"
-                    : "Nama layanan (ID), mis. Ganti LCD / Baterai"
-                }
-                aria-label="Nama perbaikan layanan baru (Bahasa Indonesia)"
-                className="flex-1 min-w-[150px] sm:min-w-[180px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
+                placeholder="Mis. Ganti LCD atau Baterai"
+                aria-label="Nama layanan baru"
+                aria-required="true"
+                aria-describedby={addError ? "admin-add-service-error" : undefined}
+                className="min-h-11 w-full rounded-[8px] border border-panel-border bg-background px-3 text-sm font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30 sm:min-h-9"
               />
-              <input
-                value={newNameEn}
-                onChange={(e) => setNewNameEn(e.target.value)}
-                placeholder="English Name (opsional), mis. Screen Replacement"
-                aria-label="Nama perbaikan layanan baru (English - opsional)"
-                className="flex-1 min-w-[150px] sm:min-w-[180px] h-8 rounded-[8px] border border-panel-border bg-background px-3 text-xs font-medium text-foreground placeholder:text-text-muted outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/30"
-              />
+            </label>
+            <div className="grid gap-1.5 text-xs font-medium text-foreground">
+              <span>Ikon layanan</span>
               <button
                 type="button"
-                onClick={addService}
-                className="inline-flex h-8 items-center justify-center gap-1.5 rounded-[8px] bg-primary hover:bg-[#0066D6] px-4 text-xs font-semibold text-white  transition-all active:scale-[0.97] shrink-0"
+                onClick={() => setOpenAddIconPicker(true)}
+                title="Pilih ikon layanan"
+                aria-label="Pilih ikon layanan"
+                className="admin-button inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[8px] border border-panel-border bg-panel-raised px-3 text-xs font-medium text-foreground transition-all hover:bg-black/5 active:scale-[0.97] dark:hover:bg-white/10 sm:min-h-9"
               >
-                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Tambah Layanan</span>
+                <ServiceIcon name={newIcon} className="h-4 w-4 text-primary" />
+                <span>Pilih ikon</span>
               </button>
             </div>
+            <button
+              type="submit"
+              className="admin-button admin-button--primary inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[8px] bg-primary px-4 text-sm font-semibold text-white transition-all hover:bg-[#0066D6] active:scale-[0.97] sm:col-span-2 xl:col-span-1 sm:min-h-9"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              <span>Buat layanan</span>
+            </button>
             {addError && (
-              <p role="alert" className="text-xs text-[#FF3B30] font-medium">
+              <p id="admin-add-service-error" role="alert" className="text-xs font-medium text-[#FF3B30] sm:col-span-2 xl:col-span-full">
                 {addError}
               </p>
             )}
-          </div>
-        </div>
+          </form>
+        </section>
 
         {/* Modal Pemilih Ikon untuk Layanan Baru */}
         <IconPickerModal
@@ -977,7 +993,7 @@ export default function PricelistEditor({
         />
 
         {/* ── Daftar Layanan Aktif ── */}
-        <div className="space-y-6 min-h-[500px]">
+        <div className="admin-service-list">
           {(() => {
             const list = activeCategory.service_types;
             const branded = list.filter((s) => s.Brand);
@@ -1130,7 +1146,7 @@ export default function PricelistEditor({
                                       setOpenSeries((prev) => (prev === seriesKey ? null : seriesKey));
                                     }}
                                     aria-expanded={seriesOpen}
-                                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left outline-none transition-colors hover:bg-panel-raised focus-visible:bg-panel-raised"
+                                    className="admin-button flex w-full items-center gap-3 px-4 py-3.5 text-left outline-none transition-colors hover:bg-panel-raised focus-visible:bg-panel-raised"
                                   >
                                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
                                     <span className="flex-1 text-sm font-medium text-foreground">{series}</span>
@@ -1179,7 +1195,7 @@ export default function PricelistEditor({
                   type="button"
                   onClick={discard}
                   disabled={saving}
-                  className="flex-1 sm:flex-initial rounded-full bg-[#E5E5EA] dark:bg-[#3A3A3C] hover:bg-[#D8D8DC] dark:hover:bg-[#48484A] text-neutral-900 dark:text-white px-4 py-1.5 text-xs font-medium transition-all active:scale-[0.97] disabled:opacity-50 text-center"
+                  className="admin-button flex-1 sm:flex-initial rounded-full bg-[#E5E5EA] dark:bg-[#3A3A3C] hover:bg-[#D8D8DC] dark:hover:bg-[#48484A] text-neutral-900 dark:text-white px-4 py-1.5 text-xs font-medium transition-all active:scale-[0.97] disabled:opacity-50 text-center"
                 >
                   Batalkan
                 </button>
@@ -1187,7 +1203,7 @@ export default function PricelistEditor({
                   type="button"
                   onClick={save}
                   disabled={saving}
-                  className="flex-1 sm:flex-initial rounded-full bg-primary hover:bg-[#0066D6] text-white px-5 py-1.5 text-xs font-semibold  transition-all active:scale-[0.97] disabled:opacity-50 text-center"
+                  className="admin-button admin-button--primary flex-1 sm:flex-initial rounded-full bg-primary hover:bg-[#0066D6] text-white px-5 py-1.5 text-xs font-semibold  transition-all active:scale-[0.97] disabled:opacity-50 text-center"
                 >
                   {saving ? "Menyimpan…" : "Simpan Perubahan"}
                 </button>

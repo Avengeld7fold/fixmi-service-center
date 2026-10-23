@@ -43,7 +43,6 @@ export async function buildPricelistXlsx(
       for (const dp of svc.device_prices) {
         for (const v of svc.variants) {
           const price = dp.prices[v.Key];
-          if (price === null || price === undefined) continue; // varian tak tersedia = baris tidak ditulis
           sheet.addRow({
             kategori: cat.Name,
             // Service bertingkat ditulis dengan SLUG (unik per merk/series) —
@@ -54,7 +53,7 @@ export async function buildPricelistXlsx(
             model: dp.DeviceModel,
             varian: v.Label,
             note: v.Note,
-            harga: price,
+            harga: price ?? "-",
           });
         }
       }

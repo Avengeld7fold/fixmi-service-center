@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const FOCUSABLE = "button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
@@ -8,7 +8,27 @@ export function useAdminDialog<T extends HTMLElement = HTMLElement>(isOpen: bool
   const dialogRef = useRef<HTMLDivElement>(null);
   const initialFocusRef = useRef<T>(null);
   const closeRef = useRef(onClose);
+  const [mounted, setMounted] = useState(isOpen);
+  if (isOpen && !mounted) setMounted(true);
+  const present = isOpen || mounted;
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
+
+  useEffect(() => {
+    const panel = dialogRef.current;
+    if (!present || !panel) return;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const previous = panel.dataset.entered === "true";
+    const style = getComputedStyle(panel);
+    const from = { opacity: previous ? style.opacity : "0", transform: previous ? style.transform : "translateY(-6px) scale(.98)" };
+    panel.dataset.entered = "true";
+    const animation = panel.animate([from, {opacity: isOpen ? "1" : "0", transform: isOpen || reduced ? "none" : "translateY(-6px) scale(.98)"}], {duration: reduced ? 0 : isOpen ? 200 : 160, easing: "cubic-bezier(.16,1,.3,1)", fill:"forwards"});
+    animation.onfinish = () => { if (!isOpen) setMounted(false); };
+    return () => {
+      // Preserve the presentation value when an exit is reversed midway.
+      if (panel.isConnected) animation.commitStyles();
+      animation.cancel();
+    };
+  }, [isOpen, present]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,5 +61,5 @@ export function useAdminDialog<T extends HTMLElement = HTMLElement>(isOpen: bool
     };
   }, [isOpen]);
 
-  return { dialogRef, initialFocusRef };
+  return { dialogRef, initialFocusRef, present };
 }
